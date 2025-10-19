@@ -60,6 +60,11 @@ export class TextTransition {
 
     logger.info(`Transitioning from "${oldText}" to "${newText}" using ${opts.strategy} strategy`);
 
+    // CRITICAL: Kill all existing GSAP animations on old elements to prevent overlapping
+    if (oldElements.length > 0) {
+      gsap.killTweensOf(oldElements);
+    }
+
     const timeline = gsap.timeline({
       onComplete: options.onComplete,
     });
@@ -89,6 +94,8 @@ export class TextTransition {
     const newElements: HTMLElement[] = [];
     newText.split('').forEach((char, index) => {
       const charElement = wrapperFactory.createCharElement(char, index);
+      // Set invisible using GSAP immediately (works on elements not yet in DOM)
+      gsap.set(charElement, { opacity: 0, scale: 0 });
       newElements.push(charElement);
     });
 
@@ -106,10 +113,7 @@ export class TextTransition {
     // Phase 2: Clear and add new elements at the right time
     timeline.call(() => {
       rootElement.innerHTML = '';
-      newElements.forEach(el => {
-        gsap.set(el, { opacity: 0, scale: 0 });
-        rootElement.appendChild(el);
-      });
+      newElements.forEach(el => rootElement.appendChild(el));
     }, undefined, opts.removeDuration);
 
     // Phase 3: Animate new characters in
@@ -121,6 +125,7 @@ export class TextTransition {
         duration: opts.addDuration,
         stagger: opts.stagger,
         ease: opts.ease,
+        clearProps: 'transform', // Clear inline transform after animation completes
       },
       `+=${opts.removeDuration * 0.05}` // Small delay after DOM update
     );
@@ -172,12 +177,13 @@ export class TextTransition {
       // Check if we have a matching old element we can reuse
       const availableOldElements = oldElementMap.get(char);
       let element: HTMLElement;
-      let isReused = false;
 
       if (availableOldElements && availableOldElements.length > 0) {
-        // Reuse an existing element (keeps it visible and styled)
+        // Reuse an existing element - ensure it's fully visible and reset any transforms
         element = availableOldElements.shift()!;
-        isReused = true;
+
+        // CRITICAL: Reset element to fully visible state (previous animations may have changed this)
+        gsap.set(element, { opacity: 1, scale: 1, x: 0, y: 0, rotation: 0 });
 
         // Update its index if enumeration is used
         const classesToUpdate = Array.from(element.classList).filter(c => /char-\d+/.test(c));
@@ -185,8 +191,9 @@ export class TextTransition {
         element.classList.add(`char-${String(newIndex + 1).padStart(3, '0')}`);
 
       } else {
-        // Create new element
+        // Create new element and set to invisible immediately using GSAP
         element = wrapperFactory.createCharElement(char, newIndex);
+        // Use GSAP set immediately (works on elements not yet in DOM)
         gsap.set(element, { opacity: 0, scale: 0 });
         elementsToAdd.push(element);
       }
@@ -231,6 +238,7 @@ export class TextTransition {
           duration: opts.addDuration,
           stagger: opts.stagger,
           ease: opts.ease,
+          clearProps: 'transform', // Clear inline transform after animation completes
         },
         opts.removeDuration * 0.5
       );

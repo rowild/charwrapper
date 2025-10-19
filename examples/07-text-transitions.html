@@ -233,29 +233,9 @@
       </div>
     </div>
 
-    <!-- Custom Timing -->
-    <div class="example">
-      <h2>3. Custom Timing</h2>
-      <p class="example-description">
-        Control durations, stagger, and easing for transitions.
-      </p>
-      <div class="text-display">
-        <div class="text-3">Customize Me</div>
-      </div>
-      <div class="controls">
-        <button onclick="demo3Fast()">Fast (0.2s)</button>
-        <button onclick="demo3Normal()">Normal (0.5s)</button>
-        <button onclick="demo3Slow()">Slow (1.5s)</button>
-        <button onclick="demo3NoStagger()">No Stagger</button>
-      </div>
-      <div class="strategy-note">
-        <strong>Options:</strong> <code>addDuration</code>, <code>removeDuration</code>, <code>stagger</code>, <code>ease</code>
-      </div>
-    </div>
-
     <!-- Real-World: Counter -->
     <div class="example">
-      <h2>4. Real-World: Counter</h2>
+      <h2>3. Real-World: Counter</h2>
       <p class="example-description">
         Practical example: animated counter that transitions smoothly between numbers.
       </p>
@@ -271,27 +251,9 @@
       </div>
     </div>
 
-    <!-- Real-World: Status Messages -->
-    <div class="example">
-      <h2>5. Real-World: Status Messages</h2>
-      <p class="example-description">
-        Practical example: updating status messages dynamically.
-      </p>
-      <div class="text-display" style="font-size: 2rem;">
-        <div class="text-5">Ready</div>
-      </div>
-      <div class="controls">
-        <button onclick="demo5('Ready')">Ready</button>
-        <button onclick="demo5('Loading...')">Loading</button>
-        <button onclick="demo5('Processing data...')">Processing</button>
-        <button onclick="demo5('Success!')">Success</button>
-        <button onclick="demo5('Error: Please try again')">Error</button>
-      </div>
-    </div>
-
     <!-- Chained Transitions -->
     <div class="example">
-      <h2>6. Chained Transitions</h2>
+      <h2>4. Chained Transitions</h2>
       <p class="example-description">
         Chain multiple transitions sequentially using GSAP timeline callbacks.
       </p>
@@ -340,50 +302,7 @@
       });
     }
 
-    // Example 3: Custom Timing
-    const wrapper3 = new CharWrapper('.text-3', {
-      wrap: { chars: true }
-    });
-    wrapper3.wrap();
-
-    function demo3Fast() {
-      wrapper3.transitionTo('Fast Transition!', {
-        strategy: 'smart',
-        addDuration: 0.2,
-        removeDuration: 0.2,
-        stagger: 0.01
-      });
-    }
-
-    function demo3Normal() {
-      wrapper3.transitionTo('Normal Speed', {
-        strategy: 'smart',
-        addDuration: 0.5,
-        removeDuration: 0.5,
-        stagger: 0.03
-      });
-    }
-
-    function demo3Slow() {
-      wrapper3.transitionTo('Slow and Smooth', {
-        strategy: 'smart',
-        addDuration: 1.5,
-        removeDuration: 1.5,
-        stagger: 0.08,
-        ease: 'power1.inOut'
-      });
-    }
-
-    function demo3NoStagger() {
-      wrapper3.transitionTo('All at Once', {
-        strategy: 'smart',
-        addDuration: 0.6,
-        removeDuration: 0.6,
-        stagger: 0
-      });
-    }
-
-    // Example 4: Counter
+    // Example 3: Counter
     const wrapper4 = new CharWrapper('.text-4', {
       wrap: { chars: true }
     });
@@ -431,22 +350,7 @@
       });
     }
 
-    // Example 5: Status Messages
-    const wrapper5 = new CharWrapper('.text-5', {
-      wrap: { chars: true }
-    });
-    wrapper5.wrap();
-
-    function demo5(newText) {
-      wrapper5.transitionTo(newText, {
-        strategy: 'smart',
-        addDuration: 0.3,
-        removeDuration: 0.3,
-        stagger: 0.02
-      });
-    }
-
-    // Example 6: Chained Transitions
+    // Example 5: Chained Transitions
     const wrapper6 = new CharWrapper('.text-6', {
       wrap: { chars: true }
     });
@@ -494,9 +398,7 @@
     window.addEventListener('beforeunload', () => {
       wrapper1.destroy();
       wrapper2.destroy();
-      wrapper3.destroy();
       wrapper4.destroy();
-      wrapper5.destroy();
       wrapper6.destroy();
     });
   </script>
