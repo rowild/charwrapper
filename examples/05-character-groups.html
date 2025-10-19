@@ -271,6 +271,9 @@
 
     const result1 = wrappers.example1.wrap();
 
+    // Initialize all characters to default state
+    gsap.set(result1.chars, { color: '#fff', scale: 1, y: 0, opacity: 1, rotation: 0 });
+
     function example1Vowels() {
       gsap.killTweensOf(result1.chars);
       gsap.set(result1.chars, { color: '#fff', scale: 1, y: 0 });
@@ -345,6 +348,9 @@
 
     const result2 = wrappers.example2.wrap();
 
+    // Initialize all characters to default state
+    gsap.set(result2.chars, { color: '#fff', scale: 1, y: 0, opacity: 1, rotation: 0 });
+
     function example2Diacritics() {
       gsap.killTweensOf(result2.chars);
       gsap.set(result2.chars, { color: '#fff', scale: 1, y: 0 });
@@ -406,6 +412,9 @@
     });
 
     const result3 = wrappers.example3.wrap();
+
+    // Initialize all characters to default state
+    gsap.set(result3.chars, { color: '#fff', scale: 1, y: 0, x: 0, opacity: 1, rotation: 0 });
 
     function example3Numbers() {
       gsap.killTweensOf(result3.chars);
@@ -473,6 +482,9 @@
 
     const result4 = wrappers.example4.wrap();
 
+    // Initialize all characters to default state
+    gsap.set(result4.chars, { color: '#fff', scale: 1, y: 0, x: 0, opacity: 1 });
+
     function example4FirstLetters() {
       gsap.killTweensOf(result4.chars);
       gsap.set(result4.chars, { scale: 1, y: 0 });
@@ -517,6 +529,9 @@
     });
 
     const result5 = wrappers.example5.wrap();
+
+    // Initialize all characters to default state
+    gsap.set(result5.chars, { color: '#fff', scale: 1, y: 0, opacity: 1, rotation: 0 });
 
     function example5EverySecond() {
       gsap.killTweensOf(result5.chars);
@@ -577,6 +592,9 @@
     });
 
     const result6 = wrappers.example6.wrap();
+
+    // Initialize all characters to default state
+    gsap.set(result6.chars, { color: '#fff', scale: 1, y: 0, opacity: 1 });
 
     function example6Keywords() {
       gsap.killTweensOf(result6.chars);
