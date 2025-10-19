@@ -2,7 +2,7 @@
  * TextTransition
  *
  * Handles smooth transitions between different text content.
- * Intelligently matches characters, animates additions/removals, and morphs text.
+ * Uses a clean approach: rebuild DOM correctly first, then animate only new/removed chars.
  */
 
 import { logger } from './utils.js';
@@ -19,19 +19,9 @@ export interface TransitionOptions {
   strategy?: TransitionStrategy;
   addDuration?: number;
   removeDuration?: number;
-  morphDuration?: number;
   stagger?: number;
   ease?: string;
   onComplete?: () => void;
-}
-
-/**
- * Character mapping result
- */
-interface CharacterMapping {
-  keep: Array<{ oldIndex: number; newIndex: number; element: HTMLElement }>;
-  remove: Array<{ index: number; element: HTMLElement }>;
-  add: Array<{ index: number; char: string }>;
 }
 
 /**
@@ -41,7 +31,6 @@ const DEFAULT_TRANSITION_OPTIONS: Required<Omit<TransitionOptions, 'onComplete'>
   strategy: 'smart',
   addDuration: 0.4,
   removeDuration: 0.4,
-  morphDuration: 0.5,
   stagger: 0.02,
   ease: 'power2.out',
 };
@@ -51,148 +40,13 @@ const DEFAULT_TRANSITION_OPTIONS: Required<Omit<TransitionOptions, 'onComplete'>
  */
 export class TextTransition {
   /**
-   * Calculate Levenshtein distance between two strings
-   * Used for smart character matching
-   */
-  private static levenshteinDistance(str1: string, str2: string): number {
-    const len1 = str1.length;
-    const len2 = str2.length;
-    const matrix: number[][] = [];
-
-    for (let i = 0; i <= len1; i++) {
-      matrix[i] = [i];
-    }
-
-    for (let j = 0; j <= len2; j++) {
-      matrix[0][j] = j;
-    }
-
-    for (let i = 1; i <= len1; i++) {
-      for (let j = 1; j <= len2; j++) {
-        const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j] + 1,      // deletion
-          matrix[i][j - 1] + 1,      // insertion
-          matrix[i - 1][j - 1] + cost // substitution
-        );
-      }
-    }
-
-    return matrix[len1][len2];
-  }
-
-  /**
-   * Map old characters to new text using smart strategy
-   * Attempts to reuse matching characters in similar positions
-   */
-  private static smartMapping(
-    oldText: string,
-    newText: string,
-    oldElements: HTMLElement[]
-  ): CharacterMapping {
-    const keep: CharacterMapping['keep'] = [];
-    const remove: CharacterMapping['remove'] = [];
-    const add: CharacterMapping['add'] = [];
-
-    const oldChars = oldText.split('');
-    const newChars = newText.split('');
-    const usedOldIndices = new Set<number>();
-    const usedNewIndices = new Set<number>();
-
-    // First pass: match identical characters in exact positions
-    const minLen = Math.min(oldChars.length, newChars.length);
-    for (let i = 0; i < minLen; i++) {
-      if (oldChars[i] === newChars[i]) {
-        keep.push({
-          oldIndex: i,
-          newIndex: i,
-          element: oldElements[i],
-        });
-        usedOldIndices.add(i);
-        usedNewIndices.add(i);
-      }
-    }
-
-    // Second pass: match remaining characters by proximity
-    for (let newIdx = 0; newIdx < newChars.length; newIdx++) {
-      if (usedNewIndices.has(newIdx)) continue;
-
-      let bestOldIdx = -1;
-      let bestDistance = Infinity;
-
-      for (let oldIdx = 0; oldIdx < oldChars.length; oldIdx++) {
-        if (usedOldIndices.has(oldIdx)) continue;
-        if (oldChars[oldIdx] !== newChars[newIdx]) continue;
-
-        const distance = Math.abs(oldIdx - newIdx);
-        if (distance < bestDistance) {
-          bestDistance = distance;
-          bestOldIdx = oldIdx;
-        }
-      }
-
-      if (bestOldIdx !== -1) {
-        keep.push({
-          oldIndex: bestOldIdx,
-          newIndex: newIdx,
-          element: oldElements[bestOldIdx],
-        });
-        usedOldIndices.add(bestOldIdx);
-        usedNewIndices.add(newIdx);
-      }
-    }
-
-    // Third pass: mark characters to remove
-    for (let i = 0; i < oldChars.length; i++) {
-      if (!usedOldIndices.has(i)) {
-        remove.push({
-          index: i,
-          element: oldElements[i],
-        });
-      }
-    }
-
-    // Fourth pass: mark characters to add
-    for (let i = 0; i < newChars.length; i++) {
-      if (!usedNewIndices.has(i)) {
-        add.push({
-          index: i,
-          char: newChars[i],
-        });
-      }
-    }
-
-    return { keep, remove, add };
-  }
-
-  /**
-   * Sequential strategy: remove all, then add all
-   */
-  private static sequentialMapping(
-    oldText: string,
-    newText: string,
-    oldElements: HTMLElement[]
-  ): CharacterMapping {
-    const remove = oldElements.map((element, index) => ({ index, element }));
-    const add = newText.split('').map((char, index) => ({ index, char }));
-
-    return {
-      keep: [],
-      remove,
-      add,
-    };
-  }
-
-  /**
-   * Execute text transition
+   * Smart transition: Rebuild DOM correctly, animate only new/removed characters
    *
-   * @param rootElement - The container element
-   * @param oldText - Current text
-   * @param newText - New text to transition to
-   * @param oldElements - Array of current wrapped character elements
-   * @param wrapperFactory - Factory for creating new character elements
-   * @param options - Transition options
-   * @returns GSAP timeline
+   * This approach ensures text is always readable and correctly spelled:
+   * 1. Clear the container
+   * 2. Build complete new structure with all characters
+   * 3. Identify which are new (animate in) vs existing (keep visible)
+   * 4. Animate
    */
   static transition(
     rootElement: Element,
@@ -206,131 +60,32 @@ export class TextTransition {
 
     logger.info(`Transitioning from "${oldText}" to "${newText}" using ${opts.strategy} strategy`);
 
-    // Create timeline
     const timeline = gsap.timeline({
       onComplete: options.onComplete,
     });
 
-    // Get character mapping based on strategy
-    let mapping: CharacterMapping;
-    if (opts.strategy === 'smart') {
-      mapping = this.smartMapping(oldText, newText, oldElements);
-    } else if (opts.strategy === 'sequential') {
-      mapping = this.sequentialMapping(oldText, newText, oldElements);
+    if (opts.strategy === 'sequential') {
+      // Sequential: Simple remove all, then add all
+      return this.sequentialTransition(rootElement, oldElements, newText, wrapperFactory, opts, timeline);
     } else {
-      // 'replace' strategy - just remove all and add all
-      mapping = this.sequentialMapping(oldText, newText, oldElements);
+      // Smart: Reuse matching characters
+      return this.smartTransition(rootElement, oldText, newText, oldElements, wrapperFactory, opts, timeline);
     }
-
-    logger.info(`Transition plan: ${mapping.keep.length} keep, ${mapping.remove.length} remove, ${mapping.add.length} add`);
-
-    // Phase 1: Remove characters that are being deleted
-    if (mapping.remove.length > 0) {
-      timeline.to(
-        mapping.remove.map((item) => item.element),
-        {
-          opacity: 0,
-          scale: 0,
-          duration: opts.removeDuration,
-          stagger: opts.stagger,
-          ease: opts.ease,
-          onComplete: () => {
-            // Remove elements from DOM
-            mapping.remove.forEach((item) => {
-              item.element.remove();
-            });
-          },
-        },
-        0
-      );
-    }
-
-    // Phase 2: Morph/reposition kept characters
-    if (mapping.keep.length > 0 && opts.strategy === 'smart') {
-      // For each kept character, animate it to its new position
-      mapping.keep.forEach((item) => {
-        if (item.oldIndex !== item.newIndex) {
-          // Calculate position offset (simplified - actual positioning would need more logic)
-          const offset = (item.newIndex - item.oldIndex) * 20; // Approximate char width
-
-          timeline.to(
-            item.element,
-            {
-              x: offset,
-              duration: opts.morphDuration,
-              ease: opts.ease,
-            },
-            opts.removeDuration * 0.5
-          );
-        }
-      });
-    }
-
-    // Phase 3: Add new characters
-    if (mapping.add.length > 0) {
-      // Create new character elements
-      const newElements: HTMLElement[] = [];
-
-      mapping.add.forEach((item) => {
-        const charElement = wrapperFactory.createCharElement(item.char, item.index);
-        newElements.push(charElement);
-
-        // Set initial state (invisible)
-        gsap.set(charElement, { opacity: 0, scale: 0 });
-
-        // Insert at correct position
-        if (item.index === 0) {
-          rootElement.insertBefore(charElement, rootElement.firstChild);
-        } else {
-          // Find the element that should come before this one
-          const prevElements = rootElement.children;
-          const insertBefore = prevElements[item.index];
-          if (insertBefore) {
-            rootElement.insertBefore(charElement, insertBefore);
-          } else {
-            rootElement.appendChild(charElement);
-          }
-        }
-      });
-
-      // Animate new characters in
-      const animateDelay = opts.strategy === 'sequential'
-        ? opts.removeDuration
-        : opts.removeDuration * 0.5;
-
-      timeline.to(
-        newElements,
-        {
-          opacity: 1,
-          scale: 1,
-          duration: opts.addDuration,
-          stagger: opts.stagger,
-          ease: opts.ease,
-        },
-        animateDelay
-      );
-    }
-
-    return timeline;
   }
 
   /**
-   * Simple replace transition (no smart matching)
-   * Just removes all and adds all sequentially
+   * Sequential transition: Remove all, then add all
    */
-  static replace(
+  private static sequentialTransition(
     rootElement: Element,
     oldElements: HTMLElement[],
     newText: string,
     wrapperFactory: any,
-    options: TransitionOptions = {}
+    opts: Required<Omit<TransitionOptions, 'onComplete'>>,
+    timeline: gsap.core.Timeline
   ): gsap.core.Timeline {
-    const opts = { ...DEFAULT_TRANSITION_OPTIONS, ...options };
-    const timeline = gsap.timeline({
-      onComplete: options.onComplete,
-    });
 
-    // Phase 1: Remove all old characters
+    // Phase 1: Fade out and remove all old characters
     timeline.to(oldElements, {
       opacity: 0,
       scale: 0,
@@ -338,11 +93,12 @@ export class TextTransition {
       stagger: opts.stagger,
       ease: opts.ease,
       onComplete: () => {
-        oldElements.forEach((el) => el.remove());
+        // Clear container
+        rootElement.innerHTML = '';
       },
     });
 
-    // Phase 2: Create and add new characters
+    // Phase 2: Create and add all new characters
     const newElements: HTMLElement[] = [];
     newText.split('').forEach((char, index) => {
       const charElement = wrapperFactory.createCharElement(char, index);
@@ -351,6 +107,7 @@ export class TextTransition {
       rootElement.appendChild(charElement);
     });
 
+    // Animate new characters in
     timeline.to(
       newElements,
       {
@@ -364,5 +121,134 @@ export class TextTransition {
     );
 
     return timeline;
+  }
+
+  /**
+   * Smart transition: Reuse matching characters
+   *
+   * Strategy:
+   * 1. Find matching characters between old and new text
+   * 2. Clear container and rebuild with ALL new characters
+   * 3. For matches, copy the old element (keeps it visible)
+   * 4. For new chars, create and start invisible
+   * 5. Animate only the new characters in
+   */
+  private static smartTransition(
+    rootElement: Element,
+    oldText: string,
+    newText: string,
+    oldElements: HTMLElement[],
+    wrapperFactory: any,
+    opts: Required<Omit<TransitionOptions, 'onComplete'>>,
+    timeline: gsap.core.Timeline
+  ): gsap.core.Timeline {
+
+    const oldChars = oldText.split('');
+    const newChars = newText.split('');
+
+    // Build a map of old elements by their character
+    const oldElementMap = new Map<string, HTMLElement[]>();
+    oldElements.forEach((el, index) => {
+      const char = oldChars[index];
+      if (!oldElementMap.has(char)) {
+        oldElementMap.set(char, []);
+      }
+      oldElementMap.get(char)!.push(el);
+    });
+
+    // Track which elements to animate
+    const elementsToRemove: HTMLElement[] = [];
+    const elementsToAdd: HTMLElement[] = [];
+
+    // Build new structure
+    const newElements: HTMLElement[] = [];
+
+    newChars.forEach((char, newIndex) => {
+      // Check if we have a matching old element we can reuse
+      const availableOldElements = oldElementMap.get(char);
+      let element: HTMLElement;
+      let isReused = false;
+
+      if (availableOldElements && availableOldElements.length > 0) {
+        // Reuse an existing element (keeps it visible and styled)
+        element = availableOldElements.shift()!;
+        isReused = true;
+
+        // Update its index if enumeration is used
+        const classesToUpdate = Array.from(element.classList).filter(c => /char-\d+/.test(c));
+        classesToUpdate.forEach(c => element.classList.remove(c));
+        element.classList.add(`char-${String(newIndex + 1).padStart(3, '0')}`);
+
+      } else {
+        // Create new element
+        element = wrapperFactory.createCharElement(char, newIndex);
+        gsap.set(element, { opacity: 0, scale: 0 });
+        elementsToAdd.push(element);
+      }
+
+      newElements.push(element);
+    });
+
+    // Collect elements that weren't reused (to remove)
+    oldElementMap.forEach((elements) => {
+      elements.forEach(el => elementsToRemove.push(el));
+    });
+
+    // Phase 1: Fade out elements that are being removed
+    if (elementsToRemove.length > 0) {
+      timeline.to(
+        elementsToRemove,
+        {
+          opacity: 0,
+          scale: 0,
+          duration: opts.removeDuration,
+          stagger: opts.stagger,
+          ease: opts.ease,
+        },
+        0
+      );
+    }
+
+    // Phase 2: Rebuild DOM structure
+    // Do this after a brief delay to allow fade-out to start
+    timeline.call(() => {
+      rootElement.innerHTML = '';
+      newElements.forEach(el => rootElement.appendChild(el));
+    }, undefined, opts.removeDuration * 0.3);
+
+    // Phase 3: Fade in new elements
+    if (elementsToAdd.length > 0) {
+      timeline.to(
+        elementsToAdd,
+        {
+          opacity: 1,
+          scale: 1,
+          duration: opts.addDuration,
+          stagger: opts.stagger,
+          ease: opts.ease,
+        },
+        opts.removeDuration * 0.5
+      );
+    }
+
+    return timeline;
+  }
+
+  /**
+   * Simple replace transition (for backwards compatibility)
+   */
+  static replace(
+    rootElement: Element,
+    oldElements: HTMLElement[],
+    newText: string,
+    wrapperFactory: any,
+    options: TransitionOptions = {}
+  ): gsap.core.Timeline {
+    const opts = { ...DEFAULT_TRANSITION_OPTIONS, ...options };
+    const timeline = gsap.timeline({
+      onComplete: options.onComplete,
+    });
+
+    return this.sequentialTransition(rootElement, oldElements, newText, wrapperFactory, opts, timeline);
   }
 }

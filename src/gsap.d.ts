@@ -11,6 +11,7 @@ declare namespace gsap {
       to(targets: any, vars: any, position?: any): this;
       from(targets: any, vars: any, position?: any): this;
       set(targets: any, vars: any): this;
+      call(callback: () => void, params?: any, position?: any): this;
       kill(): void;
     }
 
