@@ -1,6 +1,6 @@
 # CharWrapper 2.0
 
-Modern text animation library with TypeScript support, designed for seamless integration with GSAP and other animation libraries.
+Modern text wrapper library with TypeScript support, designed for seamless integration with GSAP and other animation libraries.
 
 ## 🎯 What's New in 2.0
 
