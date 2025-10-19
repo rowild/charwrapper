@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D Text Effects - CharWrapper 2.0</title>
+
+  <!-- GSAP -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- CharWrapper bundle -->
+  <script src="../dist/charwrapper.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to bottom, #1a1a2e 0%, #0f3460 50%, #16213e 100%);
+      min-height: 100vh;
+      overflow: hidden;
+      color: #fff;
+    }
+
+    .container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      perspective: 800px;
+      perspective-origin: 50% 40%;
+    }
+
+    .scene {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+    }
+
+    /* The "street" visualization - just for reference */
+    .street {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      transform-style: preserve-3d;
+      pointer-events: none;
+    }
+
+    /* Text containers - positioned in 3D space along the street */
+    .text-left,
+    .text-right {
+      position: absolute;
+      font-size: 4rem;
+      font-weight: 900;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      transform-style: preserve-3d;
+      white-space: nowrap;
+      top: 50%;
+    }
+
+    /* Left side text - angled toward the street */
+    .text-left {
+      left: 15%;
+      transform-origin: center center;
+      transform:
+        translateY(-50%)
+        translateZ(-200px)
+        rotateY(65deg)
+        rotateX(5deg);
+      color: #00d4ff;
+      text-shadow:
+        0 0 20px rgba(0, 212, 255, 0.8),
+        0 0 40px rgba(0, 212, 255, 0.5),
+        0 0 60px rgba(0, 212, 255, 0.3),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Right side text - angled toward the street from opposite side */
+    .text-right {
+      right: 15%;
+      transform-origin: center center;
+      transform:
+        translateY(-50%)
+        translateZ(-200px)
+        rotateY(-65deg)
+        rotateX(5deg);
+      color: #ff6b6b;
+      text-shadow:
+        0 0 20px rgba(255, 107, 107, 0.8),
+        0 0 40px rgba(255, 107, 107, 0.5),
+        0 0 60px rgba(255, 107, 107, 0.3),
+        2px 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .char {
+      display: inline-block;
+      transform-style: preserve-3d;
+    }
+
+    /* Info overlay */
+    .info {
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      padding: 1.5rem 2rem;
+      border-radius: 12px;
+      text-align: center;
+      z-index: 1000;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .info h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(90deg, #00d4ff, #ff6b6b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .info p {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    .controls {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 1rem;
+      z-index: 1000;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    button.active {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.6);
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateX(-5px);
+    }
+
+    .back-link::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">All Examples</a>
+
+  <div class="info">
+    <h1>3D Text Effects</h1>
+    <p>CharWrapper with CSS 3D transforms and animated effects</p>
+  </div>
+
+  <div class="container">
+    <div class="scene">
+      <div class="street">
+        <div class="text-left">Left Side</div>
+        <div class="text-right">Right Side</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="startColorWave(event)" class="active">Color Wave</button>
+    <button onclick="startScaleWave(event)">Scale Wave</button>
+    <button onclick="startRotateWave(event)">Rotate Wave</button>
+    <button onclick="startPulse(event)">Pulse Effect</button>
+    <button onclick="stopAll()">Stop All</button>
+  </div>
+
+  <script>
+    // Wrap the text
+    const leftWrapper = new CharWrapper('.text-left', {
+      wrap: { chars: true }
+    });
+
+    const rightWrapper = new CharWrapper('.text-right', {
+      wrap: { chars: true }
+    });
+
+    const leftChars = leftWrapper.wrap().chars;
+    const rightChars = rightWrapper.wrap().chars;
+
+    // Store active timelines
+    let activeTimelines = [];
+
+    // Clear all active animations
+    function stopAll() {
+      activeTimelines.forEach(tl => tl.kill());
+      activeTimelines = [];
+
+      // Reset all characters
+      gsap.set([...leftChars, ...rightChars], {
+        scale: 1,
+        rotation: 0,
+        color: '#00d4ff',
+        clearProps: 'all'
+      });
+
+      // Restore original colors
+      gsap.set(leftChars, { color: '#00d4ff' });
+      gsap.set(rightChars, { color: '#ff6b6b' });
+
+      // Update active button
+      document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+      document.querySelector('button:last-of-type').classList.add('active');
+    }
+
+    function setActiveButton(button) {
+      document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+      if (button) {
+        button.classList.add('active');
+      }
+    }
+
+    // Animation 1: Color Wave - continuous cycling with persistent colors
+    function startColorWave(event) {
+      stopAll();
+      setActiveButton(event?.target);
+
+      const colors = ['#00d4ff', '#ff6b6b', '#4ecdc4', '#f7fff7', '#ffd700', '#ff1493'];
+
+      // Create a continuous color wave that cycles through each character
+      leftChars.forEach((char, index) => {
+        const tl = gsap.timeline({ repeat: -1 });
+        tl.to(char, {
+          color: colors[0],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        })
+        .to(char, {
+          color: colors[1],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        })
+        .to(char, {
+          color: colors[2],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        })
+        .to(char, {
+          color: colors[3],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        })
+        .to(char, {
+          color: colors[4],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        })
+        .to(char, {
+          color: colors[5],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        });
+
+        // Stagger the start time for wave effect
+        tl.delay(index * 0.1);
+        activeTimelines.push(tl);
+      });
+
+      rightChars.forEach((char, index) => {
+        const tl = gsap.timeline({ repeat: -1 });
+        tl.to(char, {
+          color: colors[0],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        })
+        .to(char, {
+          color: colors[1],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        })
+        .to(char, {
+          color: colors[2],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        })
+        .to(char, {
+          color: colors[3],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        })
+        .to(char, {
+          color: colors[4],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        })
+        .to(char, {
+          color: colors[5],
+          duration: 0.4,
+          ease: 'power2.inOut'
+        });
+
+        // Stagger from opposite direction
+        tl.delay((rightChars.length - 1 - index) * 0.1 + 0.3);
+        activeTimelines.push(tl);
+      });
+    }
+
+    // Animation 2: Scale Wave - continuous scaling wave
+    function startScaleWave(event) {
+      stopAll();
+      setActiveButton(event?.target);
+
+      // Left side - scale wave from start to end
+      leftChars.forEach((char, index) => {
+        const tl = gsap.timeline({ repeat: -1, yoyo: true });
+        tl.to(char, {
+          scale: 1.6,
+          duration: 0.3,
+          ease: 'power2.inOut'
+        });
+        tl.delay(index * 0.08);
+        activeTimelines.push(tl);
+      });
+
+      // Right side - scale wave from end to start
+      rightChars.forEach((char, index) => {
+        const tl = gsap.timeline({ repeat: -1, yoyo: true });
+        tl.to(char, {
+          scale: 1.6,
+          duration: 0.3,
+          ease: 'power2.inOut'
+        });
+        tl.delay((rightChars.length - 1 - index) * 0.08 + 0.2);
+        activeTimelines.push(tl);
+      });
+    }
+
+    // Animation 3: Rotate Wave - continuous rotation wave
+    function startRotateWave(event) {
+      stopAll();
+      setActiveButton(event?.target);
+
+      // Left side - rotate continuously with wave delay
+      leftChars.forEach((char, index) => {
+        const tl = gsap.timeline({ repeat: -1 });
+        tl.to(char, {
+          rotationY: '+=360',
+          duration: 1.2,
+          ease: 'power1.inOut'
+        });
+        tl.delay(index * 0.1);
+        activeTimelines.push(tl);
+      });
+
+      // Right side - rotate opposite direction with wave delay
+      rightChars.forEach((char, index) => {
+        const tl = gsap.timeline({ repeat: -1 });
+        tl.to(char, {
+          rotationY: '-=360',
+          duration: 1.2,
+          ease: 'power1.inOut'
+        });
+        tl.delay((rightChars.length - 1 - index) * 0.1 + 0.4);
+        activeTimelines.push(tl);
+      });
+    }
+
+    // Animation 4: Pulse Effect - synchronized pulsing
+    function startPulse(event) {
+      stopAll();
+      setActiveButton(event?.target);
+
+      // Both sides pulse together with slight stagger across characters
+      [...leftChars, ...rightChars].forEach((char, index) => {
+        const tl = gsap.timeline({ repeat: -1, yoyo: true });
+        tl.to(char, {
+          scale: 1.4,
+          duration: 0.6,
+          ease: 'sine.inOut'
+        });
+        tl.delay(index * 0.03);
+        activeTimelines.push(tl);
+      });
+    }
+
+    // Start with color wave
+    startColorWave();
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      stopAll();
+      leftWrapper.destroy();
+      rightWrapper.destroy();
+    });
+  </script>
+</body>
+</html>
