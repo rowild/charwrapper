@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animation Presets - CharWrapper 2.0</title>
+
+  <!-- GSAP is REQUIRED for animation presets -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- CharWrapper bundle -->
+  <script src="../dist/charwrapper.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 3rem;
+      opacity: 0.9;
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-left: 4px solid #ffd700;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+    }
+
+    .info-box strong {
+      color: #ffd700;
+    }
+
+    .example {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .example h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    .example-description {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .text-display {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      border-radius: 12px;
+      font-size: 2.5rem;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .char {
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateX(-5px);
+    }
+
+    .back-link::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-link">All Examples</a>
+
+  <div class="container">
+    <h1>Animation Presets</h1>
+    <p class="subtitle">Ready-to-use GSAP animations with one line of code</p>
+
+    <div class="info-box">
+      <strong>⚠️ GSAP Required:</strong> Animation presets are optional GSAP-specific features.
+      CharWrapper core is animation-agnostic and works with any animation library.
+      To use presets, include GSAP: <code>&lt;script src="gsap.min.js"&gt;&lt;/script&gt;</code>
+    </div>
+
+    <!-- Entrance Animations -->
+    <div class="example">
+      <h2>Entrance Animations</h2>
+      <p class="example-description">
+        Classic entrance effects - just call <code>wrapper.animate('presetName')</code> instead of writing GSAP code.
+      </p>
+      <div class="text-display">
+        <div class="text-1">Amazing Text Animations</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo1('fadeInStagger')">Fade In</button>
+        <button onclick="demo1('slideInUp')">Slide Up</button>
+        <button onclick="demo1('scaleIn')">Scale In</button>
+        <button onclick="demo1('rotateIn')">Rotate In</button>
+        <button onclick="demo1('elasticBounce')">Elastic Bounce</button>
+        <button onclick="demo1('wave')">Wave</button>
+        <button onclick="demo1('glitch')">Glitch</button>
+        <button onclick="reset1()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Typewriter Effect -->
+    <div class="example">
+      <h2>Typewriter Effect</h2>
+      <p class="example-description">
+        Classic typing animation - preset handles everything for you.
+      </p>
+      <div class="text-display">
+        <div class="text-2">Hello, World! This is a typewriter effect.</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo2()">Typewriter (Fast)</button>
+        <button onclick="demo2Custom()">Typewriter (Slow)</button>
+        <button onclick="reset2()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Loop Animations -->
+    <div class="example">
+      <h2>Loop Animations</h2>
+      <p class="example-description">
+        Continuous animations - perfect for attention-grabbing effects.
+      </p>
+      <div class="text-display">
+        <div class="text-3">Looping Forever</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo3('floatingWave')">Floating Wave</button>
+        <button onclick="demo3('pulse')">Pulse</button>
+        <button onclick="demo3('colorCycle')">Color Cycle</button>
+        <button onclick="demo3('shimmer')">Shimmer</button>
+        <button onclick="stopLoop3()">Stop</button>
+      </div>
+    </div>
+
+    <!-- Exit Animations -->
+    <div class="example">
+      <h2>Exit Animations</h2>
+      <p class="example-description">
+        Smooth exit effects for transitions and removal.
+      </p>
+      <div class="text-display">
+        <div class="text-4">Watch Me Disappear</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo4('fadeOut')">Fade Out</button>
+        <button onclick="demo4('slideOutDown')">Slide Out</button>
+        <button onclick="demo4('scaleOut')">Scale Out</button>
+        <button onclick="demo4('explode')">Explode!</button>
+        <button onclick="reset4()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Custom Options -->
+    <div class="example">
+      <h2>Custom Options</h2>
+      <p class="example-description">
+        All presets accept custom options for duration, stagger, delay, and ease.
+      </p>
+      <div class="text-display">
+        <div class="text-5">Customize Everything</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo5Default()">Default Speed</button>
+        <button onclick="demo5Slow()">Super Slow</button>
+        <button onclick="demo5Fast()">Super Fast</button>
+        <button onclick="demo5Custom()">Custom Ease</button>
+        <button onclick="reset5()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Interactive Presets -->
+    <div class="example">
+      <h2>Interactive Presets</h2>
+      <p class="example-description">
+        Auto-attach event listeners for hover and click effects.
+      </p>
+      <div class="text-display">
+        <div class="text-6">Hover or Click Me!</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo6Hover()">Enable Hover Bounce</button>
+        <button onclick="demo6Click()">Enable Click Spin</button>
+        <button onclick="reset6()">Reset (Remove Events)</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Example 1: Entrance Animations
+    const wrapper1 = new CharWrapper('.text-1', {
+      wrap: { chars: true }
+    });
+    wrapper1.wrap();
+    gsap.set(wrapper1.getChars(), { opacity: 1, scale: 1, y: 0, x: 0, rotation: 0 });
+
+    function demo1(preset) {
+      reset1();
+      wrapper1.animate(preset);
+    }
+
+    function reset1() {
+      gsap.killTweensOf(wrapper1.getChars());
+      gsap.set(wrapper1.getChars(), { opacity: 1, scale: 1, y: 0, x: 0, rotation: 0 });
+    }
+
+    // Example 2: Typewriter
+    const wrapper2 = new CharWrapper('.text-2', {
+      wrap: { chars: true }
+    });
+    wrapper2.wrap();
+
+    function demo2() {
+      wrapper2.animate('typewriter', { stagger: 0.03 });
+    }
+
+    function demo2Custom() {
+      wrapper2.animate('typewriter', { stagger: 0.1 });
+    }
+
+    function reset2() {
+      gsap.killTweensOf(wrapper2.getChars());
+      gsap.set(wrapper2.getChars(), { opacity: 1 });
+    }
+
+    // Example 3: Loop Animations
+    const wrapper3 = new CharWrapper('.text-3', {
+      wrap: { chars: true }
+    });
+    wrapper3.wrap();
+    gsap.set(wrapper3.getChars(), { opacity: 1, scale: 1, y: 0, color: '#fff' });
+
+    let currentLoop3 = null;
+
+    function demo3(preset) {
+      stopLoop3();
+      currentLoop3 = wrapper3.animate(preset);
+    }
+
+    function stopLoop3() {
+      if (currentLoop3) {
+        currentLoop3.kill();
+        currentLoop3 = null;
+      }
+      gsap.set(wrapper3.getChars(), { opacity: 1, scale: 1, y: 0, color: '#fff' });
+    }
+
+    // Example 4: Exit Animations
+    const wrapper4 = new CharWrapper('.text-4', {
+      wrap: { chars: true }
+    });
+    wrapper4.wrap();
+    gsap.set(wrapper4.getChars(), { opacity: 1, scale: 1, y: 0, x: 0, rotation: 0 });
+
+    function demo4(preset) {
+      reset4();
+      wrapper4.animate(preset);
+    }
+
+    function reset4() {
+      gsap.killTweensOf(wrapper4.getChars());
+      gsap.set(wrapper4.getChars(), { opacity: 1, scale: 1, y: 0, x: 0, rotation: 0 });
+    }
+
+    // Example 5: Custom Options
+    const wrapper5 = new CharWrapper('.text-5', {
+      wrap: { chars: true }
+    });
+    wrapper5.wrap();
+    gsap.set(wrapper5.getChars(), { opacity: 1, scale: 1, y: 0 });
+
+    function demo5Default() {
+      reset5();
+      wrapper5.animate('slideInUp');
+    }
+
+    function demo5Slow() {
+      reset5();
+      wrapper5.animate('slideInUp', { duration: 2, stagger: 0.1 });
+    }
+
+    function demo5Fast() {
+      reset5();
+      wrapper5.animate('slideInUp', { duration: 0.2, stagger: 0.01 });
+    }
+
+    function demo5Custom() {
+      reset5();
+      wrapper5.animate('slideInUp', { duration: 1.5, stagger: 0.05, ease: 'elastic.out(1, 0.3)' });
+    }
+
+    function reset5() {
+      gsap.killTweensOf(wrapper5.getChars());
+      gsap.set(wrapper5.getChars(), { opacity: 1, scale: 1, y: 0 });
+    }
+
+    // Example 6: Interactive
+    let wrapper6 = null;
+
+    function demo6Hover() {
+      reset6();
+      wrapper6 = new CharWrapper('.text-6', { wrap: { chars: true } });
+      wrapper6.wrap();
+      wrapper6.animate('hoverBounce');
+    }
+
+    function demo6Click() {
+      reset6();
+      wrapper6 = new CharWrapper('.text-6', { wrap: { chars: true } });
+      wrapper6.wrap();
+      wrapper6.animate('clickSpin');
+    }
+
+    function reset6() {
+      if (wrapper6) {
+        wrapper6.unwrap();
+        wrapper6 = null;
+      }
+    }
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      wrapper1.destroy();
+      wrapper2.destroy();
+      wrapper3.destroy();
+      wrapper4.destroy();
+      wrapper5.destroy();
+      if (wrapper6) wrapper6.destroy();
+    });
+  </script>
+</body>
+</html>

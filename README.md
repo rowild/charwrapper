@@ -14,6 +14,8 @@ Modern text animation library with TypeScript support, designed for seamless int
 - 🌍 **Diacritical Support** - Supports accented characters (ü, é, ñ, etc.)
 - ♿ **Accessibility Built-in** - ARIA labels, aria-hidden, and title attributes for screen readers
 - 🎯 **Character Groups** - Smart selection system for targeting specific character subsets (NEW!)
+- 🎬 **Animation Presets** - Ready-to-use GSAP animations with one line of code (Optional GSAP feature)
+- 🔄 **Text Transitions** - Smoothly morph between different text content (Optional GSAP feature)
 
 ## 📦 Installation
 
@@ -509,6 +511,197 @@ Check out `examples/05-character-groups.html` for a complete interactive demonst
 
 **Note:** Character groups are completely **optional**. If you don't configure any groups, the `groups` object in the result will simply be empty `{}`.
 
+## 🎬 Animation Presets (Optional GSAP Feature)
+
+**⚠️ Requires GSAP:** Animation presets are optional GSAP-specific features. CharWrapper core is animation-agnostic and works with any animation library (anime.js, Framer Motion, etc.). To use presets, include GSAP separately:
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="charwrapper.min.js"></script>
+```
+
+### What are Animation Presets?
+
+Instead of writing custom GSAP code every time, use built-in presets with a single method call:
+
+```javascript
+const wrapper = new CharWrapper('.text', { wrap: { chars: true } });
+wrapper.wrap();
+
+// Use presets instead of writing GSAP code:
+wrapper.animate('fadeInStagger');
+wrapper.animate('typewriter', { stagger: 0.05 });
+wrapper.animate('wave', { amplitude: 30 });
+```
+
+### Built-in Presets
+
+**Entrance Animations:**
+- `fadeInStagger` - Classic fade with stagger
+- `slideInUp`, `slideInDown`, `slideInLeft`, `slideInRight` - Directional slides
+- `scaleIn` - Pop in from center
+- `rotateIn` - Spinning entrance
+- `elasticBounce` - Bouncy entrance
+- `typewriter` - Classic typing effect
+- `wave` - Wave-like stagger pattern
+- `glitch` - Digital glitch effect
+
+**Loop Animations:**
+- `floatingWave` - Continuous floating wave
+- `pulse` - Breathing effect
+- `colorCycle` - Color transitions
+- `shimmer` - Shine/shimmer effect
+
+**Exit Animations:**
+- `fadeOut`, `slideOutDown`, `scaleOut` - Standard exits
+- `explode` - Characters scatter in random directions
+
+**Interactive:**
+- `hoverBounce` - Auto-attach hover listeners
+- `clickSpin` - Auto-attach click listeners
+
+### Preset Options
+
+All presets accept custom options:
+
+```javascript
+wrapper.animate('fadeInStagger', {
+  duration: 1,
+  stagger: 0.05,
+  ease: 'power2.out',
+  delay: 0.5,
+  groups: 'vowels' // Animate only specific groups!
+});
+```
+
+### Custom Presets
+
+Register your own reusable presets:
+
+```javascript
+CharWrapper.registerPreset('myEffect', (elements, options) => {
+  return gsap.from(elements, {
+    opacity: 0,
+    scale: 2,
+    rotation: 360,
+    stagger: options.stagger || 0.05
+  });
+});
+
+wrapper.animate('myEffect');
+```
+
+### Why Use Presets?
+
+✅ **Faster development** - Common effects in one line
+✅ **Beginner-friendly** - No GSAP knowledge required
+✅ **Still flexible** - Customize any preset
+✅ **Works with groups** - Combine with character groups
+✅ **Returns GSAP timeline** - Advanced users can manipulate it
+
+## 🔄 Text Transitions (Optional GSAP Feature)
+
+**⚠️ Requires GSAP:** Text transitions are optional GSAP-specific features. CharWrapper core remains animation-agnostic. Include GSAP separately:
+
+```html
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="charwrapper.min.js"></script>
+```
+
+### What are Text Transitions?
+
+Smoothly morph from one text to another with intelligent character matching:
+
+```javascript
+const wrapper = new CharWrapper('.text', { wrap: { chars: true } });
+wrapper.wrap();
+
+// Transition to new text
+wrapper.transitionTo('New Text Here');
+
+// With options
+wrapper.transitionTo('Updated!', {
+  strategy: 'smart',
+  addDuration: 0.5,
+  removeDuration: 0.3,
+  stagger: 0.02
+});
+```
+
+### Transition Strategies
+
+**1. Smart (default)** - Intelligently matches characters between old and new text:
+```javascript
+wrapper.transitionTo('New Text', { strategy: 'smart' });
+```
+- Reuses matching characters
+- Only animates what changed
+- Best for similar text
+
+**2. Sequential** - Removes all, then adds all:
+```javascript
+wrapper.transitionTo('Completely Different', { strategy: 'sequential' });
+```
+- Clean and simple
+- Best for very different text
+
+### Transition Options
+
+```javascript
+wrapper.transitionTo('New Text', {
+  strategy: 'smart',        // 'smart' or 'sequential'
+  addDuration: 0.4,         // Duration for adding characters
+  removeDuration: 0.4,      // Duration for removing characters
+  stagger: 0.02,            // Stagger between characters
+  ease: 'power2.out',       // GSAP easing
+  onComplete: () => {       // Callback when done
+    console.log('Transition complete!');
+  }
+});
+```
+
+### Real-World Examples
+
+**Counter:**
+```javascript
+let count = 0;
+
+function increment() {
+  count++;
+  wrapper.transitionTo(String(count));
+}
+```
+
+**Status Messages:**
+```javascript
+wrapper.transitionTo('Loading...');
+// later
+wrapper.transitionTo('Success!');
+```
+
+**Chained Transitions:**
+```javascript
+wrapper.transitionTo('First', {
+  onComplete: () => {
+    setTimeout(() => {
+      wrapper.transitionTo('Second', {
+        onComplete: () => {
+          wrapper.transitionTo('Done!');
+        }
+      });
+    }, 1000);
+  }
+});
+```
+
+### Why Use Text Transitions?
+
+✅ **Smooth morphing** - No jarring content changes
+✅ **Intelligent matching** - Reuses characters when possible
+✅ **Perfect for dynamic content** - Counters, status updates, live data
+✅ **Returns GSAP timeline** - Full control for advanced users
+✅ **Auto-updates groups** - Character groups are re-evaluated after transition
+
 ## 🎨 Examples
 
 Open `examples/index.html` in your browser to see all examples:
@@ -645,6 +838,52 @@ Returns current configuration (read-only copy).
 #### `getMetadata()`
 Returns instance metadata (id, charCount, wordCount, etc.).
 
+#### `animate(presetName, options)` ⚡ GSAP Required
+Animate characters using a preset animation.
+
+```javascript
+wrapper.animate('fadeInStagger');
+wrapper.animate('wave', { amplitude: 30, duration: 1 });
+wrapper.animate('typewriter', { stagger: 0.05, groups: 'vowels' });
+```
+
+**Parameters:**
+- `presetName` (string) - Name of the animation preset
+- `options` (PresetOptions) - Animation options (duration, stagger, delay, ease, groups, etc.)
+
+**Returns:** GSAP timeline or tween, or null if preset not found
+
+**Note:** Requires GSAP to be loaded. Returns null if element is not wrapped.
+
+#### `transitionTo(newText, options)` ⚡ GSAP Required
+Transition to new text content with smooth animation.
+
+```javascript
+wrapper.transitionTo('New Text Here');
+wrapper.transitionTo('Updated!', {
+  strategy: 'smart',
+  addDuration: 0.5,
+  removeDuration: 0.3,
+  stagger: 0.02
+});
+```
+
+**Parameters:**
+- `newText` (string) - The new text to transition to
+- `options` (TransitionOptions) - Transition options
+
+**Options:**
+- `strategy` - 'smart' (default) or 'sequential'
+- `addDuration` - Duration for adding characters (default: 0.4)
+- `removeDuration` - Duration for removing characters (default: 0.4)
+- `stagger` - Stagger between characters (default: 0.02)
+- `ease` - GSAP easing (default: 'power2.out')
+- `onComplete` - Callback function
+
+**Returns:** GSAP timeline or null
+
+**Note:** Requires GSAP to be loaded. Automatically updates character groups after transition.
+
 ### Static Methods
 
 #### `CharWrapper.create(target, config)`
@@ -662,6 +901,27 @@ const wrappers = CharWrapper.wrapMultiple(['.text1', '.text2'], {
   wrap: { chars: true }
 });
 ```
+
+#### `CharWrapper.registerPreset(name, fn)` ⚡ GSAP Required
+Register a custom animation preset.
+
+```javascript
+CharWrapper.registerPreset('myEffect', (elements, options) => {
+  return gsap.from(elements, {
+    opacity: 0,
+    scale: 2,
+    rotation: 360,
+    stagger: options.stagger || 0.05
+  });
+});
+
+// Use it
+wrapper.animate('myEffect');
+```
+
+**Parameters:**
+- `name` (string) - Preset name
+- `fn` (function) - Preset function that receives (elements, options) and returns a GSAP timeline/tween
 
 ## 🏗️ Project Structure
 
