@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CharWrapper - Scroll-Triggered Animations</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(180deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+
+    .hero p {
+      font-size: 1.5rem;
+      opacity: 0.8;
+      margin-bottom: 3rem;
+    }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1rem;
+      opacity: 0.6;
+      animation: bounce 2s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-10px); }
+    }
+
+    .section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 2rem;
+      position: relative;
+    }
+
+    .section:nth-child(even) {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .content {
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .section-title {
+      font-size: 1.2rem;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 2rem;
+      opacity: 0.7;
+      font-weight: 600;
+    }
+
+    .text-demo {
+      font-size: clamp(2rem, 4vw, 4rem);
+      line-height: 1.3;
+      font-weight: 700;
+      margin-bottom: 2rem;
+    }
+
+    .description {
+      font-size: 1.2rem;
+      line-height: 1.8;
+      opacity: 0.8;
+    }
+
+    .char {
+      display: inline-block;
+      transform-origin: center;
+    }
+
+    .char--space {
+      width: 0.3em;
+    }
+
+    .word {
+      display: inline-block;
+      margin-right: 0.3em;
+    }
+
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      width: 0;
+      background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+      transform-origin: left;
+      z-index: 1000;
+    }
+
+    .back-button {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: white;
+      color: #0f0c29;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s;
+      z-index: 999;
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+    }
+  </style>
+</head>
+<body>
+  <div class="progress-bar"></div>
+
+  <section class="hero">
+    <h1 id="hero-title">Scroll-Triggered Animations</h1>
+    <p>Powered by Anime.js & Intersection Observer</p>
+    <div class="scroll-hint">↓ Scroll Down ↓</div>
+  </section>
+
+  <section class="section">
+    <div class="content">
+      <div class="section-title">Fade In on Scroll</div>
+      <div class="text-demo" id="text1">
+        Reveal text as you scroll down the page
+      </div>
+      <div class="description">
+        Each character fades in with a staggered effect as the section enters the viewport.
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="content">
+      <div class="section-title">Slide from Sides</div>
+      <div class="text-demo" id="text2">
+        Words slide in from alternating sides
+      </div>
+      <div class="description">
+        Words enter from left and right alternately, creating a dynamic entrance effect.
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="content">
+      <div class="section-title">Rotation Cascade</div>
+      <div class="text-demo" id="text3">
+        Characters rotate into view smoothly
+      </div>
+      <div class="description">
+        Each character rotates and scales up as you scroll, with perfect timing.
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="content">
+      <div class="section-title">Parallax Layers</div>
+      <div class="text-demo" id="text4">
+        Multi-layered depth effect
+      </div>
+      <div class="description">
+        Characters move at different speeds creating a parallax depth illusion.
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="content">
+      <div class="section-title">Progressive Blur</div>
+      <div class="text-demo" id="text5">
+        From blurry to crystal clear
+      </div>
+      <div class="description">
+        Text starts blurred and becomes sharp as you scroll into the section.
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="min-height: 60vh;">
+    <div class="content" style="text-align: center;">
+      <h2 style="font-size: 3rem; margin-bottom: 1rem;">You've reached the end!</h2>
+      <p style="font-size: 1.5rem; opacity: 0.8;">Scroll back up to see the effects again</p>
+    </div>
+  </section>
+
+  <button class="back-button" onclick="location.href='../index.html'">Back to Examples</button>
+
+  <!-- Web Animations API (Native) -->
+  <!-- No external animation library needed - using native Web Animations API -->
+
+  <!-- CharWrapper - Single Bundle File -->
+  <script src="../../dist/charwrapper.js"></script>
+
+  <script>
+
+    window.wrappers = [];
+
+    // Progress bar on scroll
+    const progressBar = document.querySelector('.progress-bar');
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrollPercent = (scrollTop / scrollHeight) * 100;
+      progressBar.style.width = scrollPercent + '%';
+    });
+
+    // Hero title animation
+    const heroWrapper = new CharWrapper('#hero-title', {
+      wrap: { chars: true },
+    });
+    const { chars: heroChars } = heroWrapper.wrap();
+    window.wrappers.push(heroWrapper);
+
+    // Set initial state
+    heroChars.forEach(char => {
+      char.style.opacity = '0';
+      char.style.transform = 'translateY(50px) rotate(-15deg)';
+    });
+
+    anime({
+      targets: heroChars,
+      opacity: [0, 1],
+      translateY: [50, 0],
+      rotate: [-15, 0],
+      duration: 1000,
+      delay: anime.stagger(30),
+      easing: 'easeOutBack'
+    });
+
+    // Effect 1: Fade In on Scroll
+    const wrapper1 = new CharWrapper('#text1', {
+      wrap: { chars: true },
+    });
+    const { chars: chars1 } = wrapper1.wrap();
+    window.wrappers.push(wrapper1);
+
+    // Set initial state
+    chars1.forEach(char => {
+      char.style.opacity = '0';
+      char.style.transform = 'translateY(30px)';
+    });
+
+    const observer1 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          anime({
+            targets: chars1,
+            opacity: [0, 1],
+            translateY: [30, 0],
+            duration: 800,
+            delay: anime.stagger(20),
+            easing: 'easeOutQuad'
+          });
+          observer1.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    observer1.observe(document.getElementById('text1'));
+
+    // Effect 2: Slide from Sides (Words)
+    const wrapper2 = new CharWrapper('#text2', {
+      wrap: { words: true, chars: true },
+    });
+    const { words: words2 } = wrapper2.wrap();
+    window.wrappers.push(wrapper2);
+
+    // Set initial state
+    words2.forEach((word, index) => {
+      const isEven = index % 2 === 0;
+      word.style.opacity = '0';
+      word.style.transform = `translateX(${isEven ? -100 : 100}px) rotate(${isEven ? -10 : 10}deg)`;
+    });
+
+    const observer2 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          words2.forEach((word, index) => {
+            const isEven = index % 2 === 0;
+            anime({
+              targets: word,
+              opacity: [0, 1],
+              translateX: [isEven ? -100 : 100, 0],
+              rotate: [isEven ? -10 : 10, 0],
+              duration: 1000,
+              delay: index * 100,
+              easing: 'easeOutCubic'
+            });
+          });
+          observer2.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    observer2.observe(document.getElementById('text2'));
+
+    // Effect 3: Rotation Cascade
+    const wrapper3 = new CharWrapper('#text3', {
+      wrap: { chars: true },
+    });
+    const { chars: chars3 } = wrapper3.wrap();
+    window.wrappers.push(wrapper3);
+
+    // Set initial state
+    chars3.forEach(char => {
+      char.style.opacity = '0';
+      char.style.transform = 'scale(0) rotate(180deg)';
+    });
+
+    const observer3 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          anime({
+            targets: chars3,
+            opacity: [0, 1],
+            scale: [0, 1],
+            rotate: [180, 0],
+            duration: 1000,
+            delay: anime.stagger(30),
+            easing: 'easeOutBack'
+          });
+          observer3.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    observer3.observe(document.getElementById('text3'));
+
+    // Effect 4: Parallax Layers
+    const wrapper4 = new CharWrapper('#text4', {
+      wrap: { chars: true },
+    });
+    const { chars: chars4 } = wrapper4.wrap();
+    window.wrappers.push(wrapper4);
+
+    // Parallax scroll effect
+    let text4Element = document.getElementById('text4');
+    window.addEventListener('scroll', () => {
+      const rect = text4Element.getBoundingClientRect();
+      const scrollProgress = 1 - (rect.top / window.innerHeight);
+
+      if (scrollProgress > 0 && scrollProgress < 2) {
+        chars4.forEach((char, index) => {
+          const depth = (index % 5) + 1;
+          const offset = -50 * depth * scrollProgress;
+          char.style.transform = `translateY(${offset}px)`;
+        });
+      }
+    });
+
+    // Effect 5: Progressive Blur
+    const wrapper5 = new CharWrapper('#text5', {
+      wrap: { chars: true },
+    });
+    const { chars: chars5 } = wrapper5.wrap();
+    window.wrappers.push(wrapper5);
+
+    // Set initial blur
+    chars5.forEach(char => {
+      char.style.filter = 'blur(10px)';
+      char.style.opacity = '0.3';
+    });
+
+    const observer5 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          chars5.forEach((char, i) => {
+            anime({
+              targets: char,
+              opacity: [0.3, 1],
+              filter: ['blur(10px)', 'blur(0px)'],
+              duration: 800,
+              delay: i * 20,
+              easing: 'easeOutQuad'
+            });
+          });
+          observer5.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    observer5.observe(document.getElementById('text5'));
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      window.wrappers.forEach(w => w.destroy());
+    });
+  </script>
+</body>
+</html>

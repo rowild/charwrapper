@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CharWrapper - Scramble & Shuffle Effects</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Courier New', monospace;
+      background: #0a0e27;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: #00ff41;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      margin-bottom: 3rem;
+      text-align: center;
+      font-weight: 700;
+      text-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+    }
+
+    .example-section {
+      background: rgba(0, 255, 65, 0.05);
+      border: 2px solid rgba(0, 255, 65, 0.3);
+      border-radius: 10px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .example-section::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, transparent, rgba(0, 255, 65, 0.1), transparent);
+      animation: border-flow 3s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes border-flow {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    .example-title {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .text-demo {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      line-height: 1.6;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+
+    .char {
+      display: inline-block;
+      transform-origin: center;
+    }
+
+    .char--space {
+      width: 0.3em;
+    }
+
+    .controls {
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    button {
+      background: transparent;
+      color: #00ff41;
+      border: 2px solid #00ff41;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: 'Courier New', monospace;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 0.5rem;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 255, 65, 0.2);
+      transition: left 0.3s;
+    }
+
+    button:hover::before {
+      left: 0;
+    }
+
+    button:hover {
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+      text-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
+    }
+
+    .matrix-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      opacity: 0.05;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(0, 255, 65, 0.1);
+      color: #00ff41;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 5px;
+      font-weight: 600;
+      border: 2px solid rgba(0, 255, 65, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+      background: rgba(0, 255, 65, 0.2);
+      border-color: #00ff41;
+      transform: translateX(-5px);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+
+    .back-link::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back-link">All Examples</a>
+
+  <canvas class="matrix-bg" id="matrix"></canvas>
+
+  <div class="container">
+    <h1>SCRAMBLE EFFECTS</h1>
+
+    <div class="example-section">
+      <div class="example-title">Matrix Decode</div>
+      <div class="text-demo" id="text1">
+        ACCESSING MAINFRAME
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Random Shuffle</div>
+      <div class="text-demo" id="text2">
+        DECRYPTING MESSAGE
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Glitch Effect</div>
+      <div class="text-demo" id="text3">
+        SYSTEM COMPROMISED
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Typewriter Reveal</div>
+      <div class="text-demo" id="text4">
+        INITIALIZING PROTOCOL
+      </div>
+    </div>
+
+    <div class="controls">
+      <button onclick="replayAll()">Replay</button>
+      <button onclick="location.href='../index.html'">Back</button>
+    </div>
+  </div>
+
+  <!-- Web Animations API (Native) -->
+  <!-- No external animation library needed - using native Web Animations API -->
+
+  <!-- Matrix Background Effect -->
+  <script>
+    // Simple matrix rain background
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const chars = '01アイウエオカキクケコサシスセソタチツテト';
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = Array(Math.floor(columns)).fill(1);
+
+    function drawMatrix() {
+      ctx.fillStyle = 'rgba(10, 14, 39, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = '#00ff41';
+      ctx.font = fontSize + 'px monospace';
+
+      drops.forEach((y, i) => {
+        const text = chars[Math.floor(Math.random() * chars.length)];
+        const x = i * fontSize;
+        ctx.fillText(text, x, y * fontSize);
+
+        if (y * fontSize > canvas.height && Math.random() > 0.975) {
+          drops[i] = 0;
+        }
+        drops[i]++;
+      });
+    }
+
+    setInterval(drawMatrix, 50);
+  </script>
+
+  <!-- CharWrapper - Single Bundle File -->
+  <script src="../../dist/charwrapper.js"></script>
+
+  <script>
+
+    const RANDOM_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*';
+
+    window.wrappers = [];
+    window.animations = [];
+
+    // Helper: Get random character
+    function getRandomChar() {
+      return RANDOM_CHARS[Math.floor(Math.random() * RANDOM_CHARS.length)];
+    }
+
+    // Animation 1: Matrix Decode
+    const wrapper1 = new CharWrapper('#text1', {
+      wrap: { chars: true },
+    });
+    const { chars: chars1 } = wrapper1.wrap();
+    window.wrappers.push(wrapper1);
+
+    const originalText1 = chars1.map(el => el.textContent);
+
+    function matrixDecode() {
+      // Scramble each character
+      chars1.forEach((char, i) => {
+        let scrambleCount = 0;
+        const maxScrambles = 20;
+
+        const interval = setInterval(() => {
+          char.textContent = getRandomChar();
+          scrambleCount++;
+
+          if (scrambleCount >= maxScrambles) {
+            clearInterval(interval);
+            // Reveal with scale animation
+            char.textContent = originalText1[i];
+            anime({
+              targets: char,
+              scale: [1.5, 1],
+              duration: 200,
+              easing: 'easeOutBack'
+            });
+          }
+        }, 50);
+
+        // Start each character at staggered time
+        setTimeout(() => {}, i * 50);
+      });
+    }
+
+    window.animations.push(matrixDecode);
+    matrixDecode();
+
+    // Animation 2: Random Shuffle
+    const wrapper2 = new CharWrapper('#text2', {
+      wrap: { chars: true },
+    });
+    const { chars: chars2 } = wrapper2.wrap();
+    window.wrappers.push(wrapper2);
+
+    const originalText2 = chars2.map(el => el.textContent);
+
+    function randomShuffle() {
+      // Initial scramble
+      chars2.forEach(char => {
+        char.textContent = getRandomChar();
+      });
+
+      // Staggered reveal with random chars
+      chars2.forEach((char, i) => {
+        setTimeout(() => {
+          let progress = 0;
+          const interval = setInterval(() => {
+            progress += 0.1;
+            if (progress < 0.8) {
+              char.textContent = getRandomChar();
+            } else {
+              clearInterval(interval);
+              char.textContent = originalText2[i];
+            }
+          }, 60);
+        }, 500 + i * 50);
+      });
+    }
+
+    window.animations.push(randomShuffle);
+    randomShuffle();
+
+    // Animation 3: Glitch Effect
+    const wrapper3 = new CharWrapper('#text3', {
+      wrap: { chars: true },
+    });
+    const { chars: chars3 } = wrapper3.wrap();
+    window.wrappers.push(wrapper3);
+
+    function glitchEffect() {
+      chars3.forEach((char, i) => {
+        // Set initial glitched position
+        const randomX = Math.random() * 100 - 50;
+        const randomY = Math.random() * 40 - 20;
+        const randomRotate = Math.random() * 30 - 15;
+
+        char.style.opacity = '0';
+        char.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg)`;
+
+        setTimeout(() => {
+          // Appear and snap to position
+          anime({
+            targets: char,
+            opacity: [0, 1],
+            translateX: [randomX, 0],
+            translateY: [randomY, 0],
+            rotate: [randomRotate, 0],
+            duration: 300,
+            easing: 'easeOutQuart',
+            delay: 0
+          });
+        }, 1000 + i * 30);
+      });
+    }
+
+    window.animations.push(glitchEffect);
+    glitchEffect();
+
+    // Animation 4: Typewriter Reveal
+    const wrapper4 = new CharWrapper('#text4', {
+      wrap: { chars: true },
+    });
+    const { chars: chars4 } = wrapper4.wrap();
+    window.wrappers.push(wrapper4);
+
+    function typewriterReveal() {
+      // Hide all initially
+      chars4.forEach(char => {
+        char.style.opacity = '0';
+      });
+
+      // Reveal with typewriter effect
+      chars4.forEach((char, i) => {
+        setTimeout(() => {
+          anime({
+            targets: char,
+            opacity: [0, 1],
+            duration: 50,
+            easing: 'linear',
+            complete: function() {
+              // Blink effect
+              anime({
+                targets: char,
+                opacity: [1, 0.3, 1],
+                duration: 100,
+                easing: 'linear'
+              });
+            }
+          });
+        }, 1500 + i * 80);
+      });
+    }
+
+    window.animations.push(typewriterReveal);
+    typewriterReveal();
+
+    // Replay function
+    window.replayAll = function() {
+      // Reset all characters
+      chars1.forEach((char, i) => {
+        char.textContent = originalText1[i];
+        char.style.transform = '';
+      });
+      chars2.forEach((char, i) => {
+        char.textContent = originalText2[i];
+        char.style.transform = '';
+      });
+      chars3.forEach((char) => {
+        char.style.opacity = '1';
+        char.style.transform = '';
+      });
+      chars4.forEach((char) => {
+        char.style.opacity = '1';
+      });
+
+      // Replay all animations
+      window.animations.forEach(animFn => animFn());
+    };
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      window.wrappers.forEach(w => w.destroy());
+    });
+  </script>
+</body>
+</html>
