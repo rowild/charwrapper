@@ -144,9 +144,44 @@
       pointer-events: none;
       z-index: -1;
     }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(0, 255, 65, 0.1);
+      color: #00ff41;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 5px;
+      font-weight: 600;
+      border: 2px solid rgba(0, 255, 65, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 0.9rem;
+    }
+
+    .back-link:hover {
+      background: rgba(0, 255, 65, 0.2);
+      border-color: #00ff41;
+      transform: translateX(-5px);
+      box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+
+    .back-link::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
   </style>
 </head>
 <body>
+  <a href="index.html" class="back-link">All Examples</a>
+
   <canvas class="matrix-bg" id="matrix"></canvas>
 
   <div class="container">
