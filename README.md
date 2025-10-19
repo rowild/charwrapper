@@ -1,45 +1,98 @@
 # CharWrapper 2.0
 
-Modern ES6+ text animation library designed for seamless integration with GSAP and other animation libraries.
+Modern text animation library with TypeScript support, designed for seamless integration with GSAP and other animation libraries.
 
 ## 🎯 What's New in 2.0
 
-- ✨ **Complete ES6+ Rewrite** - Modern JavaScript with private fields, classes, and modules
+- ✨ **TypeScript Support** - Full type definitions included
+- 📦 **Single Bundle File** - Just 13KB minified, one file to include
 - ⚡ **60%+ Performance Improvement** - DocumentFragment batching, optimized DOM operations
-- 🚫 **Zero Dependencies** - Removed lodash, pure vanilla JS
-- 🏗️ **Modular Architecture** - Split into 6 focused modules
+- 🚫 **Zero Dependencies** - Pure vanilla JavaScript
+- 🏗️ **Modular Architecture** - 6 focused modules for maintainability
 - 🧹 **Memory Safe** - Built-in cleanup prevents memory leaks
 - 🎨 **Cleaner API** - Simplified, intuitive configuration
-- 📝 **Full JSDoc** - TypeScript-style documentation
-- 🌍 **Diacritical Support** - Now supports accented characters (ü, é, ñ, etc.)
+- 🌍 **Diacritical Support** - Supports accented characters (ü, é, ñ, etc.)
 - ♿ **Accessibility Built-in** - ARIA labels, aria-hidden, and title attributes for screen readers
+
+## 📦 Installation
+
+### Browser (CDN) - Recommended for Quick Start
+
+```html
+<!-- Include the bundle (13KB minified) -->
+<script src="dist/charwrapper.min.js"></script>
+
+<script>
+  // CharWrapper is available globally
+  const wrapper = new CharWrapper('.my-text', {
+    wrap: { chars: true },
+    enumerate: { chars: true }
+  });
+
+  const { chars } = wrapper.wrap();
+
+  // Animate with GSAP
+  gsap.from(chars, { opacity: 0, stagger: 0.05 });
+</script>
+```
+
+### NPM Package
+
+```bash
+npm install charwrapper
+```
+
+```javascript
+// ES Module import
+import CharWrapper from 'charwrapper';
+
+const wrapper = new CharWrapper('.my-text', {
+  wrap: { chars: true }
+});
+
+const { chars } = wrapper.wrap();
+```
 
 ## 🚀 Quick Start
 
-### Basic Usage
+### Basic Example
 
-```javascript
-import CharWrapper from './src/CharWrapper.js';
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- GSAP from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
-// Create wrapper instance
-const wrapper = new CharWrapper('.my-text', {
-  wrap: { chars: true },
-  enumerate: { chars: true }
-});
+  <!-- CharWrapper bundle -->
+  <script src="dist/charwrapper.min.js"></script>
+</head>
+<body>
+  <h1 class="my-text">Hello World</h1>
 
-// Wrap the text
-const { chars, words } = wrapper.wrap();
+  <script>
+    // Create wrapper instance
+    const wrapper = new CharWrapper('.my-text', {
+      wrap: { chars: true },
+      enumerate: { chars: true }
+    });
 
-// Animate with GSAP
-gsap.from(chars, {
-  opacity: 0,
-  y: 50,
-  stagger: 0.05,
-  duration: 0.8
-});
+    // Wrap the text
+    const { chars } = wrapper.wrap();
 
-// Clean up when done
-wrapper.destroy();
+    // Animate with GSAP
+    gsap.from(chars, {
+      opacity: 0,
+      y: 50,
+      stagger: 0.05,
+      duration: 0.8
+    });
+
+    // Clean up when done
+    wrapper.destroy();
+  </script>
+</body>
+</html>
 ```
 
 ## 🆚 CharWrapper vs GSAP SplitText API
@@ -361,23 +414,60 @@ const wrappers = CharWrapper.wrapMultiple(['.text1', '.text2'], {
 });
 ```
 
-## 🏗️ Architecture
+## 🏗️ Project Structure
 
 ```
 CharWrapper/
-├── src/
-│   ├── CharWrapper.js       # Main class - public API
-│   ├── config.js            # Configuration & validation
-│   ├── utils.js             # Pure utility functions
-│   ├── WrapperFactory.js    # Creates wrapped elements
-│   ├── DOMProcessor.js      # DOM operations & traversal
-│   └── SelectionStrategy.js # Element selection strategies
-└── examples/
+├── dist/
+│   ├── charwrapper.js       # Browser bundle (36KB)
+│   ├── charwrapper.min.js   # Minified bundle (13KB) ← Use this!
+│   └── esm/                 # ES modules (for npm/bundlers)
+│       ├── CharWrapper.js
+│       ├── CharWrapper.d.ts # TypeScript definitions
+│       ├── config.js
+│       ├── utils.js
+│       └── ...
+├── src/                     # TypeScript source files
+│   ├── CharWrapper.ts       # Main class
+│   ├── config.ts            # Configuration & types
+│   ├── utils.ts             # Utilities
+│   ├── WrapperFactory.ts    # Element factory
+│   ├── DOMProcessor.ts      # DOM operations
+│   └── SelectionStrategy.ts # Selection patterns
+└── examples/                # Live examples
     ├── index.html           # Examples showcase
     ├── 01-text-reveal.html
     ├── 02-scramble.html
     ├── 03-hover-effects.html
     └── 04-scroll-trigger.html
+```
+
+## 🛠️ Development
+
+### Building from Source
+
+```bash
+npm install              # Install dependencies
+npm run build           # Compile TypeScript to esm/
+npm run bundle          # Build + create browser bundles
+npm run watch           # Watch mode for development
+npm run clean           # Remove all build output
+```
+
+### TypeScript
+
+Full TypeScript support with type definitions:
+
+```typescript
+import CharWrapper from 'charwrapper';
+
+const wrapper = new CharWrapper('.text', {
+  wrap: { chars: true },
+  enumerate: { chars: true }
+});
+
+// Full type inference and autocomplete
+const { chars, words } = wrapper.wrap();
 ```
 
 ## ⚡ Performance
@@ -417,6 +507,14 @@ CharWrapper/
 
 Uses modern ES6+ features (private fields, optional chaining, nullish coalescing).
 
+## 📂 File Sizes
+
+| File | Size | Use Case |
+|------|------|----------|
+| `charwrapper.min.js` | 13KB | Production (recommended) |
+| `charwrapper.js` | 36KB | Development/debugging |
+| ESM modules | ~40KB | NPM package (tree-shakeable) |
+
 ## 📝 Migration from v1.0
 
 ### Old API (v1.0)
@@ -432,15 +530,18 @@ wrapper.initializeWrap();
 ```
 
 ### New API (v2.0)
-```javascript
-const wrapper = new CharWrapper('.text', {
-  wrap: { chars: true },
-  enumerate: { chars: true, includeSpaces: true },
-  tags: { char: 'span' }
-});
+```html
+<script src="dist/charwrapper.min.js"></script>
+<script>
+  const wrapper = new CharWrapper('.text', {
+    wrap: { chars: true },
+    enumerate: { chars: true, includeSpaces: true },
+    tags: { char: 'span' }
+  });
 
-const { chars, words } = wrapper.wrap();
-wrapper.destroy(); // Don't forget cleanup!
+  const { chars, words } = wrapper.wrap();
+  wrapper.destroy(); // Don't forget cleanup!
+</script>
 ```
 
 ## 🐛 Known Limitations

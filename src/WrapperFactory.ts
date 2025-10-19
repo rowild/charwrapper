@@ -6,19 +6,42 @@
  * and how to structure the wrapped elements.
  */
 
-import { PATTERNS } from './config.js';
+import { PATTERNS, CharWrapperConfig } from './config.js';
 import { padNumber, buildClassString } from './utils.js';
 
+/**
+ * Options for creating character/word elements
+ */
+export interface WrapOptions {
+  subSetClass?: string | null;
+}
+
+/**
+ * Result of wrapping text into words
+ */
+export interface WrapWordsResult {
+  words: HTMLElement[];
+  chars: HTMLElement[];
+}
+
+/**
+ * Counter object for enumeration
+ */
+interface Counters {
+  char: number;
+  word: number;
+}
+
 export class WrapperFactory {
-  #config;
-  #counters;
+  #config: CharWrapperConfig;
+  #counters: Counters;
 
   /**
    * Creates a new WrapperFactory instance
    *
-   * @param {Object} config - Validated configuration object
+   * @param config - Validated configuration object
    */
-  constructor(config) {
+  constructor(config: CharWrapperConfig) {
     this.#config = config;
     this.#counters = {
       char: 0,
@@ -29,7 +52,7 @@ export class WrapperFactory {
   /**
    * Resets all counters
    */
-  resetCounters() {
+  resetCounters(): void {
     this.#counters.char = 0;
     this.#counters.word = 0;
   }
@@ -37,17 +60,16 @@ export class WrapperFactory {
   /**
    * Creates a wrapped character element
    *
-   * @param {string} char - Single character to wrap
-   * @param {Object} options - Additional options
-   * @param {string} options.subSetClass - Optional subset-specific class
-   * @returns {HTMLElement} Wrapped character element
+   * @param char - Single character to wrap
+   * @param options - Additional options
+   * @returns Wrapped character element
    */
-  createCharElement(char, options = {}) {
+  createCharElement(char: string, options: WrapOptions = {}): HTMLElement {
     const { subSetClass = null } = options;
     const element = document.createElement(this.#config.tags.char);
 
     // Build class list
-    const classes = [this.#config.classes.char];
+    const classes: (string | null | undefined | false)[] = [this.#config.classes.char];
 
     // Add enumerated class if enabled
     if (this.#config.enumerate.chars) {
@@ -96,15 +118,15 @@ export class WrapperFactory {
   /**
    * Creates a wrapped word element
    *
-   * @param {string} word - Word text
-   * @param {Array<HTMLElement>} charElements - Array of wrapped character elements
-   * @returns {HTMLElement} Wrapped word element containing character elements
+   * @param word - Word text
+   * @param charElements - Array of wrapped character elements
+   * @returns Wrapped word element containing character elements
    */
-  createWordElement(word, charElements = []) {
+  createWordElement(word: string, charElements: HTMLElement[] = []): HTMLElement {
     const element = document.createElement(this.#config.tags.word);
 
     // Build class list
-    const classes = [this.#config.classes.word];
+    const classes: string[] = [this.#config.classes.word];
 
     // Add enumerated class if enabled
     if (this.#config.enumerate.words) {
@@ -132,9 +154,9 @@ export class WrapperFactory {
   /**
    * Creates a space element between words
    *
-   * @returns {HTMLElement} Space element
+   * @returns Space element
    */
-  createSpaceElement() {
+  createSpaceElement(): HTMLElement {
     const element = document.createElement(this.#config.tags.word);
     element.className = this.#config.classes.space;
     element.textContent = this.#config.replaceSpaceWith;
@@ -150,11 +172,11 @@ export class WrapperFactory {
   /**
    * Wraps text into character elements
    *
-   * @param {string} text - Text to wrap
-   * @param {Object} options - Wrapping options
-   * @returns {Array<HTMLElement>} Array of wrapped character elements
+   * @param text - Text to wrap
+   * @param options - Wrapping options
+   * @returns Array of wrapped character elements
    */
-  wrapChars(text, options = {}) {
+  wrapChars(text: string, options: WrapOptions = {}): HTMLElement[] {
     if (!text) return [];
 
     const chars = text.split('');
@@ -164,16 +186,16 @@ export class WrapperFactory {
   /**
    * Wraps text into word elements (with nested character elements)
    *
-   * @param {string} text - Text to wrap
-   * @param {Object} options - Wrapping options
-   * @returns {Object} Object containing words and chars arrays
+   * @param text - Text to wrap
+   * @param options - Wrapping options
+   * @returns Object containing words and chars arrays
    */
-  wrapWords(text, options = {}) {
+  wrapWords(text: string, options: WrapOptions = {}): WrapWordsResult {
     if (!text) return { words: [], chars: [] };
 
     const words = text.split(' ');
-    const wordElements = [];
-    const allCharElements = [];
+    const wordElements: HTMLElement[] = [];
+    const allCharElements: HTMLElement[] = [];
 
     words.forEach((word, index) => {
       // Wrap each character in the word
@@ -200,10 +222,10 @@ export class WrapperFactory {
   /**
    * Determines if a character should be enumerated based on config
    *
-   * @param {string} char - Character to check
-   * @returns {boolean}
+   * @param char - Character to check
+   * @returns Whether the character should be enumerated
    */
-  #shouldEnumerateChar(char) {
+  #shouldEnumerateChar(char: string): boolean {
     const isSpace = PATTERNS.space.test(char);
     const isSpecial = PATTERNS.special.test(char);
 
@@ -229,9 +251,9 @@ export class WrapperFactory {
   /**
    * Gets current counter values (useful for debugging)
    *
-   * @returns {Object} Current counter values
+   * @returns Current counter values
    */
-  getCounters() {
+  getCounters(): Counters {
     return { ...this.#counters };
   }
 }

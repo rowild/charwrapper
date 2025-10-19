@@ -7,6 +7,14 @@
  */
 
 import { querySelectorSafe, sortByDataAttribute, is, logger } from './utils.js';
+import { CharWrapperConfig } from './config.js';
+
+/**
+ * Options for selection strategies
+ */
+export interface SelectionOptions {
+  ordered?: boolean;
+}
 
 /**
  * Base class for selection strategies
@@ -15,10 +23,11 @@ class SelectionStrategy {
   /**
    * Selects elements based on strategy
    *
-   * @param {string|Element} _target - Target selector or element (unused in base class)
-   * @returns {Element|Array<Element>} Selected element(s)
+   * @param _target - Target selector or element (unused in base class)
+   * @param _options - Selection options (unused in base class)
+   * @returns Selected element(s)
    */
-  select(_target) {
+  select(_target: string | Element, _options?: SelectionOptions): Element | Element[] {
     throw new Error('select() must be implemented by subclass');
   }
 }
@@ -28,7 +37,7 @@ class SelectionStrategy {
  * Selects a single element by CSS selector
  */
 export class CSSStrategy extends SelectionStrategy {
-  select(target) {
+  select(target: string | Element): Element {
     if (is.element(target)) {
       return target;
     }
@@ -46,9 +55,9 @@ export class CSSStrategy extends SelectionStrategy {
  * Selects multiple elements by data attributes with optional ordering
  */
 export class DataAttributeStrategy extends SelectionStrategy {
-  #config;
+  #config: CharWrapperConfig;
 
-  constructor(config) {
+  constructor(config: CharWrapperConfig) {
     super();
     this.#config = config;
   }
@@ -56,12 +65,11 @@ export class DataAttributeStrategy extends SelectionStrategy {
   /**
    * Selects elements based on data attributes
    *
-   * @param {string|Element} rootElement - Root element or selector
-   * @param {Object} options - Selection options
-   * @param {boolean} options.ordered - Whether to sort by data-custom-order
-   * @returns {Array<Element>} Array of selected elements
+   * @param rootElement - Root element or selector
+   * @param options - Selection options
+   * @returns Array of selected elements
    */
-  select(rootElement, options = {}) {
+  select(rootElement: string | Element, options: SelectionOptions = {}): Element[] {
     const { ordered = false } = options;
 
     // Get root element
@@ -82,7 +90,7 @@ export class DataAttributeStrategy extends SelectionStrategy {
 
     // Filter out excluded elements
     const filtered = elements.filter(el => {
-      const name = el.dataset[dataAttrName];
+      const name = (el as HTMLElement).dataset[dataAttrName];
       return name !== '_exclude_';
     });
 
@@ -98,10 +106,10 @@ export class DataAttributeStrategy extends SelectionStrategy {
   /**
    * Converts camelCase to kebab-case for data attributes
    *
-   * @param {string} str - CamelCase string
-   * @returns {string} kebab-case string
+   * @param str - CamelCase string
+   * @returns kebab-case string
    */
-  #camelToKebab(str) {
+  #camelToKebab(str: string): string {
     return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
   }
 }
@@ -113,11 +121,11 @@ export class SelectionStrategyFactory {
   /**
    * Creates appropriate selection strategy based on input
    *
-   * @param {string|Element} target - Target element or selector
-   * @param {Object} config - Configuration object
-   * @returns {SelectionStrategy} Appropriate selection strategy
+   * @param target - Target element or selector
+   * @param config - Configuration object
+   * @returns Appropriate selection strategy
    */
-  static create(target, config) {
+  static create(target: string | Element, config: CharWrapperConfig): SelectionStrategy {
     // If target is an element, use CSS strategy
     if (is.element(target)) {
       return new CSSStrategy();
@@ -139,26 +147,26 @@ export class SelectionStrategyFactory {
  * Provides a simple interface for selecting elements
  */
 export class Selector {
-  #config;
-  #strategy;
+  #config: CharWrapperConfig;
+  #strategy?: SelectionStrategy;
 
   /**
    * Creates a new Selector instance
    *
-   * @param {Object} config - Configuration object
+   * @param config - Configuration object
    */
-  constructor(config) {
+  constructor(config: CharWrapperConfig) {
     this.#config = config;
   }
 
   /**
    * Selects element(s) based on target and options
    *
-   * @param {string|Element} target - Target element or selector
-   * @param {Object} options - Selection options
-   * @returns {Element|Array<Element>} Selected element(s)
+   * @param target - Target element or selector
+   * @param options - Selection options
+   * @returns Selected element(s)
    */
-  select(target, options = {}) {
+  select(target: string | Element, options: SelectionOptions = {}): Element | Element[] {
     this.#strategy = SelectionStrategyFactory.create(target, this.#config);
     return this.#strategy.select(target, options);
   }
@@ -166,10 +174,10 @@ export class Selector {
   /**
    * Checks if a selector is valid
    *
-   * @param {string|Element} target - Target to validate
-   * @returns {boolean} Whether the selector is valid
+   * @param target - Target to validate
+   * @returns Whether the selector is valid
    */
-  isValid(target) {
+  isValid(target: string | Element): boolean {
     if (is.element(target)) {
       return true;
     }

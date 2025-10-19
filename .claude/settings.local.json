@@ -3,7 +3,8 @@
     "allow": [
       "WebSearch",
       "WebFetch(domain:gsap.com)",
-      "WebFetch(domain:webflow.com)"
+      "WebFetch(domain:webflow.com)",
+      "Bash(npx tsc --noEmit src/utils.ts)"
     ],
     "deny": [],
     "ask": []

@@ -4,7 +4,126 @@
  * Modern ES6+ configuration with validation and sensible defaults.
  */
 
-export const DEFAULT_CONFIG = {
+/**
+ * Valid HTML tags for wrapping elements
+ */
+export type WrapTag = 'span' | 'div' | 'i' | 'em' | 'strong' | 'mark';
+
+/**
+ * ARIA label configuration
+ */
+export type AriaLabelConfig = 'auto' | 'none' | string;
+
+/**
+ * Wrapping options configuration
+ */
+export interface WrapConfig {
+  chars: boolean;
+  words: boolean;
+  spaces: boolean;
+  specialChars: boolean;
+}
+
+/**
+ * Enumeration options configuration
+ */
+export interface EnumerateConfig {
+  chars: boolean;
+  words: boolean;
+  includeSpaces: boolean;
+  includeSpecialChars: boolean;
+}
+
+/**
+ * CSS class names configuration
+ */
+export interface ClassesConfig {
+  char: string;
+  word: string;
+  space: string;
+  special: string;
+  regular: string;
+}
+
+/**
+ * HTML tags configuration
+ */
+export interface TagsConfig {
+  char: WrapTag;
+  word: WrapTag;
+}
+
+/**
+ * Data attributes configuration
+ */
+export interface DataAttributesConfig {
+  subSetName: string;
+  subSetClass: string;
+  customOrder: string;
+}
+
+/**
+ * Processing options configuration
+ */
+export interface ProcessingConfig {
+  stripHTML: boolean;
+  trimWhitespace: boolean;
+  preserveStructure: boolean;
+  lazyWrap: boolean;
+}
+
+/**
+ * Performance options configuration
+ */
+export interface PerformanceConfig {
+  useBatching: boolean;
+  cacheSelectors: boolean;
+}
+
+/**
+ * Accessibility options configuration
+ */
+export interface AccessibilityConfig {
+  enabled: boolean;
+  ariaLabel: AriaLabelConfig;
+  ariaHidden: boolean;
+  addTitle: boolean;
+}
+
+/**
+ * Complete CharWrapper configuration interface
+ */
+export interface CharWrapperConfig {
+  wrap: WrapConfig;
+  enumerate: EnumerateConfig;
+  classes: ClassesConfig;
+  tags: TagsConfig;
+  dataAttributes: DataAttributesConfig;
+  replaceSpaceWith: string;
+  processing: ProcessingConfig;
+  performance: PerformanceConfig;
+  accessibility: AccessibilityConfig;
+}
+
+/**
+ * Partial user configuration (all fields optional)
+ */
+export type UserConfig = Partial<{
+  wrap: Partial<WrapConfig>;
+  enumerate: Partial<EnumerateConfig>;
+  classes: Partial<ClassesConfig>;
+  tags: Partial<TagsConfig>;
+  dataAttributes: Partial<DataAttributesConfig>;
+  replaceSpaceWith: string;
+  processing: Partial<ProcessingConfig>;
+  performance: Partial<PerformanceConfig>;
+  accessibility: Partial<AccessibilityConfig>;
+}>;
+
+/**
+ * Default configuration with all required values
+ */
+export const DEFAULT_CONFIG: CharWrapperConfig = {
   // Wrapping options
   wrap: {
     chars: true,
@@ -72,7 +191,7 @@ export const DEFAULT_CONFIG = {
 /**
  * Regular expression patterns for character matching
  */
-export const PATTERNS = {
+export const PATTERNS: Record<string, RegExp> = {
   // Regular characters (alphanumeric + common diacritics)
   regular: /[\w\-+äüöÄÜÖßéèêëúùûüóòôöáàâäíìîïÉÈÊËÚÙÛÜÓÒÔÖÁÀÂÄÍÌÎÏçÇñÑ]/,
 
@@ -92,13 +211,13 @@ export const PATTERNS = {
 /**
  * Validates and merges user configuration with defaults
  *
- * @param {Object} userConfig - User-provided configuration
- * @returns {Object} Validated and merged configuration
+ * @param userConfig - User-provided configuration
+ * @returns Validated and merged configuration
  * @throws {Error} If configuration is invalid
  */
-export function validateConfig(userConfig = {}) {
+export function validateConfig(userConfig: UserConfig = {}): CharWrapperConfig {
   // Deep merge user config with defaults
-  const config = deepMerge(DEFAULT_CONFIG, userConfig);
+  const config = deepMerge(DEFAULT_CONFIG, userConfig) as CharWrapperConfig;
 
   // Validate wrap options
   if (typeof config.wrap !== 'object') {
@@ -106,7 +225,7 @@ export function validateConfig(userConfig = {}) {
   }
 
   // Validate tags
-  const validTags = ['span', 'div', 'i', 'em', 'strong', 'mark'];
+  const validTags: WrapTag[] = ['span', 'div', 'i', 'em', 'strong', 'mark'];
   if (!validTags.includes(config.tags.char)) {
     throw new Error(`config.tags.char must be one of: ${validTags.join(', ')}`);
   }
@@ -127,23 +246,27 @@ export function validateConfig(userConfig = {}) {
 /**
  * Deep merge two objects (replaces lodash merge)
  *
- * @param {Object} target - Target object
- * @param {Object} source - Source object
- * @returns {Object} Merged object
+ * @param target - Target object
+ * @param source - Source object
+ * @returns Merged object
  */
-function deepMerge(target, source) {
-  const output = { ...target };
+function deepMerge<T extends Record<string, any>>(target: T, source: Partial<T>): T {
+  const output = { ...target } as T;
 
   if (isObject(target) && isObject(source)) {
     Object.keys(source).forEach(key => {
-      if (isObject(source[key])) {
+      const sourceValue = source[key as keyof T];
+      if (isObject(sourceValue)) {
         if (!(key in target)) {
-          Object.assign(output, { [key]: source[key] });
+          Object.assign(output, { [key]: sourceValue });
         } else {
-          output[key] = deepMerge(target[key], source[key]);
+          (output as any)[key] = deepMerge(
+            target[key as keyof T] as Record<string, any>,
+            sourceValue as Record<string, any>
+          );
         }
       } else {
-        Object.assign(output, { [key]: source[key] });
+        Object.assign(output, { [key]: sourceValue });
       }
     });
   }
@@ -154,9 +277,9 @@ function deepMerge(target, source) {
 /**
  * Check if value is a plain object
  *
- * @param {*} item - Value to check
- * @returns {boolean}
+ * @param item - Value to check
+ * @returns True if item is a plain object
  */
-function isObject(item) {
+function isObject(item: any): item is Record<string, any> {
   return item && typeof item === 'object' && !Array.isArray(item);
 }

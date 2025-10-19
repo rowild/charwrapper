@@ -6,17 +6,34 @@
  */
 
 import { stripHTML, normalizeWhitespace, createFragment, is, logger } from './utils.js';
+import { CharWrapperConfig } from './config.js';
+import { WrapperFactory, WrapOptions } from './WrapperFactory.js';
+
+/**
+ * Result of processing text nodes
+ */
+export interface ProcessResult {
+  words: HTMLElement[];
+  chars: HTMLElement[];
+}
+
+/**
+ * Options for processing operations
+ */
+export interface ProcessOptions extends WrapOptions {
+  // Additional processing-specific options can be added here
+}
 
 export class DOMProcessor {
-  #config;
-  #cache;
+  #config: CharWrapperConfig;
+  #cache: WeakMap<Element, string>;
 
   /**
    * Creates a new DOMProcessor instance
    *
-   * @param {Object} config - Validated configuration object
+   * @param config - Validated configuration object
    */
-  constructor(config) {
+  constructor(config: CharWrapperConfig) {
     this.#config = config;
     this.#cache = new WeakMap(); // Prevents memory leaks
   }
@@ -24,17 +41,17 @@ export class DOMProcessor {
   /**
    * Extracts and processes text from a DOM element
    *
-   * @param {Element} element - DOM element to process
-   * @returns {string} Processed text content
+   * @param element - DOM element to process
+   * @returns Processed text content
    */
-  extractText(element) {
+  extractText(element: Element): string {
     if (!is.element(element)) {
       throw new TypeError('extractText requires a valid DOM element');
     }
 
     // Check cache first
     if (this.#config.performance.cacheSelectors && this.#cache.has(element)) {
-      return this.#cache.get(element);
+      return this.#cache.get(element)!;
     }
 
     let text = element.textContent || '';
@@ -60,16 +77,16 @@ export class DOMProcessor {
   /**
    * Finds all text nodes within an element (recursive)
    *
-   * @param {Element} element - Root element to search
-   * @param {Array<Node>} textNodes - Accumulator for text nodes
-   * @returns {Array<Node>} Array of text nodes
+   * @param element - Root element to search
+   * @param textNodes - Accumulator for text nodes
+   * @returns Array of text nodes
    */
-  findTextNodes(element, textNodes = []) {
-    if (!element || !element.childNodes) {
+  findTextNodes(element: Element | Node, textNodes: Node[] = []): Node[] {
+    if (!element || !('childNodes' in element)) {
       return textNodes;
     }
 
-    for (const node of element.childNodes) {
+    for (const node of Array.from(element.childNodes)) {
       if (is.textNode(node)) {
         // Only include non-empty text nodes
         const text = normalizeWhitespace(node.textContent, true);
@@ -78,7 +95,7 @@ export class DOMProcessor {
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
         // Skip excluded elements
-        const isExcluded = node.dataset?.subSetName === '_exclude_';
+        const isExcluded = (node as HTMLElement).dataset?.subSetName === '_exclude_';
         if (!isExcluded) {
           this.findTextNodes(node, textNodes);
         }
@@ -92,10 +109,10 @@ export class DOMProcessor {
    * Replaces element content with wrapped elements
    * Uses DocumentFragment for optimal performance
    *
-   * @param {Element} element - Element to replace content in
-   * @param {Array<HTMLElement>} wrappedElements - Array of wrapped elements
+   * @param element - Element to replace content in
+   * @param wrappedElements - Array of wrapped elements
    */
-  replaceContent(element, wrappedElements) {
+  replaceContent(element: Element, wrappedElements: HTMLElement[]): void {
     if (!is.element(element)) {
       throw new TypeError('replaceContent requires a valid DOM element');
     }
@@ -120,12 +137,12 @@ export class DOMProcessor {
   /**
    * Processes a single text node and replaces it with wrapped content
    *
-   * @param {Node} textNode - Text node to process
-   * @param {WrapperFactory} wrapperFactory - Factory for creating wrapped elements
-   * @param {Object} options - Processing options
-   * @returns {Object} Object containing wrapped elements and metadata
+   * @param textNode - Text node to process
+   * @param wrapperFactory - Factory for creating wrapped elements
+   * @param options - Processing options
+   * @returns Object containing wrapped elements and metadata
    */
-  processTextNode(textNode, wrapperFactory, options = {}) {
+  processTextNode(textNode: Node, wrapperFactory: WrapperFactory, options: ProcessOptions = {}): ProcessResult | null {
     if (!is.textNode(textNode)) {
       logger.warn('processTextNode called with non-text node', textNode);
       return null;
@@ -142,7 +159,7 @@ export class DOMProcessor {
     const wrapWords = this.#config.wrap.words;
     const wrapChars = this.#config.wrap.chars;
 
-    let result = { words: [], chars: [] };
+    let result: ProcessResult = { words: [], chars: [] };
 
     if (wrapWords) {
       // Wrap as words (with nested characters if chars is also enabled)
@@ -178,12 +195,12 @@ export class DOMProcessor {
   /**
    * Processes an entire element and all its text nodes
    *
-   * @param {Element} element - Root element to process
-   * @param {WrapperFactory} wrapperFactory - Factory for creating wrapped elements
-   * @param {Object} options - Processing options
-   * @returns {Object} Object containing all wrapped elements
+   * @param element - Root element to process
+   * @param wrapperFactory - Factory for creating wrapped elements
+   * @param options - Processing options
+   * @returns Object containing all wrapped elements
    */
-  processElement(element, wrapperFactory, options = {}) {
+  processElement(element: Element, wrapperFactory: WrapperFactory, options: ProcessOptions = {}): ProcessResult {
     const textNodes = this.findTextNodes(element);
 
     if (textNodes.length === 0) {
@@ -191,14 +208,14 @@ export class DOMProcessor {
       return { words: [], chars: [] };
     }
 
-    const allWords = [];
-    const allChars = [];
+    const allWords: HTMLElement[] = [];
+    const allChars: HTMLElement[] = [];
 
     // Process each text node
     textNodes.forEach(textNode => {
       const result = this.processTextNode(textNode, wrapperFactory, {
         ...options,
-        subSetClass: textNode.parentElement?.dataset?.[this.#config.dataAttributes.subSetClass],
+        subSetClass: (textNode.parentElement as HTMLElement)?.dataset?.[this.#config.dataAttributes.subSetClass],
       });
 
       if (result) {
@@ -239,7 +256,7 @@ export class DOMProcessor {
   /**
    * Clears the internal cache
    */
-  clearCache() {
+  clearCache(): void {
     // WeakMap doesn't have a clear method, but entries are automatically
     // garbage collected when elements are removed from DOM
     this.#cache = new WeakMap();

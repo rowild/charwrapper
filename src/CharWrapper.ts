@@ -23,32 +23,56 @@
  * wrapper.destroy();
  */
 
-import { validateConfig } from './config.js';
+import { validateConfig, CharWrapperConfig, UserConfig } from './config.js';
 import { WrapperFactory } from './WrapperFactory.js';
-import { DOMProcessor } from './DOMProcessor.js';
+import { DOMProcessor, ProcessOptions } from './DOMProcessor.js';
 import { Selector } from './SelectionStrategy.js';
 import { logger, generateId, is } from './utils.js';
 
+/**
+ * Result of wrapping operations
+ */
+export interface WrapResult {
+  chars: HTMLElement[];
+  words: HTMLElement[];
+}
+
+/**
+ * Instance metadata
+ */
+export interface InstanceMetadata {
+  id: string;
+  isWrapped: boolean;
+  charCount: number;
+  wordCount: number;
+  rootElement?: string;
+}
+
+/**
+ * Character type for filtering
+ */
+export type CharType = 'regular' | 'space' | 'special';
+
 export class CharWrapper {
   // Private fields (ES2022+)
-  #config;
-  #selector;
-  #processor;
-  #factory;
-  #rootElement;
-  #originalContent;
-  #wrappedElements;
-  #isWrapped;
-  #instanceId;
+  #config: CharWrapperConfig;
+  #selector: Selector | null;
+  #processor: DOMProcessor | null;
+  #factory: WrapperFactory | null;
+  #rootElement: Element | null;
+  #originalContent: string;
+  #wrappedElements: WrapResult;
+  #isWrapped: boolean;
+  #instanceId: string;
 
   /**
    * Creates a new CharWrapper instance
    *
-   * @param {string|Element} target - CSS selector or DOM element to wrap
-   * @param {Object} userConfig - Configuration options
-   * @throws {Error} If target is invalid or not found
+   * @param target - CSS selector or DOM element to wrap
+   * @param userConfig - Configuration options
+   * @throws Error if target is invalid or not found
    */
-  constructor(target, userConfig = {}) {
+  constructor(target: string | Element, userConfig: UserConfig = {}) {
     // Validate and merge configuration
     this.#config = validateConfig(userConfig);
 
@@ -64,7 +88,8 @@ export class CharWrapper {
     }
 
     // Select root element
-    this.#rootElement = this.#selector.select(target);
+    const selected = this.#selector.select(target);
+    this.#rootElement = Array.isArray(selected) ? selected[0] : selected;
 
     // Store original content for potential restoration
     this.#originalContent = this.#rootElement.innerHTML;
@@ -89,10 +114,10 @@ export class CharWrapper {
   /**
    * Wraps the text content
    *
-   * @param {Object} options - Additional wrapping options
-   * @returns {Object} Object containing wrapped elements { chars, words }
+   * @param options - Additional wrapping options
+   * @returns Object containing wrapped elements { chars, words }
    */
-  wrap(options = {}) {
+  wrap(options: ProcessOptions = {}): WrapResult {
     if (this.#isWrapped) {
       logger.warn('Element already wrapped. Call unwrap() first or use rewrap()');
       return this.#wrappedElements;
@@ -105,12 +130,12 @@ export class CharWrapper {
       }
 
       // Reset factory counters
-      this.#factory.resetCounters();
+      this.#factory!.resetCounters();
 
       // Process the element
-      const result = this.#processor.processElement(
-        this.#rootElement,
-        this.#factory,
+      const result = this.#processor!.processElement(
+        this.#rootElement!,
+        this.#factory!,
         options
       );
 
@@ -138,29 +163,29 @@ export class CharWrapper {
    * Applies accessibility attributes to root element
    * @private
    */
-  #applyAccessibility() {
+  #applyAccessibility(): void {
     const { ariaLabel, addTitle } = this.#config.accessibility;
 
     // Get original text content
-    const originalText = this.#rootElement.textContent?.trim() || '';
+    const originalText = this.#rootElement!.textContent?.trim() || '';
 
     // Add aria-label if configured
     if (ariaLabel === 'auto' && originalText) {
-      this.#rootElement.setAttribute('aria-label', originalText);
+      this.#rootElement!.setAttribute('aria-label', originalText);
     } else if (ariaLabel && ariaLabel !== 'auto' && ariaLabel !== 'none') {
-      this.#rootElement.setAttribute('aria-label', ariaLabel);
+      this.#rootElement!.setAttribute('aria-label', ariaLabel);
     }
 
     // Add title attribute if not present and configured
-    if (addTitle && !this.#rootElement.hasAttribute('title') && originalText) {
-      this.#rootElement.setAttribute('title', originalText);
+    if (addTitle && !this.#rootElement!.hasAttribute('title') && originalText) {
+      this.#rootElement!.setAttribute('title', originalText);
     }
   }
 
   /**
    * Unwraps the text content (restores original)
    */
-  unwrap() {
+  unwrap(): void {
     if (!this.#isWrapped) {
       logger.warn('Element is not wrapped');
       return;
@@ -168,7 +193,7 @@ export class CharWrapper {
 
     try {
       // Restore original content
-      this.#rootElement.innerHTML = this.#originalContent;
+      this.#rootElement!.innerHTML = this.#originalContent;
 
       // Reset state
       this.#wrappedElements = { chars: [], words: [] };
@@ -184,10 +209,10 @@ export class CharWrapper {
   /**
    * Rewraps the text content (unwrap + wrap)
    *
-   * @param {Object} options - Additional wrapping options
-   * @returns {Object} Object containing wrapped elements { chars, words }
+   * @param options - Additional wrapping options
+   * @returns Object containing wrapped elements { chars, words }
    */
-  rewrap(options = {}) {
+  rewrap(options: ProcessOptions = {}): WrapResult {
     this.unwrap();
     return this.wrap(options);
   }
@@ -195,17 +220,17 @@ export class CharWrapper {
   /**
    * Destroys the wrapper instance and cleans up resources
    */
-  destroy() {
+  destroy(): void {
     // Unwrap if currently wrapped
     if (this.#isWrapped) {
       this.unwrap();
     }
 
     // Clear processor cache
-    this.#processor.clearCache();
+    this.#processor?.clearCache();
 
     // Clear references
-    this.#wrappedElements = null;
+    this.#wrappedElements = { chars: [], words: [] };
     this.#rootElement = null;
     this.#processor = null;
     this.#factory = null;
@@ -217,74 +242,74 @@ export class CharWrapper {
   /**
    * Gets the wrapped character elements
    *
-   * @returns {Array<HTMLElement>} Array of wrapped character elements
+   * @returns Array of wrapped character elements
    */
-  getChars() {
+  getChars(): HTMLElement[] {
     return [...this.#wrappedElements.chars];
   }
 
   /**
    * Gets the wrapped word elements
    *
-   * @returns {Array<HTMLElement>} Array of wrapped word elements
+   * @returns Array of wrapped word elements
    */
-  getWords() {
+  getWords(): HTMLElement[] {
     return [...this.#wrappedElements.words];
   }
 
   /**
    * Gets a specific character element by index
    *
-   * @param {number} index - Character index
-   * @returns {HTMLElement|undefined} Character element
+   * @param index - Character index
+   * @returns Character element or undefined
    */
-  getChar(index) {
+  getChar(index: number): HTMLElement | undefined {
     return this.#wrappedElements.chars[index];
   }
 
   /**
    * Gets a specific word element by index
    *
-   * @param {number} index - Word index
-   * @returns {HTMLElement|undefined} Word element
+   * @param index - Word index
+   * @returns Word element or undefined
    */
-  getWord(index) {
+  getWord(index: number): HTMLElement | undefined {
     return this.#wrappedElements.words[index];
   }
 
   /**
    * Checks if the element is currently wrapped
    *
-   * @returns {boolean}
+   * @returns True if wrapped
    */
-  isWrapped() {
+  isWrapped(): boolean {
     return this.#isWrapped;
   }
 
   /**
    * Gets the root element
    *
-   * @returns {Element} Root DOM element
+   * @returns Root DOM element or null if destroyed
    */
-  getRootElement() {
+  getRootElement(): Element | null {
     return this.#rootElement;
   }
 
   /**
    * Gets the current configuration
    *
-   * @returns {Object} Current configuration (read-only copy)
+   * @returns Current configuration (read-only copy)
    */
-  getConfig() {
+  getConfig(): CharWrapperConfig {
     return JSON.parse(JSON.stringify(this.#config));
   }
 
   /**
    * Gets instance metadata
    *
-   * @returns {Object} Instance metadata
+   * @returns Instance metadata
    */
-  getMetadata() {
+  getMetadata(): InstanceMetadata {
     return {
       id: this.#instanceId,
       isWrapped: this.#isWrapped,
@@ -297,10 +322,10 @@ export class CharWrapper {
   /**
    * Filters wrapped characters by class name
    *
-   * @param {string} className - Class name to filter by
-   * @returns {Array<HTMLElement>} Filtered character elements
+   * @param className - Class name to filter by
+   * @returns Filtered character elements
    */
-  filterCharsByClass(className) {
+  filterCharsByClass(className: string): HTMLElement[] {
     return this.#wrappedElements.chars.filter(el =>
       el.classList.contains(className)
     );
@@ -309,11 +334,11 @@ export class CharWrapper {
   /**
    * Gets all characters matching a pattern (e.g., only regular chars, only spaces)
    *
-   * @param {string} type - Type to filter ('regular', 'space', 'special')
-   * @returns {Array<HTMLElement>} Filtered elements
+   * @param type - Type to filter ('regular', 'space', 'special')
+   * @returns Filtered elements
    */
-  getCharsByType(type) {
-    const typeMap = {
+  getCharsByType(type: CharType): HTMLElement[] {
+    const typeMap: Record<CharType, string> = {
       regular: this.#config.classes.regular,
       space: this.#config.classes.space,
       special: this.#config.classes.special,
@@ -331,11 +356,11 @@ export class CharWrapper {
   /**
    * Static factory method for quick usage
    *
-   * @param {string|Element} target - CSS selector or DOM element
-   * @param {Object} config - Configuration options
-   * @returns {CharWrapper} New CharWrapper instance
+   * @param target - CSS selector or DOM element
+   * @param config - Configuration options
+   * @returns New CharWrapper instance (already wrapped)
    */
-  static create(target, config = {}) {
+  static create(target: string | Element, config: UserConfig = {}): CharWrapper {
     const wrapper = new CharWrapper(target, config);
     wrapper.wrap();
     return wrapper;
@@ -344,11 +369,11 @@ export class CharWrapper {
   /**
    * Static method to wrap multiple elements at once
    *
-   * @param {Array<string|Element>} targets - Array of targets
-   * @param {Object} config - Configuration options
-   * @returns {Array<CharWrapper>} Array of CharWrapper instances
+   * @param targets - Array of targets
+   * @param config - Configuration options
+   * @returns Array of CharWrapper instances
    */
-  static wrapMultiple(targets, config = {}) {
+  static wrapMultiple(targets: (string | Element)[], config: UserConfig = {}): CharWrapper[] {
     if (!is.array(targets)) {
       throw new TypeError('targets must be an array');
     }
