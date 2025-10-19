@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CharWrapper - Interactive Hover Effects</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: white;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      text-align: center;
+      opacity: 0.8;
+      margin-bottom: 3rem;
+      font-size: 1.2rem;
+    }
+
+    .example-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+      cursor: default;
+    }
+
+    .example-title {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+    }
+
+    .text-demo {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1.4;
+      font-weight: 700;
+      user-select: none;
+    }
+
+    .char {
+      display: inline-block;
+      transform-origin: center;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .char--space {
+      width: 0.3em;
+      pointer-events: none;
+    }
+
+    /* Color variations for rainbow effect */
+    .rainbow-0 { color: #ff6b6b; }
+    .rainbow-1 { color: #ffd93d; }
+    .rainbow-2 { color: #6bcf7f; }
+    .rainbow-3 { color: #4d96ff; }
+    .rainbow-4 { color: #a78bfa; }
+    .rainbow-5 { color: #ff6bda; }
+
+    .controls {
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    button {
+      background: white;
+      color: #1e3c72;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 0.5rem;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .instruction {
+      text-align: center;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateX(-5px);
+    }
+
+    .back-link::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back-link">All Examples</a>
+
+  <div class="container">
+    <h1>Interactive Hover Effects</h1>
+    <div class="subtitle">Hover or click on the letters!</div>
+
+    <div class="instruction">
+      👆 Try interacting with each text below
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Bounce on Hover</div>
+      <div class="text-demo" id="text1">
+        BOUNCE WITH ME
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Rainbow Wave</div>
+      <div class="text-demo" id="text2">
+        COLORS EVERYWHERE
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Magnetic Pull</div>
+      <div class="text-demo" id="text3">
+        FOLLOW THE MOUSE
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Ripple Effect</div>
+      <div class="text-demo" id="text4">
+        CLICK TO RIPPLE
+      </div>
+    </div>
+
+    <div class="controls">
+      <button onclick="location.href='../index.html'">Back to Examples</button>
+    </div>
+  </div>
+
+  <!-- Motion One from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
+
+  <!-- CharWrapper - Single Bundle File -->
+  <script src="../../dist/charwrapper.js"></script>
+
+  <script>
+
+    window.wrappers = [];
+
+    // Effect 1: Bounce on Hover
+    const wrapper1 = new CharWrapper('#text1', {
+      wrap: { chars: true },
+    });
+    const { chars: chars1 } = wrapper1.wrap();
+    window.wrappers.push(wrapper1);
+
+    chars1.forEach(char => {
+      char.addEventListener('mouseenter', () => {
+        anime({
+          targets: char,
+          translateY: [
+            { value: -20, duration: 300, easing: 'easeOutQuad' },
+            { value: 0, duration: 500, easing: 'easeOutBounce' }
+          ]
+        });
+      });
+    });
+
+    // Effect 2: Rainbow Wave
+    const wrapper2 = new CharWrapper('#text2', {
+      wrap: { chars: true },
+    });
+    const { chars: chars2 } = wrapper2.wrap();
+    window.wrappers.push(wrapper2);
+
+    const rainbowColors = ['#ff6b6b', '#ffd93d', '#6bcf7f', '#4d96ff', '#a78bfa', '#ff6bda'];
+
+    chars2.forEach((char, index) => {
+      char.addEventListener('mouseenter', () => {
+        // Color wave effect
+        chars2.forEach((c, i) => {
+          const distance = Math.abs(i - index);
+          const colorIndex = distance % rainbowColors.length;
+          const delay = distance * 50;
+
+          anime({
+            targets: c,
+            color: [
+              { value: rainbowColors[colorIndex], duration: 300 },
+              { value: '#ffffff', duration: 300, delay: 300 }
+            ],
+            scale: [
+              { value: 1.2, duration: 300, easing: 'easeOutBack' },
+              { value: 1, duration: 300, delay: 300 }
+            ],
+            delay: delay,
+            easing: 'easeOutQuad'
+          });
+        });
+      });
+    });
+
+    // Effect 3: Magnetic Pull
+    const wrapper3 = new CharWrapper('#text3', {
+      wrap: { chars: true },
+    });
+    const { chars: chars3 } = wrapper3.wrap();
+    window.wrappers.push(wrapper3);
+
+    const section3 = document.getElementById('text3').parentElement;
+    const magneticAnimations = new Map();
+
+    section3.addEventListener('mousemove', (e) => {
+      const rect = section3.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      chars3.forEach(char => {
+        const charRect = char.getBoundingClientRect();
+        const charX = charRect.left + charRect.width / 2 - rect.left;
+        const charY = charRect.top + charRect.height / 2 - rect.top;
+
+        const deltaX = mouseX - charX;
+        const deltaY = mouseY - charY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        const maxDistance = 200;
+        if (distance < maxDistance) {
+          const force = (1 - distance / maxDistance) * 30;
+          const angle = Math.atan2(deltaY, deltaX);
+
+          // Cancel previous animation if exists
+          if (magneticAnimations.has(char)) {
+            magneticAnimations.get(char).pause();
+          }
+
+          const anim = anime({
+            targets: char,
+            translateX: Math.cos(angle) * force,
+            translateY: Math.sin(angle) * force,
+            duration: 300,
+            easing: 'easeOutQuad'
+          });
+
+          magneticAnimations.set(char, anim);
+        } else {
+          if (magneticAnimations.has(char)) {
+            magneticAnimations.get(char).pause();
+          }
+
+          const anim = anime({
+            targets: char,
+            translateX: 0,
+            translateY: 0,
+            duration: 500,
+            easing: 'easeOutElastic(1, 0.3)'
+          });
+
+          magneticAnimations.set(char, anim);
+        }
+      });
+    });
+
+    section3.addEventListener('mouseleave', () => {
+      anime({
+        targets: chars3,
+        translateX: 0,
+        translateY: 0,
+        duration: 800,
+        easing: 'easeOutElastic(1, 0.3)'
+      });
+    });
+
+    // Effect 4: Ripple Effect on Click
+    const wrapper4 = new CharWrapper('#text4', {
+      wrap: { chars: true },
+    });
+    const { chars: chars4 } = wrapper4.wrap();
+    window.wrappers.push(wrapper4);
+
+    chars4.forEach((char, index) => {
+      char.addEventListener('click', () => {
+        // Create ripple from clicked character
+        chars4.forEach((c, i) => {
+          const distance = Math.abs(i - index);
+          const delay = distance * 50;
+
+          // Scale wave
+          anime({
+            targets: c,
+            scale: [
+              { value: 1.5, duration: 400, easing: 'easeOutQuad' },
+              { value: 1, duration: 400, easing: 'easeOutElastic(1, 0.5)' }
+            ],
+            rotate: [
+              { value: 360, duration: 400, easing: 'easeOutQuad' },
+              { value: 0, duration: 400, easing: 'easeOutElastic(1, 0.5)' }
+            ],
+            color: [
+              { value: '#ffd93d', duration: 400 },
+              { value: '#ffffff', duration: 400 }
+            ],
+            delay: delay
+          });
+        });
+      });
+    });
+
+    // Initial entrance animation
+    const allChars = [...chars1, ...chars2, ...chars3, ...chars4];
+
+    // Set initial state
+    allChars.forEach(char => {
+      char.style.opacity = '0';
+      char.style.transform = 'translateY(30px)';
+    });
+
+    // Shuffle array for random stagger
+    const shuffled = [...allChars].sort(() => Math.random() - 0.5);
+
+    anime({
+      targets: allChars,
+      opacity: [0, 1],
+      translateY: [30, 0],
+      duration: 800,
+      delay: anime.stagger(20, { from: 'center' }),
+      easing: 'easeOutBack'
+    });
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      window.wrappers.forEach(w => w.destroy());
+    });
+  </script>
+</body>
+</html>
