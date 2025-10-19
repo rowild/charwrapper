@@ -13,6 +13,7 @@ Modern text animation library with TypeScript support, designed for seamless int
 - 🎨 **Cleaner API** - Simplified, intuitive configuration
 - 🌍 **Diacritical Support** - Supports accented characters (ü, é, ñ, etc.)
 - ♿ **Accessibility Built-in** - ARIA labels, aria-hidden, and title attributes for screen readers
+- 🎯 **Character Groups** - Smart selection system for targeting specific character subsets (NEW!)
 
 ## 📦 Installation
 
@@ -263,6 +264,251 @@ const wrapper = new CharWrapper('.text', {
 
 **Note:** Accessibility is **enabled by default**. This ensures your text animations are screen reader friendly out of the box!
 
+## 🎯 Character Groups (NEW!)
+
+CharWrapper 2.0 introduces **Character Groups** - a powerful feature for selecting and animating specific character subsets. This is something GSAP SplitText doesn't offer!
+
+### What are Character Groups?
+
+Character groups allow you to organize wrapped characters into named collections based on patterns, positions, or custom logic. You can then animate each group independently.
+
+```javascript
+const wrapper = new CharWrapper('.text', {
+  wrap: { chars: true },
+  groups: {
+    vowels: /[aeiou]/i,
+    consonants: /[bcdfghjklmnpqrstvwxyz]/i,
+    everyThird: { nth: 3 }
+  }
+});
+
+const { chars, groups } = wrapper.wrap();
+
+// Animate vowels and consonants separately
+gsap.from(groups.vowels, { opacity: 0, color: '#ff6b9d', stagger: 0.05 });
+gsap.from(groups.consonants, { y: 20, stagger: 0.03, delay: 0.3 });
+```
+
+### Predefined Character Groups
+
+CharWrapper includes predefined patterns you can use instantly:
+
+```javascript
+import { PREDEFINED_GROUPS } from 'charwrapper';
+
+// Basic character types
+PREDEFINED_GROUPS.vowels          // a, e, i, o, u (case insensitive)
+PREDEFINED_GROUPS.consonants      // All consonants
+PREDEFINED_GROUPS.numbers         // 0-9
+PREDEFINED_GROUPS.lowercase       // a-z
+PREDEFINED_GROUPS.uppercase       // A-Z
+
+// Punctuation
+PREDEFINED_GROUPS.punctuation     // . , ! ? ; :
+PREDEFINED_GROUPS.quotes          // " ' ` ´
+PREDEFINED_GROUPS.brackets        // [ ] ( ) { }
+
+// Diacritics (accented characters) - Perfect for multilingual content!
+PREDEFINED_GROUPS.diacritics      // All accented characters (à, é, ü, ñ, etc.)
+
+// Language-specific diacritics
+PREDEFINED_GROUPS.french          // é, è, ç, à, û, etc.
+PREDEFINED_GROUPS.german          // ä, ö, ü, ß
+PREDEFINED_GROUPS.spanish         // á, é, í, ó, ú, ñ, ¿, ¡
+PREDEFINED_GROUPS.portuguese      // ã, õ, ç
+PREDEFINED_GROUPS.slavic          // Czech, Polish, Croatian characters
+PREDEFINED_GROUPS.scandinavian    // å, æ, ø
+
+// Special symbols
+PREDEFINED_GROUPS.currency        // $, €, £, ¥, ₹, ₽
+PREDEFINED_GROUPS.math            // +, -, =, ×, ÷, ±, ∞, ≈
+PREDEFINED_GROUPS.emoji           // Emoji ranges
+```
+
+### Group Configuration Options
+
+#### 1. Pattern Matching (RegEx)
+
+```javascript
+{
+  groups: {
+    vowels: /[aeiou]/i,
+    specialChars: /[!@#$%^&*]/
+  }
+}
+```
+
+#### 2. Every Nth Character
+
+```javascript
+{
+  groups: {
+    everySecond: { nth: 2 },  // Every 2nd character
+    everyThird: { nth: 3 },   // Every 3rd character
+    everyFifth: { nth: 5 }    // Every 5th character
+  }
+}
+```
+
+#### 3. Specific Indices
+
+```javascript
+{
+  groups: {
+    firstThree: { indices: [0, 1, 2] },
+    highlights: { indices: [5, 10, 15, 20] }
+  }
+}
+```
+
+#### 4. Word-Based Selection
+
+```javascript
+{
+  groups: {
+    keywords: {
+      words: ['CharWrapper', 'animation', 'GSAP'],
+      class: 'keyword-highlight'  // Optional: add CSS class
+    }
+  }
+}
+```
+
+#### 5. Custom Filter Functions
+
+The most powerful option - full control with context awareness:
+
+```javascript
+{
+  groups: {
+    firstLetters: {
+      custom: (char, index, context) => context.isFirstInWord,
+      class: 'first-letter'
+    },
+    lastLetters: {
+      custom: (char, index, context) => context.isLastInWord
+    },
+    oddPositions: {
+      custom: (char, index) => index % 2 === 1
+    }
+  }
+}
+```
+
+**CharContext API:**
+- `char` (string) - The character
+- `index` (number) - Character position in text
+- `isFirstInWord` (boolean) - Is first character of a word
+- `isLastInWord` (boolean) - Is last character of a word
+- `wordIndex` (number) - Which word this character belongs to
+
+### Real-World Examples
+
+#### Multilingual Diacritics Highlighting
+
+```javascript
+// Perfect for emphasizing accented characters in French text
+const wrapper = new CharWrapper('.french-text', {
+  wrap: { chars: true },
+  groups: {
+    accents: /[àâæçéèêëïîôùûüÿœ]/i
+  }
+});
+
+const { groups } = wrapper.wrap();
+
+gsap.to(groups.accents, {
+  color: '#ff6b9d',
+  scale: 1.2,
+  stagger: 0.1,
+  yoyo: true,
+  repeat: -1,
+  repeatDelay: 2
+});
+```
+
+#### Data Visualization - Highlight Numbers
+
+```javascript
+const wrapper = new CharWrapper('.price', {
+  wrap: { chars: true },
+  groups: {
+    numbers: /[0-9]/,
+    currency: /[$€£¥]/
+  }
+});
+
+const { groups } = wrapper.wrap();
+
+// Animate numbers and currency symbols differently
+gsap.from(groups.currency, { scale: 0, duration: 0.5 });
+gsap.from(groups.numbers, {
+  opacity: 0,
+  y: -20,
+  stagger: 0.05,
+  delay: 0.3
+});
+```
+
+#### First Letter Emphasis
+
+```javascript
+const wrapper = new CharWrapper('.headline', {
+  wrap: { chars: true },
+  groups: {
+    firstLetters: {
+      custom: (char, index, context) => context.isFirstInWord,
+      class: 'drop-cap'
+    }
+  }
+});
+
+const { groups } = wrapper.wrap();
+
+gsap.from(groups.firstLetters, {
+  scale: 2,
+  color: '#ffd700',
+  stagger: 0.15,
+  ease: 'back.out(1.7)'
+});
+```
+
+### Combining Multiple Groups
+
+```javascript
+const wrapper = new CharWrapper('.text', {
+  wrap: { chars: true },
+  groups: {
+    vowels: /[aeiou]/i,
+    numbers: /[0-9]/,
+    everyThird: { nth: 3 },
+    firstLetters: {
+      custom: (char, index, context) => context.isFirstInWord
+    }
+  }
+});
+
+const { groups } = wrapper.wrap();
+
+// Animate each group with different effects
+gsap.from(groups.vowels, { opacity: 0, stagger: 0.02 });
+gsap.from(groups.numbers, { scale: 2, stagger: 0.1 });
+gsap.from(groups.everyThird, { color: '#ff6b9d' });
+gsap.from(groups.firstLetters, { y: -30, ease: 'bounce.out' });
+```
+
+### Live Demo
+
+Check out `examples/05-character-groups.html` for a complete interactive demonstration with:
+- Vowels vs consonants separation
+- Multilingual diacritics (French, German, Spanish)
+- Mixed content separation (letters, numbers, punctuation)
+- Custom filters (first/last letters of words)
+- Nth character patterns
+- Word-based selection
+
+**Note:** Character groups are completely **optional**. If you don't configure any groups, the `groups` object in the result will simply be empty `{}`.
+
 ## 🎨 Examples
 
 Open `examples/index.html` in your browser to see all examples:
@@ -350,7 +596,10 @@ new CharWrapper(target, config)
 
 #### `wrap(options)`
 Wraps the text content.
-- **Returns:** `{ chars: Array<HTMLElement>, words: Array<HTMLElement> }`
+- **Returns:** `{ chars: Array<HTMLElement>, words: Array<HTMLElement>, groups: GroupResult }`
+  - `chars` - Array of all wrapped character elements
+  - `words` - Array of all wrapped word elements
+  - `groups` - Object containing grouped character elements (e.g., `{ vowels: [...], consonants: [...] }`)
 
 #### `unwrap()`
 Restores original content.

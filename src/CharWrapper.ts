@@ -27,6 +27,7 @@ import { validateConfig, CharWrapperConfig, UserConfig } from './config.js';
 import { WrapperFactory } from './WrapperFactory.js';
 import { DOMProcessor, ProcessOptions } from './DOMProcessor.js';
 import { Selector } from './SelectionStrategy.js';
+import { CharacterGrouper, GroupResult } from './CharacterGrouper.js';
 import { logger, generateId, is } from './utils.js';
 
 /**
@@ -35,6 +36,7 @@ import { logger, generateId, is } from './utils.js';
 export interface WrapResult {
   chars: HTMLElement[];
   words: HTMLElement[];
+  groups: GroupResult;
 }
 
 /**
@@ -59,8 +61,10 @@ export class CharWrapper {
   #selector: Selector | null;
   #processor: DOMProcessor | null;
   #factory: WrapperFactory | null;
+  #grouper: CharacterGrouper | null;
   #rootElement: Element | null;
   #originalContent: string;
+  #originalText: string;
   #wrappedElements: WrapResult;
   #isWrapped: boolean;
   #instanceId: string;
@@ -93,15 +97,18 @@ export class CharWrapper {
 
     // Store original content for potential restoration
     this.#originalContent = this.#rootElement.innerHTML;
+    this.#originalText = this.#rootElement.textContent || '';
 
-    // Initialize processor and factory
+    // Initialize processor, factory, and grouper
     this.#processor = new DOMProcessor(this.#config);
     this.#factory = new WrapperFactory(this.#config);
+    this.#grouper = new CharacterGrouper(this.#config.groups);
 
     // Initialize state
     this.#wrappedElements = {
       chars: [],
       words: [],
+      groups: {},
     };
     this.#isWrapped = false;
 
@@ -139,10 +146,14 @@ export class CharWrapper {
         options
       );
 
+      // Group characters if groups are configured
+      const groups = this.#grouper!.groupCharacters(result.chars, this.#originalText);
+
       // Store wrapped elements
       this.#wrappedElements = {
         chars: result.chars,
         words: result.words,
+        groups,
       };
 
       this.#isWrapped = true;
@@ -150,6 +161,7 @@ export class CharWrapper {
       logger.info(`Text wrapped successfully: ${this.#instanceId}`, {
         charCount: result.chars.length,
         wordCount: result.words.length,
+        groupCount: Object.keys(groups).length,
       });
 
       return this.#wrappedElements;
@@ -196,7 +208,7 @@ export class CharWrapper {
       this.#rootElement!.innerHTML = this.#originalContent;
 
       // Reset state
-      this.#wrappedElements = { chars: [], words: [] };
+      this.#wrappedElements = { chars: [], words: [], groups: {} };
       this.#isWrapped = false;
 
       logger.info(`Text unwrapped: ${this.#instanceId}`);
@@ -230,10 +242,11 @@ export class CharWrapper {
     this.#processor?.clearCache();
 
     // Clear references
-    this.#wrappedElements = { chars: [], words: [] };
+    this.#wrappedElements = { chars: [], words: [], groups: {} };
     this.#rootElement = null;
     this.#processor = null;
     this.#factory = null;
+    this.#grouper = null;
     this.#selector = null;
 
     logger.info(`CharWrapper instance destroyed: ${this.#instanceId}`);

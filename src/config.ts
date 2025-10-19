@@ -15,6 +15,41 @@ export type WrapTag = 'span' | 'div' | 'i' | 'em' | 'strong' | 'mark';
 export type AriaLabelConfig = 'auto' | 'none' | string;
 
 /**
+ * Character context information for custom group filters
+ */
+export interface CharContext {
+  char: string;
+  index: number;
+  isFirstInWord: boolean;
+  isLastInWord: boolean;
+  wordIndex: number;
+}
+
+/**
+ * Custom filter function for character groups
+ */
+export type GroupFilterFunction = (char: string, index: number, context: CharContext) => boolean;
+
+/**
+ * Configuration for a single character group
+ */
+export interface GroupConfig {
+  pattern?: RegExp;           // Match characters by regex pattern
+  nth?: number;               // Every nth character (e.g., 3 = every 3rd char)
+  indices?: number[];         // Specific character positions [0, 5, 10]
+  class?: string;             // Additional CSS class to add
+  words?: string[];           // Match characters in specific words
+  custom?: GroupFilterFunction; // Custom filter function
+}
+
+/**
+ * Character groups configuration
+ */
+export interface GroupsConfig {
+  [groupName: string]: GroupConfig | RegExp;
+}
+
+/**
  * Wrapping options configuration
  */
 export interface WrapConfig {
@@ -103,6 +138,7 @@ export interface CharWrapperConfig {
   processing: ProcessingConfig;
   performance: PerformanceConfig;
   accessibility: AccessibilityConfig;
+  groups: GroupsConfig;
 }
 
 /**
@@ -118,6 +154,7 @@ export type UserConfig = Partial<{
   processing: Partial<ProcessingConfig>;
   performance: Partial<PerformanceConfig>;
   accessibility: Partial<AccessibilityConfig>;
+  groups: GroupsConfig;
 }>;
 
 /**
@@ -186,6 +223,9 @@ export const DEFAULT_CONFIG: CharWrapperConfig = {
     ariaHidden: true,         // Add aria-hidden to wrapped elements
     addTitle: true,           // Add title attribute if not present
   },
+
+  // Character groups (predefined patterns + custom groups)
+  groups: {},
 };
 
 /**
@@ -206,6 +246,48 @@ export const PATTERNS: Record<string, RegExp> = {
 
   // Include special chars + diacritics
   withSpecialChars: /[\w\-+<>?!:;,.$%€£¥\u2026\u00AB\u00BB|äüöÄÜÖßéèêëúùûüóòôöáàâäíìîïÉÈÊËÚÙÛÜÓÒÔÖÁÀÂÄÍÌÎÏçÇñÑ]/,
+};
+
+/**
+ * Predefined character group patterns
+ * Users can use these in their groups configuration
+ */
+export const PREDEFINED_GROUPS: Record<string, RegExp> = {
+  // Basic character types
+  vowels: /[aeiouAEIOU]/,
+  consonants: /[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/,
+  numbers: /[0-9]/,
+  lowercase: /[a-z]/,
+  uppercase: /[A-Z]/,
+
+  // Punctuation
+  punctuation: /[.,!?;:]/,
+  quotes: /["'`´]/,
+  brackets: /[\[\](){}]/,
+
+  // Diacritics (accented characters) - The special letters you mentioned!
+  diacritics: /[àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ]/,
+
+  // Specific language groups
+  french: /[àâæçéèêëïîôùûüÿœÀÂÆÇÉÈÊËÏÎÔÙÛÜŸŒ]/,
+  german: /[äöüßÄÖÜ]/,
+  spanish: /[áéíóúüñ¿¡ÁÉÍÓÚÜÑ]/,
+  portuguese: /[ãõçÃÕÇ]/,
+
+  // Slavic languages (Czech, Polish, Croatian, etc.)
+  slavic: /[čďěňřšťůžČĎĚŇŘŠŤŮŽąćęłńóśźżĄĆĘŁŃÓŚŹŻđšžčćĐŠŽČĆ]/,
+
+  // Scandinavian
+  scandinavian: /[åæøÅÆØ]/,
+
+  // Currency symbols
+  currency: /[$€£¥₹₽]/,
+
+  // Mathematical symbols
+  math: /[+\-=×÷±∞≈≠≤≥]/,
+
+  // Emoji ranges (basic)
+  emoji: /[\u{1F300}-\u{1F9FF}]/u,
 };
 
 /**
