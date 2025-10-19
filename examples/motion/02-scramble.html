@@ -298,12 +298,10 @@
             clearInterval(interval);
             // Reveal with scale animation
             char.textContent = originalText1[i];
-            anime({
-              targets: char,
-              scale: [1.5, 1],
-              duration: 200,
-              easing: 'easeOutBack'
-            });
+            motion.animate(char,
+              { scale: [1.5, 1] },
+              { duration: 0.2, easing: 'ease-out' }
+            );
           }
         }, 50);
 
@@ -369,16 +367,15 @@
 
         setTimeout(() => {
           // Appear and snap to position
-          anime({
-            targets: char,
-            opacity: [0, 1],
-            translateX: [randomX, 0],
-            translateY: [randomY, 0],
-            rotate: [randomRotate, 0],
-            duration: 300,
-            easing: 'easeOutQuart',
-            delay: 0
-          });
+          motion.animate(char,
+            {
+              opacity: [0, 1],
+              x: [randomX, 0],
+              y: [randomY, 0],
+              rotate: [randomRotate, 0]
+            },
+            { duration: 0.3, easing: 'ease-out' }
+          );
         }, 1000 + i * 30);
       });
     }
@@ -402,20 +399,16 @@
       // Reveal with typewriter effect
       chars4.forEach((char, i) => {
         setTimeout(() => {
-          anime({
-            targets: char,
-            opacity: [0, 1],
-            duration: 50,
-            easing: 'linear',
-            complete: function() {
-              // Blink effect
-              anime({
-                targets: char,
-                opacity: [1, 0.3, 1],
-                duration: 100,
-                easing: 'linear'
-              });
-            }
+          const anim = motion.animate(char,
+            { opacity: [0, 1] },
+            { duration: 0.05, easing: 'linear' }
+          );
+          anim.finished.then(() => {
+            // Blink effect
+            motion.animate(char,
+              { opacity: [1, 0.3, 1] },
+              { duration: 0.1, easing: 'linear' }
+            );
           });
         }, 1500 + i * 80);
       });

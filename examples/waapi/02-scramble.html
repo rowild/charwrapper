@@ -298,12 +298,13 @@
             clearInterval(interval);
             // Reveal with scale animation
             char.textContent = originalText1[i];
-            anime({
-              targets: char,
-              scale: [1.5, 1],
-              duration: 200,
-              easing: 'easeOutBack'
-            });
+            char.animate(
+              [
+                { transform: 'scale(1.5)' },
+                { transform: 'scale(1)' }
+              ],
+              { duration: 200, easing: 'ease-out', fill: 'forwards' }
+            );
           }
         }, 50);
 
@@ -369,16 +370,13 @@
 
         setTimeout(() => {
           // Appear and snap to position
-          anime({
-            targets: char,
-            opacity: [0, 1],
-            translateX: [randomX, 0],
-            translateY: [randomY, 0],
-            rotate: [randomRotate, 0],
-            duration: 300,
-            easing: 'easeOutQuart',
-            delay: 0
-          });
+          char.animate(
+            [
+              { opacity: 0, transform: `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg)` },
+              { opacity: 1, transform: 'translate(0, 0) rotate(0deg)' }
+            ],
+            { duration: 300, easing: 'ease-out', fill: 'forwards' }
+          );
         }, 1000 + i * 30);
       });
     }
@@ -402,20 +400,16 @@
       // Reveal with typewriter effect
       chars4.forEach((char, i) => {
         setTimeout(() => {
-          anime({
-            targets: char,
-            opacity: [0, 1],
-            duration: 50,
-            easing: 'linear',
-            complete: function() {
-              // Blink effect
-              anime({
-                targets: char,
-                opacity: [1, 0.3, 1],
-                duration: 100,
-                easing: 'linear'
-              });
-            }
+          const anim = char.animate(
+            [{ opacity: 0 }, { opacity: 1 }],
+            { duration: 50, easing: 'linear', fill: 'forwards' }
+          );
+          anim.finished.then(() => {
+            // Blink effect
+            char.animate(
+              [{ opacity: 1 }, { opacity: 0.3 }, { opacity: 1 }],
+              { duration: 100, easing: 'linear', fill: 'forwards' }
+            );
           });
         }, 1500 + i * 80);
       });
