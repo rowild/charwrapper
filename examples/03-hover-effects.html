@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CharWrapper - Interactive Hover Effects</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: white;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      text-align: center;
+      opacity: 0.8;
+      margin-bottom: 3rem;
+      font-size: 1.2rem;
+    }
+
+    .example-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+      cursor: default;
+    }
+
+    .example-title {
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+    }
+
+    .text-demo {
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      line-height: 1.4;
+      font-weight: 700;
+      user-select: none;
+    }
+
+    .char {
+      display: inline-block;
+      transform-origin: center;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .char--space {
+      width: 0.3em;
+      pointer-events: none;
+    }
+
+    /* Color variations for rainbow effect */
+    .rainbow-0 { color: #ff6b6b; }
+    .rainbow-1 { color: #ffd93d; }
+    .rainbow-2 { color: #6bcf7f; }
+    .rainbow-3 { color: #4d96ff; }
+    .rainbow-4 { color: #a78bfa; }
+    .rainbow-5 { color: #ff6bda; }
+
+    .controls {
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    button {
+      background: white;
+      color: #1e3c72;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 0.5rem;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .instruction {
+      text-align: center;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 10px;
+      margin-bottom: 2rem;
+      font-size: 1.1rem;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 0.8; }
+      50% { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Interactive Hover Effects</h1>
+    <div class="subtitle">Hover or click on the letters!</div>
+
+    <div class="instruction">
+      👆 Try interacting with each text below
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Bounce on Hover</div>
+      <div class="text-demo" id="text1">
+        BOUNCE WITH ME
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Rainbow Wave</div>
+      <div class="text-demo" id="text2">
+        COLORS EVERYWHERE
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Magnetic Pull</div>
+      <div class="text-demo" id="text3">
+        FOLLOW THE MOUSE
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Ripple Effect</div>
+      <div class="text-demo" id="text4">
+        CLICK TO RIPPLE
+      </div>
+    </div>
+
+    <div class="controls">
+      <button onclick="location.href='index.html'">Back to Examples</button>
+    </div>
+  </div>
+
+  <!-- GSAP from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <script type="module">
+    import CharWrapper from '../src/CharWrapper.js';
+
+    window.wrappers = [];
+
+    // Effect 1: Bounce on Hover
+    const wrapper1 = new CharWrapper('#text1', {
+      wrap: { chars: true },
+    });
+    const { chars: chars1 } = wrapper1.wrap();
+    window.wrappers.push(wrapper1);
+
+    chars1.forEach(char => {
+      char.addEventListener('mouseenter', () => {
+        gsap.to(char, {
+          y: -20,
+          duration: 0.3,
+          ease: 'power2.out',
+        });
+        gsap.to(char, {
+          y: 0,
+          duration: 0.5,
+          delay: 0.3,
+          ease: 'bounce.out',
+        });
+      });
+    });
+
+    // Effect 2: Rainbow Wave
+    const wrapper2 = new CharWrapper('#text2', {
+      wrap: { chars: true },
+    });
+    const { chars: chars2 } = wrapper2.wrap();
+    window.wrappers.push(wrapper2);
+
+    const rainbowColors = ['#ff6b6b', '#ffd93d', '#6bcf7f', '#4d96ff', '#a78bfa', '#ff6bda'];
+
+    chars2.forEach((char, index) => {
+      char.addEventListener('mouseenter', () => {
+        // Color wave effect
+        chars2.forEach((c, i) => {
+          const distance = Math.abs(i - index);
+          const colorIndex = distance % rainbowColors.length;
+          const delay = distance * 0.05;
+
+          gsap.to(c, {
+            color: rainbowColors[colorIndex],
+            scale: 1.2,
+            duration: 0.3,
+            delay: delay,
+            ease: 'back.out(2)',
+          });
+
+          gsap.to(c, {
+            color: '#ffffff',
+            scale: 1,
+            duration: 0.3,
+            delay: delay + 0.3,
+          });
+        });
+      });
+    });
+
+    // Effect 3: Magnetic Pull
+    const wrapper3 = new CharWrapper('#text3', {
+      wrap: { chars: true },
+    });
+    const { chars: chars3 } = wrapper3.wrap();
+    window.wrappers.push(wrapper3);
+
+    const section3 = document.getElementById('text3').parentElement;
+
+    section3.addEventListener('mousemove', (e) => {
+      const rect = section3.getBoundingClientRect();
+      const mouseX = e.clientX - rect.left;
+      const mouseY = e.clientY - rect.top;
+
+      chars3.forEach(char => {
+        const charRect = char.getBoundingClientRect();
+        const charX = charRect.left + charRect.width / 2 - rect.left;
+        const charY = charRect.top + charRect.height / 2 - rect.top;
+
+        const deltaX = mouseX - charX;
+        const deltaY = mouseY - charY;
+        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+        const maxDistance = 200;
+        if (distance < maxDistance) {
+          const force = (1 - distance / maxDistance) * 30;
+          const angle = Math.atan2(deltaY, deltaX);
+
+          gsap.to(char, {
+            x: Math.cos(angle) * force,
+            y: Math.sin(angle) * force,
+            duration: 0.3,
+            ease: 'power2.out',
+          });
+        } else {
+          gsap.to(char, {
+            x: 0,
+            y: 0,
+            duration: 0.5,
+            ease: 'elastic.out(1, 0.3)',
+          });
+        }
+      });
+    });
+
+    section3.addEventListener('mouseleave', () => {
+      gsap.to(chars3, {
+        x: 0,
+        y: 0,
+        duration: 0.8,
+        ease: 'elastic.out(1, 0.3)',
+      });
+    });
+
+    // Effect 4: Ripple Effect on Click
+    const wrapper4 = new CharWrapper('#text4', {
+      wrap: { chars: true },
+    });
+    const { chars: chars4 } = wrapper4.wrap();
+    window.wrappers.push(wrapper4);
+
+    chars4.forEach((char, index) => {
+      char.addEventListener('click', () => {
+        // Create ripple from clicked character
+        chars4.forEach((c, i) => {
+          const distance = Math.abs(i - index);
+          const delay = distance * 0.05;
+
+          // Scale wave
+          gsap.to(c, {
+            scale: 1.5,
+            rotation: 360,
+            color: '#ffd93d',
+            duration: 0.4,
+            delay: delay,
+            ease: 'power2.out',
+          });
+
+          gsap.to(c, {
+            scale: 1,
+            rotation: 0,
+            color: '#ffffff',
+            duration: 0.4,
+            delay: delay + 0.4,
+            ease: 'elastic.out(1, 0.5)',
+          });
+        });
+      });
+    });
+
+    // Initial entrance animation
+    gsap.from([chars1, chars2, chars3, chars4].flat(), {
+      opacity: 0,
+      y: 30,
+      duration: 0.8,
+      stagger: {
+        each: 0.02,
+        from: 'random',
+      },
+      ease: 'back.out(1.7)',
+    });
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      window.wrappers.forEach(w => w.destroy());
+    });
+  </script>
+</body>
+</html>

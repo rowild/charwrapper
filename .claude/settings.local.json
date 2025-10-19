@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:gsap.com)",
+      "WebFetch(domain:webflow.com)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

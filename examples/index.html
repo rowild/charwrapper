@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CharWrapper 2.0 - Modern ES6+ Text Animation Library</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .logo {
+      font-size: clamp(3rem, 8vw, 6rem);
+      font-weight: 900;
+      margin-bottom: 1rem;
+      letter-spacing: -2px;
+    }
+
+    .version {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .tagline {
+      font-size: clamp(1.2rem, 3vw, 2rem);
+      margin-bottom: 1rem;
+      opacity: 0.9;
+      max-width: 800px;
+      line-height: 1.4;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      opacity: 0.8;
+      margin-bottom: 3rem;
+      max-width: 600px;
+    }
+
+    .char {
+      display: inline-block;
+      transform-origin: center;
+    }
+
+    .char--space {
+      width: 0.3em;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      max-width: 1000px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+
+    .feature {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 15px;
+      padding: 1.5rem;
+      text-align: left;
+      transition: all 0.3s;
+    }
+
+    .feature:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-title {
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-description {
+      opacity: 0.9;
+      line-height: 1.6;
+    }
+
+    .examples-section {
+      padding: 4rem 2rem;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .section-title {
+      text-align: center;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 3rem;
+    }
+
+    .examples-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .example-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 2rem;
+      text-decoration: none;
+      color: white;
+      transition: all 0.4s;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      /* Initial hidden state for animation */
+      opacity: 0;
+      transform: translateY(50px);
+    }
+
+    .example-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transition: left 0.5s;
+    }
+
+    .example-card:hover::before {
+      left: 100%;
+    }
+
+    .example-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+      border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .example-number {
+      font-size: 3rem;
+      font-weight: 900;
+      opacity: 0.3;
+      line-height: 1;
+      margin-bottom: 0.5rem;
+    }
+
+    .example-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .example-description {
+      opacity: 0.9;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+    }
+
+    .example-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tag {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .cta-section {
+      padding: 4rem 2rem;
+      text-align: center;
+    }
+
+    .cta-title {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 1rem 2.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      text-decoration: none;
+      transition: all 0.3s;
+      border: 2px solid white;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #667eea;
+    }
+
+    .btn-primary:hover {
+      background: transparent;
+      color: white;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: white;
+      color: #667eea;
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .footer {
+      padding: 2rem;
+      text-align: center;
+      opacity: 0.7;
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .code-snippet {
+      background: rgba(0, 0, 0, 0.4);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin: 2rem auto;
+      max-width: 600px;
+      text-align: left;
+      font-family: 'Courier New', monospace;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .code-snippet code {
+      color: #ffd93d;
+    }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="logo" id="logo">CharWrapper</div>
+    <div class="version">v2.0.0</div>
+    <div class="tagline" id="tagline">
+      Modern ES6+ text animation library for GSAP
+    </div>
+    <div class="subtitle">
+      Zero dependencies • Modular architecture • Performance optimized
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div class="feature-title">Lightning Fast</div>
+        <div class="feature-description">
+          60%+ performance improvement with DocumentFragment batching and optimized DOM operations
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🎨</div>
+        <div class="feature-title">Flexible API</div>
+        <div class="feature-description">
+          Clean, intuitive interface with full TypeScript-style JSDoc annotations
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔧</div>
+        <div class="feature-title">Zero Dependencies</div>
+        <div class="feature-description">
+          Pure ES6+ with no external libraries required (removed lodash dependency)
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">♻️</div>
+        <div class="feature-title">Memory Safe</div>
+        <div class="feature-description">
+          Built-in cleanup methods prevent memory leaks in single-page applications
+        </div>
+      </div>
+    </div>
+
+    <div class="code-snippet">
+      <code>
+        <span style="color: #ff6b6b;">import</span> <span style="color: #4ecdc4;">CharWrapper</span> <span style="color: #ff6b6b;">from</span> <span style="color: #95e1d3;">'./CharWrapper.js'</span>;<br><br>
+        <span style="color: #ff6b6b;">const</span> wrapper = <span style="color: #ff6b6b;">new</span> <span style="color: #4ecdc4;">CharWrapper</span>(<span style="color: #95e1d3;">'.text'</span>, {<br>
+        &nbsp;&nbsp;wrap: { chars: <span style="color: #ffd93d;">true</span> },<br>
+        &nbsp;&nbsp;enumerate: { chars: <span style="color: #ffd93d;">true</span> }<br>
+        });<br><br>
+        <span style="color: #ff6b6b;">const</span> { chars } = wrapper.<span style="color: #4ecdc4;">wrap</span>();<br>
+        <span style="color: #a8e6cf;">gsap</span>.<span style="color: #4ecdc4;">from</span>(chars, { opacity: <span style="color: #ffd93d;">0</span>, stagger: <span style="color: #ffd93d;">0.05</span> });
+      </code>
+    </div>
+  </section>
+
+  <section class="examples-section">
+    <h2 class="section-title">Explore Examples</h2>
+    <div class="examples-grid">
+      <a href="01-text-reveal.html" class="example-card">
+        <div class="example-number">01</div>
+        <div class="example-title">Text Reveal</div>
+        <div class="example-description">
+          Staggered entrance animations with fade, slide, scale, and wave effects. Perfect for hero sections and headings.
+        </div>
+        <div class="example-tags">
+          <span class="tag">Fade</span>
+          <span class="tag">Slide</span>
+          <span class="tag">Bounce</span>
+          <span class="tag">Wave</span>
+        </div>
+      </a>
+
+      <a href="02-scramble.html" class="example-card">
+        <div class="example-number">02</div>
+        <div class="example-title">Scramble & Shuffle</div>
+        <div class="example-description">
+          Matrix-style decoding effects, character randomization, and glitch animations. Cyberpunk aesthetic included!
+        </div>
+        <div class="example-tags">
+          <span class="tag">Matrix</span>
+          <span class="tag">Decode</span>
+          <span class="tag">Glitch</span>
+          <span class="tag">Typewriter</span>
+        </div>
+      </a>
+
+      <a href="03-hover-effects.html" class="example-card">
+        <div class="example-number">03</div>
+        <div class="example-title">Interactive Hover</div>
+        <div class="example-description">
+          Mouse-reactive animations including bounce, rainbow waves, magnetic pull, and ripple effects. Fully interactive!
+        </div>
+        <div class="example-tags">
+          <span class="tag">Hover</span>
+          <span class="tag">Click</span>
+          <span class="tag">Magnetic</span>
+          <span class="tag">Ripple</span>
+        </div>
+      </a>
+
+      <a href="04-scroll-trigger.html" class="example-card">
+        <div class="example-number">04</div>
+        <div class="example-title">Scroll Triggered</div>
+        <div class="example-description">
+          Scroll-based animations using GSAP ScrollTrigger. Includes parallax, blur effects, and smooth scrubbing.
+        </div>
+        <div class="example-tags">
+          <span class="tag">Scroll</span>
+          <span class="tag">Parallax</span>
+          <span class="tag">Blur</span>
+          <span class="tag">Scrub</span>
+        </div>
+      </a>
+    </div>
+  </section>
+
+  <section class="cta-section">
+    <h2 class="cta-title">Ready to get started?</h2>
+    <p class="subtitle">Check out the source code and start animating!</p>
+    <div class="cta-buttons">
+      <a href="../src/CharWrapper.js" class="btn btn-primary">View Source</a>
+      <a href="01-text-reveal.html" class="btn btn-secondary">Try Examples</a>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <p>CharWrapper 2.0 - Modern ES6+ Text Animation Library</p>
+    <p>Built with ❤️ for GSAP animations • No dependencies • MIT License</p>
+  </footer>
+
+  <!-- GSAP from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <script type="module">
+    import CharWrapper from '../src/CharWrapper.js';
+
+    // Animate logo
+    const logoWrapper = new CharWrapper('#logo', {
+      wrap: { chars: true },
+      enumerate: { chars: true },
+    });
+    const { chars: logoChars } = logoWrapper.wrap();
+
+    gsap.from(logoChars, {
+      opacity: 0,
+      y: -50,
+      rotation: -180,
+      scale: 0,
+      duration: 1,
+      stagger: 0.05,
+      ease: 'back.out(2)',
+    });
+
+    // Animate tagline
+    const taglineWrapper = new CharWrapper('#tagline', {
+      wrap: { chars: true },
+    });
+    const { chars: taglineChars } = taglineWrapper.wrap();
+
+    gsap.from(taglineChars, {
+      opacity: 0,
+      y: 20,
+      duration: 0.8,
+      stagger: 0.02,
+      delay: 0.8,
+      ease: 'power2.out',
+    });
+
+    // Animate example cards - initial state is set in CSS
+    gsap.to('.example-card', {
+      opacity: 1,
+      y: 0,
+      duration: 0.5,
+      stagger: 0.08,
+      delay: 0.3,
+      ease: 'power3.out',
+    });
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      logoWrapper.destroy();
+      taglineWrapper.destroy();
+    });
+  </script>
+</body>
+</html>
