@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CharWrapper - Text Reveal Animations</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: white;
+    }
+
+    .container {
+      max-width: 1200px;
+      width: 100%;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      margin-bottom: 3rem;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .example-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .example-title {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 600;
+    }
+
+    .text-demo {
+      font-size: clamp(1.5rem, 3vw, 3rem);
+      line-height: 1.4;
+      font-weight: 600;
+    }
+
+    /* Character styling */
+    .char {
+      display: inline-block;
+      transform-origin: center;
+    }
+
+    .char--space {
+      width: 0.3em;
+    }
+
+    .controls {
+      text-align: center;
+      margin-top: 3rem;
+    }
+
+    button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 0.5rem;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateX(-5px);
+    }
+
+    .back-link::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back-link">All Examples</a>
+
+  <div class="container">
+    <h1>Text Reveal Animations</h1>
+
+    <div class="example-section">
+      <div class="example-title">Fade In Stagger</div>
+      <div class="text-demo" id="text1">
+        Welcome to CharWrapper 2.0
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Slide Up Reveal</div>
+      <div class="text-demo" id="text2">
+        Modern ES6+ Text Animations
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Scale & Rotate</div>
+      <div class="text-demo" id="text3">
+        Built for GSAP Animations
+      </div>
+    </div>
+
+    <div class="example-section">
+      <div class="example-title">Wave Effect</div>
+      <div class="text-demo" id="text4">
+        Zero Dependencies Pure ES6
+      </div>
+    </div>
+
+    <div class="controls">
+      <button onclick="replayAll()">Replay All</button>
+      <button onclick="location.href='../index.html'">Back to Examples</button>
+    </div>
+  </div>
+
+  <!-- GSAP from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- CharWrapper - Single Bundle File -->
+  <script src="../dist/charwrapper.js"></script>
+
+  <script>
+
+    // Store wrappers and timelines for replay
+    window.wrappers = [];
+    window.timelines = [];
+
+    // Animation 1: Fade In Stagger
+    const wrapper1 = new CharWrapper('#text1', {
+      wrap: { chars: true },
+      enumerate: { chars: true },
+    });
+    const { chars: chars1 } = wrapper1.wrap();
+    window.wrappers.push(wrapper1);
+
+    const tl1 = gsap.timeline();
+    tl1.from(chars1, {
+      opacity: 0,
+      duration: 0.8,
+      stagger: 0.03,
+      ease: 'power2.out',
+    });
+    window.timelines.push(tl1);
+
+    // Animation 2: Slide Up Reveal
+    const wrapper2 = new CharWrapper('#text2', {
+      wrap: { chars: true },
+      enumerate: { chars: true },
+    });
+    const { chars: chars2 } = wrapper2.wrap();
+    window.wrappers.push(wrapper2);
+
+    const tl2 = gsap.timeline({ delay: 0.3 });
+    tl2.from(chars2, {
+      opacity: 0,
+      y: 50,
+      duration: 0.6,
+      stagger: 0.02,
+      ease: 'back.out(1.7)',
+    });
+    window.timelines.push(tl2);
+
+    // Animation 3: Scale & Rotate
+    const wrapper3 = new CharWrapper('#text3', {
+      wrap: { chars: true },
+      enumerate: { chars: true },
+    });
+    const { chars: chars3 } = wrapper3.wrap();
+    window.wrappers.push(wrapper3);
+
+    const tl3 = gsap.timeline({ delay: 0.6 });
+    tl3.from(chars3, {
+      opacity: 0,
+      scale: 0,
+      rotation: 180,
+      duration: 0.8,
+      stagger: 0.025,
+      ease: 'elastic.out(1, 0.5)',
+    });
+    window.timelines.push(tl3);
+
+    // Animation 4: Wave Effect
+    const wrapper4 = new CharWrapper('#text4', {
+      wrap: { chars: true },
+      enumerate: { chars: true },
+    });
+    const { chars: chars4 } = wrapper4.wrap();
+    window.wrappers.push(wrapper4);
+
+    const tl4 = gsap.timeline({ delay: 0.9 });
+    tl4.from(chars4, {
+      opacity: 0,
+      y: -30,
+      duration: 0.6,
+      stagger: {
+        each: 0.03,
+        from: 'center',
+        ease: 'sine.inOut',
+      },
+      ease: 'bounce.out',
+    });
+    window.timelines.push(tl4);
+
+    // Replay function
+    window.replayAll = function() {
+      window.timelines.forEach(tl => tl.restart());
+    };
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      window.wrappers.forEach(w => w.destroy());
+    });
+  </script>
+</body>
+</html>

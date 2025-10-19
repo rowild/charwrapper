@@ -114,6 +114,7 @@
       top: 0;
       left: 0;
       height: 4px;
+      width: 0;
       background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
       transform-origin: left;
       z-index: 1000;
@@ -147,7 +148,7 @@
 
   <section class="hero">
     <h1 id="hero-title">Scroll-Triggered Animations</h1>
-    <p>Powered by GSAP ScrollTrigger</p>
+    <p>Powered by Anime.js & Intersection Observer</p>
     <div class="scroll-hint">↓ Scroll Down ↓</div>
   </section>
 
@@ -218,31 +219,25 @@
     </div>
   </section>
 
-  <button class="back-button" onclick="location.href='index.html'">Back to Examples</button>
+  <button class="back-button" onclick="location.href='../index.html'">Back to Examples</button>
 
-  <!-- GSAP + ScrollTrigger from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- Anime.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
 
   <!-- CharWrapper - Single Bundle File -->
-  <script src="../dist/charwrapper.js"></script>
+  <script src="../../dist/charwrapper.js"></script>
 
   <script>
 
-    // Register ScrollTrigger plugin
-    gsap.registerPlugin(ScrollTrigger);
-
     window.wrappers = [];
 
-    // Progress bar
-    gsap.to('.progress-bar', {
-      scaleX: 1,
-      ease: 'none',
-      scrollTrigger: {
-        start: 'top top',
-        end: 'bottom bottom',
-        scrub: true,
-      },
+    // Progress bar on scroll
+    const progressBar = document.querySelector('.progress-bar');
+    window.addEventListener('scroll', () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      const scrollPercent = (scrollTop / scrollHeight) * 100;
+      progressBar.style.width = scrollPercent + '%';
     });
 
     // Hero title animation
@@ -252,13 +247,20 @@
     const { chars: heroChars } = heroWrapper.wrap();
     window.wrappers.push(heroWrapper);
 
-    gsap.from(heroChars, {
-      opacity: 0,
-      y: 50,
-      rotation: -15,
-      duration: 1,
-      stagger: 0.03,
-      ease: 'back.out(1.7)',
+    // Set initial state
+    heroChars.forEach(char => {
+      char.style.opacity = '0';
+      char.style.transform = 'translateY(50px) rotate(-15deg)';
+    });
+
+    anime({
+      targets: heroChars,
+      opacity: [0, 1],
+      translateY: [50, 0],
+      rotate: [-15, 0],
+      duration: 1000,
+      delay: anime.stagger(30),
+      easing: 'easeOutBack'
     });
 
     // Effect 1: Fade In on Scroll
@@ -268,19 +270,29 @@
     const { chars: chars1 } = wrapper1.wrap();
     window.wrappers.push(wrapper1);
 
-    gsap.from(chars1, {
-      opacity: 0,
-      y: 30,
-      stagger: 0.02,
-      duration: 0.8,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '#text1',
-        start: 'top 80%',
-        end: 'top 50%',
-        scrub: 1,
-      },
+    // Set initial state
+    chars1.forEach(char => {
+      char.style.opacity = '0';
+      char.style.transform = 'translateY(30px)';
     });
+
+    const observer1 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          anime({
+            targets: chars1,
+            opacity: [0, 1],
+            translateY: [30, 0],
+            duration: 800,
+            delay: anime.stagger(20),
+            easing: 'easeOutQuad'
+          });
+          observer1.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    observer1.observe(document.getElementById('text1'));
 
     // Effect 2: Slide from Sides (Words)
     const wrapper2 = new CharWrapper('#text2', {
@@ -289,22 +301,34 @@
     const { words: words2 } = wrapper2.wrap();
     window.wrappers.push(wrapper2);
 
+    // Set initial state
     words2.forEach((word, index) => {
       const isEven = index % 2 === 0;
-      gsap.from(word, {
-        opacity: 0,
-        x: isEven ? -100 : 100,
-        rotation: isEven ? -10 : 10,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '#text2',
-          start: 'top 75%',
-          end: 'top 40%',
-          scrub: 1,
-        },
-      });
+      word.style.opacity = '0';
+      word.style.transform = `translateX(${isEven ? -100 : 100}px) rotate(${isEven ? -10 : 10}deg)`;
     });
+
+    const observer2 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          words2.forEach((word, index) => {
+            const isEven = index % 2 === 0;
+            anime({
+              targets: word,
+              opacity: [0, 1],
+              translateX: [isEven ? -100 : 100, 0],
+              rotate: [isEven ? -10 : 10, 0],
+              duration: 1000,
+              delay: index * 100,
+              easing: 'easeOutCubic'
+            });
+          });
+          observer2.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    observer2.observe(document.getElementById('text2'));
 
     // Effect 3: Rotation Cascade
     const wrapper3 = new CharWrapper('#text3', {
@@ -313,19 +337,30 @@
     const { chars: chars3 } = wrapper3.wrap();
     window.wrappers.push(wrapper3);
 
-    gsap.from(chars3, {
-      opacity: 0,
-      scale: 0,
-      rotation: 180,
-      stagger: 0.03,
-      ease: 'back.out(2)',
-      scrollTrigger: {
-        trigger: '#text3',
-        start: 'top 75%',
-        end: 'top 40%',
-        scrub: 1,
-      },
+    // Set initial state
+    chars3.forEach(char => {
+      char.style.opacity = '0';
+      char.style.transform = 'scale(0) rotate(180deg)';
     });
+
+    const observer3 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          anime({
+            targets: chars3,
+            opacity: [0, 1],
+            scale: [0, 1],
+            rotate: [180, 0],
+            duration: 1000,
+            delay: anime.stagger(30),
+            easing: 'easeOutBack'
+          });
+          observer3.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    observer3.observe(document.getElementById('text3'));
 
     // Effect 4: Parallax Layers
     const wrapper4 = new CharWrapper('#text4', {
@@ -334,18 +369,19 @@
     const { chars: chars4 } = wrapper4.wrap();
     window.wrappers.push(wrapper4);
 
-    chars4.forEach((char, index) => {
-      const depth = (index % 5) + 1; // 1-5 depth layers
-      gsap.to(char, {
-        y: -50 * depth,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '#text4',
-          start: 'top bottom',
-          end: 'bottom top',
-          scrub: true,
-        },
-      });
+    // Parallax scroll effect
+    let text4Element = document.getElementById('text4');
+    window.addEventListener('scroll', () => {
+      const rect = text4Element.getBoundingClientRect();
+      const scrollProgress = 1 - (rect.top / window.innerHeight);
+
+      if (scrollProgress > 0 && scrollProgress < 2) {
+        chars4.forEach((char, index) => {
+          const depth = (index % 5) + 1;
+          const offset = -50 * depth * scrollProgress;
+          char.style.transform = `translateY(${offset}px)`;
+        });
+      }
     });
 
     // Effect 5: Progressive Blur
@@ -356,25 +392,34 @@
     window.wrappers.push(wrapper5);
 
     // Set initial blur
-    gsap.set(chars5, { filter: 'blur(10px)', opacity: 0.3 });
-
-    gsap.to(chars5, {
-      filter: 'blur(0px)',
-      opacity: 1,
-      stagger: 0.02,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '#text5',
-        start: 'top 80%',
-        end: 'top 40%',
-        scrub: 1,
-      },
+    chars5.forEach(char => {
+      char.style.filter = 'blur(10px)';
+      char.style.opacity = '0.3';
     });
+
+    const observer5 = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          chars5.forEach((char, i) => {
+            anime({
+              targets: char,
+              opacity: [0.3, 1],
+              filter: ['blur(10px)', 'blur(0px)'],
+              duration: 800,
+              delay: i * 20,
+              easing: 'easeOutQuad'
+            });
+          });
+          observer5.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.5 });
+
+    observer5.observe(document.getElementById('text5'));
 
     // Cleanup
     window.addEventListener('beforeunload', () => {
       window.wrappers.forEach(w => w.destroy());
-      ScrollTrigger.getAll().forEach(st => st.kill());
     });
   </script>
 </body>

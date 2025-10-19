@@ -129,7 +129,7 @@
   </style>
 </head>
 <body>
-  <a href="index.html" class="back-link">All Examples</a>
+  <a href="../index.html" class="back-link">All Examples</a>
 
   <div class="container">
     <h1>Text Reveal Animations</h1>
@@ -151,7 +151,7 @@
     <div class="example-section">
       <div class="example-title">Scale & Rotate</div>
       <div class="text-demo" id="text3">
-        Built for GSAP Animations
+        Built for Animation Libraries
       </div>
     </div>
 
@@ -164,21 +164,21 @@
 
     <div class="controls">
       <button onclick="replayAll()">Replay All</button>
-      <button onclick="location.href='index.html'">Back to Examples</button>
+      <button onclick="location.href='../index.html'">Back to Examples</button>
     </div>
   </div>
 
-  <!-- GSAP from CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- Anime.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
 
   <!-- CharWrapper - Single Bundle File -->
-  <script src="../dist/charwrapper.js"></script>
+  <script src="../../dist/charwrapper.js"></script>
 
   <script>
 
-    // Store wrappers and timelines for replay
+    // Store wrappers and animations for replay
     window.wrappers = [];
-    window.timelines = [];
+    window.animations = [];
 
     // Animation 1: Fade In Stagger
     const wrapper1 = new CharWrapper('#text1', {
@@ -188,14 +188,19 @@
     const { chars: chars1 } = wrapper1.wrap();
     window.wrappers.push(wrapper1);
 
-    const tl1 = gsap.timeline();
-    tl1.from(chars1, {
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.03,
-      ease: 'power2.out',
+    // Set initial state
+    chars1.forEach(char => {
+      char.style.opacity = '0';
     });
-    window.timelines.push(tl1);
+
+    const anim1 = anime({
+      targets: chars1,
+      opacity: [0, 1],
+      duration: 800,
+      delay: anime.stagger(30),
+      easing: 'easeOutQuad',
+    });
+    window.animations.push(anim1);
 
     // Animation 2: Slide Up Reveal
     const wrapper2 = new CharWrapper('#text2', {
@@ -205,15 +210,21 @@
     const { chars: chars2 } = wrapper2.wrap();
     window.wrappers.push(wrapper2);
 
-    const tl2 = gsap.timeline({ delay: 0.3 });
-    tl2.from(chars2, {
-      opacity: 0,
-      y: 50,
-      duration: 0.6,
-      stagger: 0.02,
-      ease: 'back.out(1.7)',
+    // Set initial state
+    chars2.forEach(char => {
+      char.style.opacity = '0';
+      char.style.transform = 'translateY(50px)';
     });
-    window.timelines.push(tl2);
+
+    const anim2 = anime({
+      targets: chars2,
+      opacity: [0, 1],
+      translateY: [50, 0],
+      duration: 600,
+      delay: anime.stagger(20, {start: 300}),
+      easing: 'easeOutBack',
+    });
+    window.animations.push(anim2);
 
     // Animation 3: Scale & Rotate
     const wrapper3 = new CharWrapper('#text3', {
@@ -223,16 +234,22 @@
     const { chars: chars3 } = wrapper3.wrap();
     window.wrappers.push(wrapper3);
 
-    const tl3 = gsap.timeline({ delay: 0.6 });
-    tl3.from(chars3, {
-      opacity: 0,
-      scale: 0,
-      rotation: 180,
-      duration: 0.8,
-      stagger: 0.025,
-      ease: 'elastic.out(1, 0.5)',
+    // Set initial state
+    chars3.forEach(char => {
+      char.style.opacity = '0';
+      char.style.transform = 'scale(0) rotate(180deg)';
     });
-    window.timelines.push(tl3);
+
+    const anim3 = anime({
+      targets: chars3,
+      opacity: [0, 1],
+      scale: [0, 1],
+      rotate: [180, 0],
+      duration: 800,
+      delay: anime.stagger(25, {start: 600}),
+      easing: 'easeOutElastic(1, 0.5)',
+    });
+    window.animations.push(anim3);
 
     // Animation 4: Wave Effect
     const wrapper4 = new CharWrapper('#text4', {
@@ -242,23 +259,46 @@
     const { chars: chars4 } = wrapper4.wrap();
     window.wrappers.push(wrapper4);
 
-    const tl4 = gsap.timeline({ delay: 0.9 });
-    tl4.from(chars4, {
-      opacity: 0,
-      y: -30,
-      duration: 0.6,
-      stagger: {
-        each: 0.03,
-        from: 'center',
-        ease: 'sine.inOut',
-      },
-      ease: 'bounce.out',
+    // Set initial state
+    chars4.forEach(char => {
+      char.style.opacity = '0';
+      char.style.transform = 'translateY(-30px)';
     });
-    window.timelines.push(tl4);
+
+    const anim4 = anime({
+      targets: chars4,
+      opacity: [0, 1],
+      translateY: [-30, 0],
+      duration: 600,
+      delay: function(el, i, l) {
+        // From center stagger
+        const center = l / 2;
+        const distance = Math.abs(i - center);
+        return 900 + (distance * 30);
+      },
+      easing: 'easeOutBounce',
+    });
+    window.animations.push(anim4);
 
     // Replay function
     window.replayAll = function() {
-      window.timelines.forEach(tl => tl.restart());
+      // Reset all characters to initial state
+      chars1.forEach(char => { char.style.opacity = '0'; });
+      chars2.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'translateY(50px)';
+      });
+      chars3.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'scale(0) rotate(180deg)';
+      });
+      chars4.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'translateY(-30px)';
+      });
+
+      // Restart all animations
+      window.animations.forEach(anim => anim.restart());
     };
 
     // Cleanup on page unload

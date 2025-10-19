@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CharWrapper 2.0 - Modern ES6+ Text Animation Library</title>
+  <title>CharWrapper 2.0 - Modern ES6+ Text Wrapper Library</title>
   <style>
     * {
       margin: 0;
@@ -281,6 +281,51 @@
     .code-snippet code {
       color: #ffd93d;
     }
+
+    /* Tab styles */
+    .tabs-container {
+      max-width: 1200px;
+      margin: 0 auto 3rem auto;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tab-button {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      padding: 1rem 3rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tab-button:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .tab-button.active {
+      background: white;
+      color: #667eea;
+      border-color: white;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -288,7 +333,7 @@
     <div class="logo" id="logo">CharWrapper</div>
     <div class="version">v2.0.0</div>
     <div class="tagline" id="tagline">
-      Modern ES6+ text animation library for GSAP
+      Modern ES6+ text wrapper library
     </div>
     <div class="subtitle">
       Zero dependencies • Modular architecture • Performance optimized
@@ -340,8 +385,16 @@
 
   <section class="examples-section">
     <h2 class="section-title">Explore Examples</h2>
-    <div class="examples-grid">
-      <a href="01-text-reveal.html" class="example-card">
+
+    <div class="tabs-container">
+      <button class="tab-button active" onclick="switchTab('gsap')">GSAP</button>
+      <button class="tab-button" onclick="switchTab('animejs')">Anime.js</button>
+    </div>
+
+    <!-- GSAP Examples -->
+    <div id="gsap-tab" class="tab-content active">
+      <div class="examples-grid">
+        <a href="gsap/01-text-reveal.html" class="example-card">
         <div class="example-number">01</div>
         <div class="example-title">Text Reveal</div>
         <div class="example-description">
@@ -355,7 +408,7 @@
         </div>
       </a>
 
-      <a href="02-scramble.html" class="example-card">
+      <a href="gsap/02-scramble.html" class="example-card">
         <div class="example-number">02</div>
         <div class="example-title">Scramble & Shuffle</div>
         <div class="example-description">
@@ -369,7 +422,7 @@
         </div>
       </a>
 
-      <a href="03-hover-effects.html" class="example-card">
+      <a href="gsap/03-hover-effects.html" class="example-card">
         <div class="example-number">03</div>
         <div class="example-title">Interactive Hover</div>
         <div class="example-description">
@@ -383,7 +436,7 @@
         </div>
       </a>
 
-      <a href="04-scroll-trigger.html" class="example-card">
+      <a href="gsap/04-scroll-trigger.html" class="example-card">
         <div class="example-number">04</div>
         <div class="example-title">Scroll Triggered</div>
         <div class="example-description">
@@ -397,7 +450,7 @@
         </div>
       </a>
 
-      <a href="05-character-groups.html" class="example-card">
+      <a href="gsap/05-character-groups.html" class="example-card">
         <div class="example-number">05</div>
         <div class="example-title">Character Groups</div>
         <div class="example-description">
@@ -411,7 +464,7 @@
         </div>
       </a>
 
-      <a href="06-animation-presets.html" class="example-card">
+      <a href="gsap/06-animation-presets.html" class="example-card">
         <div class="example-number">06</div>
         <div class="example-title">Animation Presets</div>
         <div class="example-description">
@@ -425,7 +478,7 @@
         </div>
       </a>
 
-      <a href="07-text-transitions.html" class="example-card">
+      <a href="gsap/07-text-transitions.html" class="example-card">
         <div class="example-number">07</div>
         <div class="example-title">Text Transitions</div>
         <div class="example-description">
@@ -439,7 +492,7 @@
         </div>
       </a>
 
-      <a href="08-3d-text.html" class="example-card">
+      <a href="gsap/08-3d-text.html" class="example-card">
         <div class="example-number">08</div>
         <div class="example-title">3D Text Effects</div>
         <div class="example-description">
@@ -452,6 +505,124 @@
           <span class="tag">GSAP</span>
         </div>
       </a>
+    </div>
+    </div>
+
+    <!-- Anime.js Examples -->
+    <div id="animejs-tab" class="tab-content">
+      <div class="examples-grid">
+        <a href="animejs/01-text-reveal.html" class="example-card">
+        <div class="example-number">01</div>
+        <div class="example-title">Text Reveal</div>
+        <div class="example-description">
+          Staggered entrance animations with fade, slide, scale, and wave effects. Perfect for hero sections and headings.
+        </div>
+        <div class="example-tags">
+          <span class="tag">Fade</span>
+          <span class="tag">Slide</span>
+          <span class="tag">Bounce</span>
+          <span class="tag">Wave</span>
+        </div>
+      </a>
+
+      <a href="animejs/02-scramble.html" class="example-card">
+        <div class="example-number">02</div>
+        <div class="example-title">Scramble & Shuffle</div>
+        <div class="example-description">
+          Matrix-style decoding effects, character randomization, and glitch animations. Cyberpunk aesthetic included!
+        </div>
+        <div class="example-tags">
+          <span class="tag">Matrix</span>
+          <span class="tag">Decode</span>
+          <span class="tag">Glitch</span>
+          <span class="tag">Typewriter</span>
+        </div>
+      </a>
+
+      <a href="animejs/03-hover-effects.html" class="example-card">
+        <div class="example-number">03</div>
+        <div class="example-title">Interactive Hover</div>
+        <div class="example-description">
+          Mouse-reactive animations including bounce, rainbow waves, magnetic pull, and ripple effects. Fully interactive!
+        </div>
+        <div class="example-tags">
+          <span class="tag">Hover</span>
+          <span class="tag">Click</span>
+          <span class="tag">Magnetic</span>
+          <span class="tag">Ripple</span>
+        </div>
+      </a>
+
+      <a href="animejs/04-scroll-trigger.html" class="example-card">
+        <div class="example-number">04</div>
+        <div class="example-title">Scroll Triggered</div>
+        <div class="example-description">
+          Scroll-based animations using Intersection Observer. Includes parallax, blur effects, and smooth transitions.
+        </div>
+        <div class="example-tags">
+          <span class="tag">Scroll</span>
+          <span class="tag">Parallax</span>
+          <span class="tag">Blur</span>
+          <span class="tag">Observer</span>
+        </div>
+      </a>
+
+      <a href="animejs/05-character-groups.html" class="example-card">
+        <div class="example-number">05</div>
+        <div class="example-title">Character Groups</div>
+        <div class="example-description">
+          Smart character selection with pattern matching, diacritics support, and custom filters. A unique feature not in GSAP SplitText!
+        </div>
+        <div class="example-tags">
+          <span class="tag">Groups</span>
+          <span class="tag">Patterns</span>
+          <span class="tag">Diacritics</span>
+          <span class="tag">Filters</span>
+        </div>
+      </a>
+
+      <a href="animejs/06-animation-presets.html" class="example-card">
+        <div class="example-number">06</div>
+        <div class="example-title">Animation Examples</div>
+        <div class="example-description">
+          Ready-to-use anime.js animations showcasing various effects. Great starting points for your own animations!
+        </div>
+        <div class="example-tags">
+          <span class="tag">Examples</span>
+          <span class="tag">Anime.js</span>
+          <span class="tag">Easy</span>
+          <span class="tag">Reference</span>
+        </div>
+      </a>
+
+      <a href="animejs/07-text-transitions.html" class="example-card">
+        <div class="example-number">07</div>
+        <div class="example-title">Text Transitions</div>
+        <div class="example-description">
+          Smoothly morph between different text content with intelligent character matching. Perfect for counters and dynamic content!
+        </div>
+        <div class="example-tags">
+          <span class="tag">Transitions</span>
+          <span class="tag">Morphing</span>
+          <span class="tag">Dynamic</span>
+          <span class="tag">Anime.js</span>
+        </div>
+      </a>
+
+      <a href="animejs/08-3d-text.html" class="example-card">
+        <div class="example-number">08</div>
+        <div class="example-title">3D Text Effects</div>
+        <div class="example-description">
+          CharWrapper in a 3D CSS environment with text positioned along a virtual street perspective. Features color waves, scale waves, rotation, and pulse effects!
+        </div>
+        <div class="example-tags">
+          <span class="tag">3D CSS</span>
+          <span class="tag">Perspective</span>
+          <span class="tag">Advanced</span>
+          <span class="tag">Anime.js</span>
+        </div>
+      </a>
+    </div>
     </div>
   </section>
 
@@ -475,6 +646,25 @@
   <!-- CharWrapper - Single Bundle File -->
   <script src="../dist/charwrapper.js"></script>
   <script type="module">
+
+    // Tab switching function
+    window.switchTab = function(tabName) {
+      // Hide all tab contents
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.remove('active');
+      });
+
+      // Remove active class from all buttons
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+      });
+
+      // Show selected tab content
+      document.getElementById(`${tabName}-tab`).classList.add('active');
+
+      // Add active class to clicked button
+      event.target.classList.add('active');
+    };
 
     // Animate logo
     const logoWrapper = new CharWrapper('#logo', {

@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Character Groups - CharWrapper 2.0</title>
+
+  <!-- Anime.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+
+  <!-- CharWrapper bundle -->
+  <script src="../../dist/charwrapper.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 3rem;
+      opacity: 0.9;
+    }
+
+    .example {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .example h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    .example-description {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .text-display {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 30px;
+      border-radius: 12px;
+      font-size: 2rem;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      min-height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .char {
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    /* Color classes for different character types */
+    .highlight-vowel { color: #ff6b9d; }
+    .highlight-consonant { color: #4ecdc4; }
+    .highlight-number { color: #ffd93d; }
+    .highlight-diacritic { color: #95e1d3; }
+    .highlight-punctuation { color: #ff9ff3; }
+    .highlight-first { color: #feca57; font-weight: bold; }
+
+    code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    .info {
+      background: rgba(255, 215, 0, 0.2);
+      border-left: 4px solid #ffd700;
+      padding: 15px;
+      margin: 20px 0;
+      border-radius: 4px;
+      font-size: 0.95rem;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateX(-5px);
+    }
+
+    .back-link::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back-link">All Examples</a>
+
+  <div class="container">
+    <h1>Character Groups</h1>
+    <p class="subtitle">Smart character selection and animation with predefined patterns</p>
+
+    <!-- Example 1: Vowels vs Consonants -->
+    <div class="example">
+      <h2>1. Vowels vs Consonants</h2>
+      <p class="example-description">
+        Separate vowels and consonants into different groups for unique animations.
+        Uses predefined patterns from <code>PREDEFINED_GROUPS</code>.
+      </p>
+      <div class="text-display">
+        <div class="text-1">The quick brown fox jumps over the lazy dog</div>
+      </div>
+      <div class="controls">
+        <button onclick="example1Vowels()">Animate Vowels</button>
+        <button onclick="example1Consonants()">Animate Consonants</button>
+        <button onclick="example1Both()">Animate Both</button>
+        <button onclick="example1Reset()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Example 2: Diacritics (Special Characters) -->
+    <div class="example">
+      <h2>2. Diacritics & Language-Specific Characters</h2>
+      <p class="example-description">
+        Highlight accented characters across multiple languages. Perfect for multilingual content.
+        Includes French (é, è, ç), German (ü, ö, ä, ß), Spanish (ñ, á), and Slavic characters.
+      </p>
+      <div class="text-display">
+        <div class="text-2">Café français, Gemütlichkeit, España, naïve résumé</div>
+      </div>
+      <div class="controls">
+        <button onclick="example2Diacritics()">Highlight All Diacritics</button>
+        <button onclick="example2French()">French Only</button>
+        <button onclick="example2German()">German Only</button>
+        <button onclick="example2Reset()">Reset</button>
+      </div>
+      <div class="info">
+        <strong>Supported:</strong> French, German, Spanish, Portuguese, Slavic (Czech, Polish, Croatian),
+        Scandinavian (å, æ, ø), and many more Unicode diacritical marks.
+      </div>
+    </div>
+
+    <!-- Example 3: Mixed Content (Letters, Numbers, Punctuation) -->
+    <div class="example">
+      <h2>3. Mixed Content Separation</h2>
+      <p class="example-description">
+        Separate numbers, letters, and punctuation for data visualization or creative effects.
+      </p>
+      <div class="text-display">
+        <div class="text-3">Order #12345 costs $99.99! Ships in 2-3 days.</div>
+      </div>
+      <div class="controls">
+        <button onclick="example3Numbers()">Animate Numbers</button>
+        <button onclick="example3Punctuation()">Animate Punctuation</button>
+        <button onclick="example3Letters()">Animate Letters</button>
+        <button onclick="example3Reset()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Example 4: Custom Filter - First Letter of Each Word -->
+    <div class="example">
+      <h2>4. Custom Filter Function</h2>
+      <p class="example-description">
+        Use custom filter functions with context awareness. This example highlights the first letter of each word.
+        The filter receives <code>CharContext</code> with <code>isFirstInWord</code>, <code>isLastInWord</code>,
+        <code>wordIndex</code>, etc.
+      </p>
+      <div class="text-display">
+        <div class="text-4">Every First Letter Gets Special Attention</div>
+      </div>
+      <div class="controls">
+        <button onclick="example4FirstLetters()">Animate First Letters</button>
+        <button onclick="example4LastLetters()">Animate Last Letters</button>
+        <button onclick="example4Reset()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Example 5: Nth Character Selection -->
+    <div class="example">
+      <h2>5. Every Nth Character</h2>
+      <p class="example-description">
+        Select every 2nd, 3rd, or Nth character for rhythmic patterns and creative effects.
+      </p>
+      <div class="text-display">
+        <div class="text-5">Pattern Recognition Through Rhythmic Selection</div>
+      </div>
+      <div class="controls">
+        <button onclick="example5EverySecond()">Every 2nd Character</button>
+        <button onclick="example5EveryThird()">Every 3rd Character</button>
+        <button onclick="example5EveryFifth()">Every 5th Character</button>
+        <button onclick="example5Reset()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Example 6: Word-Based Selection -->
+    <div class="example">
+      <h2>6. Word-Based Character Groups</h2>
+      <p class="example-description">
+        Select all characters in specific words. Great for emphasizing keywords or brand names.
+      </p>
+      <div class="text-display">
+        <div class="text-6">CharWrapper makes animation simple and powerful</div>
+      </div>
+      <div class="controls">
+        <button onclick="example6Keywords()">Highlight Keywords</button>
+        <button onclick="example6Reset()">Reset</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Store wrapper instances globally for cleanup
+    const wrappers = {};
+    const animations = {}; // Store active animations for cleanup
+
+    // Helper to kill active animations
+    function killAnimations(key) {
+      if (animations[key]) {
+        animations[key].forEach(anim => {
+          if (anim && anim.pause) anim.pause();
+        });
+        animations[key] = [];
+      }
+    }
+
+    // Example 1: Vowels vs Consonants
+    wrappers.example1 = new CharWrapper('.text-1', {
+      wrap: { chars: true },
+      groups: {
+        vowels: /[aeiouAEIOU]/,
+        consonants: /[bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ]/
+      }
+    });
+
+    const result1 = wrappers.example1.wrap();
+    animations.example1 = [];
+
+    function example1Vowels() {
+      killAnimations('example1');
+      result1.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) translateY(0)';
+        char.style.opacity = '1';
+      });
+
+      result1.groups.vowels.forEach(char => char.classList.add('highlight-vowel'));
+
+      result1.groups.vowels.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'scale(0)';
+      });
+
+      const anim = anime({
+        targets: result1.groups.vowels,
+        scale: [0, 1],
+        opacity: [0, 1],
+        duration: 500,
+        delay: anime.stagger(50),
+        easing: 'easeOutBack'
+      });
+      animations.example1.push(anim);
+    }
+
+    function example1Consonants() {
+      killAnimations('example1');
+      result1.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) translateY(0)';
+      });
+      result1.groups.vowels.forEach(char => char.classList.remove('highlight-vowel'));
+
+      result1.groups.consonants.forEach(char => char.classList.add('highlight-consonant'));
+
+      result1.groups.consonants.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'translateY(-30px)';
+      });
+
+      const anim = anime({
+        targets: result1.groups.consonants,
+        translateY: [-30, 0],
+        opacity: [0, 1],
+        duration: 600,
+        delay: anime.stagger(30),
+        easing: 'easeOutBounce'
+      });
+      animations.example1.push(anim);
+    }
+
+    function example1Both() {
+      killAnimations('example1');
+      result1.chars.forEach(char => {
+        char.style.transform = 'scale(1) translateY(0)';
+      });
+
+      result1.groups.vowels.forEach(char => char.classList.add('highlight-vowel'));
+      result1.groups.consonants.forEach(char => char.classList.add('highlight-consonant'));
+
+      result1.groups.vowels.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'scale(0)';
+      });
+
+      const anim1 = anime({
+        targets: result1.groups.vowels,
+        scale: [0, 1],
+        opacity: [0, 1],
+        duration: 500,
+        delay: anime.stagger(50),
+        easing: 'easeOutBack'
+      });
+
+      result1.groups.consonants.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'translateY(30px)';
+      });
+
+      const anim2 = anime({
+        targets: result1.groups.consonants,
+        translateY: [30, 0],
+        opacity: [0, 1],
+        duration: 600,
+        delay: anime.stagger(30, {start: 200}),
+        easing: 'easeOutQuad'
+      });
+
+      animations.example1.push(anim1, anim2);
+    }
+
+    function example1Reset() {
+      killAnimations('example1');
+      result1.groups.vowels.forEach(char => char.classList.remove('highlight-vowel'));
+      result1.groups.consonants.forEach(char => char.classList.remove('highlight-consonant'));
+      result1.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) translateY(0)';
+        char.style.opacity = '1';
+      });
+    }
+
+    // Example 2: Diacritics
+    wrappers.example2 = new CharWrapper('.text-2', {
+      wrap: { chars: true },
+      groups: {
+        diacritics: /[àáâãäåæçèéêëìíîïðñòóôõöøùúûüýþÿĀāĂăĄąĆćĈĉĊċČčĎďĐđĒēĔĕĖėĘęĚěĜĝĞğĠġĢģĤĥĦħĨĩĪīĬĭĮįİıĲĳĴĵĶķĸĹĺĻļĽľĿŀŁłŃńŅņŇňŉŊŋŌōŎŏŐőŒœŔŕŖŗŘřŚśŜŝŞşŠšŢţŤťŦŧŨũŪūŬŭŮůŰűŲųŴŵŶŷŸŹźŻżŽžſ]/,
+        french: /[àâæçéèêëïîôùûüÿœÀÂÆÇÉÈÊËÏÎÔÙÛÜŸŒ]/,
+        german: /[äöüßÄÖÜ]/,
+        spanish: /[áéíóúüñ¿¡ÁÉÍÓÚÜÑ]/
+      }
+    });
+
+    const result2 = wrappers.example2.wrap();
+    animations.example2 = [];
+
+    function example2Diacritics() {
+      killAnimations('example2');
+      result2.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) translateY(0)';
+      });
+
+      result2.groups.diacritics.forEach(char => char.classList.add('highlight-diacritic'));
+
+      result2.groups.diacritics.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'scale(1.5)';
+      });
+
+      const anim = anime({
+        targets: result2.groups.diacritics,
+        scale: [1.5, 1],
+        opacity: [0, 1],
+        duration: 800,
+        delay: anime.stagger(100),
+        easing: 'easeOutElastic(1, 0.5)'
+      });
+      animations.example2.push(anim);
+    }
+
+    function example2French() {
+      killAnimations('example2');
+      result2.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) rotate(0deg)';
+      });
+      result2.groups.diacritics.forEach(char => char.classList.remove('highlight-diacritic'));
+
+      result2.groups.french.forEach(char => char.classList.add('highlight-diacritic'));
+
+      result2.groups.french.forEach(char => {
+        char.style.transform = 'scale(0) rotate(360deg)';
+      });
+
+      const anim = anime({
+        targets: result2.groups.french,
+        rotate: [360, 0],
+        scale: [0, 1],
+        duration: 800,
+        delay: anime.stagger(150),
+        easing: 'easeOutBack'
+      });
+      animations.example2.push(anim);
+    }
+
+    function example2German() {
+      killAnimations('example2');
+      result2.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) translateY(0)';
+      });
+      result2.groups.diacritics.forEach(char => char.classList.remove('highlight-diacritic'));
+
+      result2.groups.german.forEach(char => char.classList.add('highlight-diacritic'));
+
+      result2.groups.german.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'translateY(-50px)';
+      });
+
+      const anim = anime({
+        targets: result2.groups.german,
+        translateY: [-50, 0],
+        opacity: [0, 1],
+        duration: 1000,
+        delay: anime.stagger(200),
+        easing: 'easeOutBounce'
+      });
+      animations.example2.push(anim);
+    }
+
+    function example2Reset() {
+      killAnimations('example2');
+      result2.groups.diacritics.forEach(char => char.classList.remove('highlight-diacritic'));
+      result2.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) translateY(0) rotate(0deg)';
+        char.style.opacity = '1';
+      });
+    }
+
+    // Example 3: Mixed Content
+    wrappers.example3 = new CharWrapper('.text-3', {
+      wrap: { chars: true },
+      groups: {
+        numbers: /[0-9]/,
+        punctuation: /[.,!?;:$#]/,
+        letters: /[a-zA-Z]/
+      }
+    });
+
+    const result3 = wrappers.example3.wrap();
+    animations.example3 = [];
+
+    function example3Numbers() {
+      killAnimations('example3');
+      result3.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) translateY(0)';
+      });
+
+      result3.groups.numbers.forEach(char => char.classList.add('highlight-number'));
+
+      result3.groups.numbers.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'scale(2)';
+      });
+
+      const anim = anime({
+        targets: result3.groups.numbers,
+        scale: [2, 1],
+        opacity: [0, 1],
+        duration: 600,
+        delay: anime.stagger(100),
+        easing: 'easeOutQuad'
+      });
+      animations.example3.push(anim);
+    }
+
+    function example3Punctuation() {
+      killAnimations('example3');
+      result3.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) rotate(0deg)';
+      });
+      result3.groups.numbers.forEach(char => char.classList.remove('highlight-number'));
+
+      result3.groups.punctuation.forEach(char => char.classList.add('highlight-punctuation'));
+
+      result3.groups.punctuation.forEach(char => {
+        char.style.transform = 'scale(0) rotate(720deg)';
+      });
+
+      const anim = anime({
+        targets: result3.groups.punctuation,
+        rotate: [720, 0],
+        scale: [0, 1],
+        duration: 800,
+        delay: anime.stagger(150),
+        easing: 'easeOutBack'
+      });
+      animations.example3.push(anim);
+    }
+
+    function example3Letters() {
+      killAnimations('example3');
+      result3.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) translateX(0) rotate(0deg)';
+      });
+      result3.groups.numbers.forEach(char => char.classList.remove('highlight-number'));
+      result3.groups.punctuation.forEach(char => char.classList.remove('highlight-punctuation'));
+
+      result3.groups.letters.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'translateX(-20px)';
+      });
+
+      const anim = anime({
+        targets: result3.groups.letters,
+        opacity: [0, 1],
+        translateX: [-20, 0],
+        duration: 500,
+        delay: anime.stagger(20)
+      });
+      animations.example3.push(anim);
+    }
+
+    function example3Reset() {
+      killAnimations('example3');
+      result3.groups.numbers.forEach(char => char.classList.remove('highlight-number'));
+      result3.groups.punctuation.forEach(char => char.classList.remove('highlight-punctuation'));
+      result3.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) translateY(0) translateX(0) rotate(0deg)';
+        char.style.opacity = '1';
+      });
+    }
+
+    // Example 4: Custom Filter (First/Last letter of each word)
+    wrappers.example4 = new CharWrapper('.text-4', {
+      wrap: { chars: true },
+      groups: {
+        firstLetters: {
+          custom: (char, index, context) => context.isFirstInWord,
+          class: 'highlight-first'
+        },
+        lastLetters: {
+          custom: (char, index, context) => context.isLastInWord
+        }
+      }
+    });
+
+    const result4 = wrappers.example4.wrap();
+    animations.example4 = [];
+
+    function example4FirstLetters() {
+      killAnimations('example4');
+      result4.chars.forEach(char => {
+        char.style.transform = 'scale(1) translateY(0)';
+      });
+
+      result4.groups.firstLetters.forEach(char => {
+        char.style.transform = 'scale(1.5) translateY(-20px)';
+      });
+
+      const anim = anime({
+        targets: result4.groups.firstLetters,
+        scale: [1.5, 1],
+        translateY: [-20, 0],
+        duration: 600,
+        delay: anime.stagger(100),
+        easing: 'easeOutBack'
+      });
+      animations.example4.push(anim);
+    }
+
+    function example4LastLetters() {
+      killAnimations('example4');
+      result4.chars.forEach(char => {
+        char.style.transform = 'scale(1) translateX(0)';
+      });
+
+      result4.groups.lastLetters.forEach(char => {
+        char.style.color = '#ff6b9d';
+        char.style.opacity = '0';
+        char.style.transform = 'translateX(20px)';
+      });
+
+      const anim = anime({
+        targets: result4.groups.lastLetters,
+        opacity: [0, 1],
+        translateX: [20, 0],
+        duration: 600,
+        delay: anime.stagger(100),
+        easing: 'easeOutQuad'
+      });
+      animations.example4.push(anim);
+    }
+
+    function example4Reset() {
+      killAnimations('example4');
+      result4.groups.lastLetters.forEach(char => char.style.color = '#fff');
+      result4.chars.forEach(char => {
+        char.style.transform = 'scale(1) translateX(0) translateY(0)';
+        char.style.opacity = '1';
+      });
+    }
+
+    // Example 5: Every Nth Character
+    wrappers.example5 = new CharWrapper('.text-5', {
+      wrap: { chars: true },
+      groups: {
+        everySecond: { nth: 2 },
+        everyThird: { nth: 3 },
+        everyFifth: { nth: 5 }
+      }
+    });
+
+    const result5 = wrappers.example5.wrap();
+    animations.example5 = [];
+
+    function example5EverySecond() {
+      killAnimations('example5');
+      result5.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'translateY(0)';
+      });
+
+      result5.groups.everySecond.forEach(char => {
+        char.style.color = '#4ecdc4';
+        char.style.opacity = '0';
+        char.style.transform = 'translateY(-15px)';
+      });
+
+      const anim = anime({
+        targets: result5.groups.everySecond,
+        translateY: [-15, 0],
+        opacity: [0, 1],
+        duration: 500,
+        delay: anime.stagger(50),
+        easing: 'easeOutQuad'
+      });
+      animations.example5.push(anim);
+    }
+
+    function example5EveryThird() {
+      killAnimations('example5');
+      result5.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1)';
+      });
+
+      result5.groups.everyThird.forEach(char => {
+        char.style.color = '#ff6b9d';
+        char.style.opacity = '0';
+        char.style.transform = 'scale(1.5)';
+      });
+
+      const anim = anime({
+        targets: result5.groups.everyThird,
+        scale: [1.5, 1],
+        opacity: [0, 1],
+        duration: 600,
+        delay: anime.stagger(80),
+        easing: 'easeOutBack'
+      });
+      animations.example5.push(anim);
+    }
+
+    function example5EveryFifth() {
+      killAnimations('example5');
+      result5.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) rotate(0deg)';
+      });
+
+      result5.groups.everyFifth.forEach(char => {
+        char.style.color = '#ffd93d';
+        char.style.transform = 'scale(0) rotate(360deg)';
+      });
+
+      const anim = anime({
+        targets: result5.groups.everyFifth,
+        rotate: [360, 0],
+        scale: [0, 1],
+        duration: 800,
+        delay: anime.stagger(150),
+        easing: 'easeOutBack'
+      });
+      animations.example5.push(anim);
+    }
+
+    function example5Reset() {
+      killAnimations('example5');
+      result5.chars.forEach(char => {
+        char.style.color = '#fff';
+        char.style.transform = 'scale(1) translateY(0) rotate(0deg)';
+        char.style.opacity = '1';
+      });
+    }
+
+    // Example 6: Word-Based Selection
+    wrappers.example6 = new CharWrapper('.text-6', {
+      wrap: { chars: true },
+      groups: {
+        keywords: {
+          words: ['CharWrapper', 'animation', 'powerful'],
+          class: 'highlight-first'
+        }
+      }
+    });
+
+    const result6 = wrappers.example6.wrap();
+    animations.example6 = [];
+
+    function example6Keywords() {
+      killAnimations('example6');
+      result6.chars.forEach(char => {
+        char.style.transform = 'scale(1) translateY(0)';
+      });
+
+      result6.groups.keywords.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'scale(1.3) translateY(-10px)';
+      });
+
+      const anim = anime({
+        targets: result6.groups.keywords,
+        scale: [1.3, 1],
+        translateY: [-10, 0],
+        opacity: [0, 1],
+        duration: 800,
+        delay: anime.stagger(30),
+        easing: 'easeOutElastic(1, 0.5)'
+      });
+      animations.example6.push(anim);
+    }
+
+    function example6Reset() {
+      killAnimations('example6');
+      result6.chars.forEach(char => {
+        char.style.transform = 'scale(1) translateY(0)';
+        char.style.opacity = '1';
+      });
+    }
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      Object.values(wrappers).forEach(wrapper => wrapper.destroy());
+    });
+  </script>
+</body>
+</html>

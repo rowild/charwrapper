@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animation Examples - CharWrapper 2.0</title>
+
+  <!-- Anime.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+
+  <!-- CharWrapper bundle -->
+  <script src="../../dist/charwrapper.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 3rem;
+      opacity: 0.9;
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-left: 4px solid #ffd700;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+    }
+
+    .info-box strong {
+      color: #ffd700;
+    }
+
+    .example {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .example h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    .example-description {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .text-display {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 40px;
+      border-radius: 12px;
+      font-size: 2.5rem;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .char {
+      display: inline-block;
+      transition: all 0.3s ease;
+    }
+
+    code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateX(-5px);
+    }
+
+    .back-link::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back-link">All Examples</a>
+
+  <div class="container">
+    <h1>Animation Examples</h1>
+    <p class="subtitle">Ready-to-use anime.js animations</p>
+
+    <div class="info-box">
+      <strong>ℹ️ Anime.js Powered:</strong> These animations showcase CharWrapper with anime.js.
+      CharWrapper core is animation-agnostic and works with any animation library.
+    </div>
+
+    <!-- Entrance Animations -->
+    <div class="example">
+      <h2>Entrance Animations</h2>
+      <p class="example-description">
+        Classic entrance effects with various easing and timing options.
+      </p>
+      <div class="text-display">
+        <div class="text-1">Amazing Text Animations</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo1('fadeIn')">Fade In</button>
+        <button onclick="demo1('slideUp')">Slide Up</button>
+        <button onclick="demo1('scaleIn')">Scale In</button>
+        <button onclick="demo1('rotateIn')">Rotate In</button>
+        <button onclick="demo1('elastic')">Elastic Bounce</button>
+        <button onclick="demo1('wave')">Wave</button>
+        <button onclick="demo1('glitch')">Glitch</button>
+        <button onclick="reset1()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Typewriter Effect -->
+    <div class="example">
+      <h2>Typewriter Effect</h2>
+      <p class="example-description">
+        Classic typing animation with customizable speed.
+      </p>
+      <div class="text-display">
+        <div class="text-2">Hello, World! This is a typewriter effect.</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo2()">Typewriter (Fast)</button>
+        <button onclick="demo2Custom()">Typewriter (Slow)</button>
+        <button onclick="reset2()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Loop Animations -->
+    <div class="example">
+      <h2>Loop Animations</h2>
+      <p class="example-description">
+        Continuous animations - perfect for attention-grabbing effects.
+      </p>
+      <div class="text-display">
+        <div class="text-3">Looping Forever</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo3('wave')">Floating Wave</button>
+        <button onclick="demo3('pulse')">Pulse</button>
+        <button onclick="demo3('color')">Color Cycle</button>
+        <button onclick="demo3('shimmer')">Shimmer</button>
+        <button onclick="stopLoop3()">Stop</button>
+      </div>
+    </div>
+
+    <!-- Exit Animations -->
+    <div class="example">
+      <h2>Exit Animations</h2>
+      <p class="example-description">
+        Smooth exit effects for transitions and removal.
+      </p>
+      <div class="text-display">
+        <div class="text-4">Watch Me Disappear</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo4('fadeOut')">Fade Out</button>
+        <button onclick="demo4('slideOut')">Slide Out</button>
+        <button onclick="demo4('scaleOut')">Scale Out</button>
+        <button onclick="demo4('explode')">Explode!</button>
+        <button onclick="reset4()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Custom Options -->
+    <div class="example">
+      <h2>Custom Options</h2>
+      <p class="example-description">
+        Control duration, stagger, delay, and easing for any animation.
+      </p>
+      <div class="text-display">
+        <div class="text-5">Customize Everything</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo5Default()">Default Speed</button>
+        <button onclick="demo5Slow()">Super Slow</button>
+        <button onclick="demo5Fast()">Super Fast</button>
+        <button onclick="demo5Custom()">Custom Ease</button>
+        <button onclick="reset5()">Reset</button>
+      </div>
+    </div>
+
+    <!-- Interactive -->
+    <div class="example">
+      <h2>Interactive Effects</h2>
+      <p class="example-description">
+        Hover and click interactions with character-level animations.
+      </p>
+      <div class="text-display">
+        <div class="text-6">Hover or Click Me!</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo6Hover()">Enable Hover Bounce</button>
+        <button onclick="demo6Click()">Enable Click Spin</button>
+        <button onclick="reset6()">Reset</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentAnims = {};
+
+    // Example 1: Entrance Animations
+    const wrapper1 = new CharWrapper('.text-1', {
+      wrap: { chars: true }
+    });
+    const result1 = wrapper1.wrap();
+
+    function demo1(type) {
+      reset1();
+      const chars = result1.chars;
+
+      if (type === 'fadeIn') {
+        chars.forEach(c => c.style.opacity = '0');
+        anime({ targets: chars, opacity: [0, 1], duration: 800, delay: anime.stagger(30), easing: 'easeOutQuad' });
+      } else if (type === 'slideUp') {
+        chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
+        anime({ targets: chars, translateY: [50, 0], opacity: [0, 1], duration: 600, delay: anime.stagger(20), easing: 'easeOutBack' });
+      } else if (type === 'scaleIn') {
+        chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'scale(0)'; });
+        anime({ targets: chars, scale: [0, 1], opacity: [0, 1], duration: 600, delay: anime.stagger(25), easing: 'easeOutElastic(1, 0.6)' });
+      } else if (type === 'rotateIn') {
+        chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'scale(0) rotate(180deg)'; });
+        anime({ targets: chars, scale: [0, 1], rotate: [180, 0], opacity: [0, 1], duration: 800, delay: anime.stagger(25), easing: 'easeOutBack' });
+      } else if (type === 'elastic') {
+        chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(-50px)'; });
+        anime({ targets: chars, translateY: [-50, 0], opacity: [0, 1], duration: 800, delay: anime.stagger(30), easing: 'easeOutElastic(1, 0.5)' });
+      } else if (type === 'wave') {
+        chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(-30px)'; });
+        anime({ targets: chars, translateY: [-30, 0], opacity: [0, 1], duration: 600, delay: function(el, i) { return i * 30 + Math.sin(i) * 50; }, easing: 'easeOutBounce' });
+      } else if (type === 'glitch') {
+        chars.forEach((c, i) => { c.style.opacity = '0'; c.style.transform = `translate(${Math.random()*100-50}px, ${Math.random()*40-20}px) rotate(${Math.random()*30-15}deg)`; });
+        anime({ targets: chars, translateX: 0, translateY: 0, rotate: 0, opacity: [0, 1], duration: 300, delay: anime.stagger(30), easing: 'easeOutQuart' });
+      }
+    }
+
+    function reset1() {
+      if (currentAnims.demo1) currentAnims.demo1.pause();
+      result1.chars.forEach(c => { c.style.opacity = '1'; c.style.transform = 'scale(1) translateY(0) translateX(0) rotate(0)'; });
+    }
+
+    // Example 2: Typewriter
+    const wrapper2 = new CharWrapper('.text-2', { wrap: { chars: true } });
+    const result2 = wrapper2.wrap();
+
+    function demo2() {
+      result2.chars.forEach(c => c.style.opacity = '0');
+      anime({ targets: result2.chars, opacity: [0, 1], duration: 50, delay: anime.stagger(30), easing: 'linear' });
+    }
+
+    function demo2Custom() {
+      result2.chars.forEach(c => c.style.opacity = '0');
+      anime({ targets: result2.chars, opacity: [0, 1], duration: 50, delay: anime.stagger(100), easing: 'linear' });
+    }
+
+    function reset2() {
+      result2.chars.forEach(c => c.style.opacity = '1');
+    }
+
+    // Example 3: Loop Animations
+    const wrapper3 = new CharWrapper('.text-3', { wrap: { chars: true } });
+    const result3 = wrapper3.wrap();
+
+    function demo3(type) {
+      stopLoop3();
+      if (type === 'wave') {
+        currentAnims.demo3 = anime({ targets: result3.chars, translateY: [-10, 10], duration: 1000, delay: anime.stagger(50), direction: 'alternate', loop: true, easing: 'easeInOutSine' });
+      } else if (type === 'pulse') {
+        currentAnims.demo3 = anime({ targets: result3.chars, scale: [1, 1.2, 1], duration: 800, delay: anime.stagger(100), loop: true, easing: 'easeInOutQuad' });
+      } else if (type === 'color') {
+        const colors = ['#ff6b9d', '#ffd93d', '#6bcf7f', '#4d96ff', '#a78bfa'];
+        let colorIndex = 0;
+        currentAnims.demo3 = setInterval(() => {
+          result3.chars.forEach(c => c.style.color = colors[colorIndex % colors.length]);
+          colorIndex++;
+        }, 500);
+      } else if (type === 'shimmer') {
+        currentAnims.demo3 = anime({ targets: result3.chars, opacity: [1, 0.3, 1], duration: 1500, delay: anime.stagger(100), loop: true, easing: 'easeInOutQuad' });
+      }
+    }
+
+    function stopLoop3() {
+      if (currentAnims.demo3) {
+        if (currentAnims.demo3.pause) currentAnims.demo3.pause();
+        else clearInterval(currentAnims.demo3);
+        currentAnims.demo3 = null;
+      }
+      result3.chars.forEach(c => { c.style.opacity = '1'; c.style.transform = 'scale(1) translateY(0)'; c.style.color = '#fff'; });
+    }
+
+    // Example 4: Exit Animations
+    const wrapper4 = new CharWrapper('.text-4', { wrap: { chars: true } });
+    const result4 = wrapper4.wrap();
+
+    function demo4(type) {
+      reset4();
+      if (type === 'fadeOut') {
+        anime({ targets: result4.chars, opacity: [1, 0], duration: 600, delay: anime.stagger(30), easing: 'easeOutQuad' });
+      } else if (type === 'slideOut') {
+        anime({ targets: result4.chars, translateY: [0, 100], opacity: [1, 0], duration: 600, delay: anime.stagger(20), easing: 'easeInQuad' });
+      } else if (type === 'scaleOut') {
+        anime({ targets: result4.chars, scale: [1, 0], opacity: [1, 0], duration: 500, delay: anime.stagger(25), easing: 'easeInBack' });
+      } else if (type === 'explode') {
+        result4.chars.forEach((c, i) => {
+          const angle = (i / result4.chars.length) * Math.PI * 2;
+          const distance = 200;
+          anime({ targets: c, translateX: Math.cos(angle) * distance, translateY: Math.sin(angle) * distance, rotate: Math.random() * 720, opacity: [1, 0], duration: 1000, easing: 'easeOutQuad' });
+        });
+      }
+    }
+
+    function reset4() {
+      result4.chars.forEach(c => { c.style.opacity = '1'; c.style.transform = 'scale(1) translateY(0) translateX(0) rotate(0)'; });
+    }
+
+    // Example 5: Custom Options
+    const wrapper5 = new CharWrapper('.text-5', { wrap: { chars: true } });
+    const result5 = wrapper5.wrap();
+
+    function demo5Default() {
+      reset5();
+      result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
+      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 600, delay: anime.stagger(20), easing: 'easeOutQuad' });
+    }
+
+    function demo5Slow() {
+      reset5();
+      result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
+      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 2000, delay: anime.stagger(100), easing: 'easeOutQuad' });
+    }
+
+    function demo5Fast() {
+      reset5();
+      result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
+      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 200, delay: anime.stagger(10), easing: 'easeOutQuad' });
+    }
+
+    function demo5Custom() {
+      reset5();
+      result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
+      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 1500, delay: anime.stagger(50), easing: 'easeOutElastic(1, 0.3)' });
+    }
+
+    function reset5() {
+      result5.chars.forEach(c => { c.style.opacity = '1'; c.style.transform = 'scale(1) translateY(0)'; });
+    }
+
+    // Example 6: Interactive
+    let wrapper6 = null;
+    let eventListeners6 = [];
+
+    function demo6Hover() {
+      reset6();
+      wrapper6 = new CharWrapper('.text-6', { wrap: { chars: true } });
+      const result = wrapper6.wrap();
+      result.chars.forEach(char => {
+        const listener = () => anime({ targets: char, translateY: [0, -20, 0], duration: 600, easing: 'easeOutBounce' });
+        char.addEventListener('mouseenter', listener);
+        eventListeners6.push({ el: char, type: 'mouseenter', fn: listener });
+      });
+    }
+
+    function demo6Click() {
+      reset6();
+      wrapper6 = new CharWrapper('.text-6', { wrap: { chars: true } });
+      const result = wrapper6.wrap();
+      result.chars.forEach(char => {
+        const listener = () => anime({ targets: char, rotate: [0, 360], duration: 600, easing: 'easeOutQuad' });
+        char.addEventListener('click', listener);
+        eventListeners6.push({ el: char, type: 'click', fn: listener });
+      });
+    }
+
+    function reset6() {
+      eventListeners6.forEach(({ el, type, fn }) => el.removeEventListener(type, fn));
+      eventListeners6 = [];
+      if (wrapper6) {
+        wrapper6.unwrap();
+        wrapper6 = null;
+      }
+    }
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      wrapper1.destroy();
+      wrapper2.destroy();
+      wrapper3.destroy();
+      wrapper4.destroy();
+      wrapper5.destroy();
+      if (wrapper6) wrapper6.destroy();
+    });
+  </script>
+</body>
+</html>

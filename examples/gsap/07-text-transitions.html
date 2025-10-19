@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Text Transitions - CharWrapper 2.0</title>
+
+  <!-- GSAP is REQUIRED for text transitions -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- CharWrapper bundle -->
+  <script src="../dist/charwrapper.min.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      min-height: 100vh;
+      padding: 40px 20px;
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-align: center;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1.2rem;
+      margin-bottom: 3rem;
+      opacity: 0.9;
+    }
+
+    .info-box {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-left: 4px solid #ffd700;
+      padding: 20px;
+      margin-bottom: 30px;
+      border-radius: 8px;
+    }
+
+    .info-box strong {
+      color: #ffd700;
+    }
+
+    .example {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 40px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+    }
+
+    .example h2 {
+      font-size: 1.8rem;
+      margin-bottom: 10px;
+      color: #ffd700;
+    }
+
+    .example-description {
+      font-size: 0.95rem;
+      opacity: 0.85;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .text-display {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 50px;
+      border-radius: 12px;
+      font-size: 3rem;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    button {
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    button:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .char {
+      display: inline-block;
+    }
+
+    code {
+      background: rgba(0,0,0,0.3);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateX(-5px);
+    }
+
+    .back-link::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
+
+    .strategy-note {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 15px;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back-link">All Examples</a>
+
+  <div class="container">
+    <h1>Text Transitions</h1>
+    <p class="subtitle">Smoothly morph between different text content</p>
+
+    <div class="info-box">
+      <strong>⚠️ GSAP Required:</strong> Text transitions are optional GSAP-specific features.
+      CharWrapper core works with any animation library.
+      To use transitions, include GSAP: <code>&lt;script src="gsap.min.js"&gt;&lt;/script&gt;</code>
+    </div>
+
+    <!-- Smart Strategy -->
+    <div class="example">
+      <h2>1. Smart Transition</h2>
+      <p class="example-description">
+        Intelligently matches characters between old and new text, reusing matching characters
+        and only animating what changed. Best for similar text.
+      </p>
+      <div class="text-display">
+        <div class="text-1">Hello World</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo1('Hello World')">Original</button>
+        <button onclick="demo1('Hello There')">Hello There</button>
+        <button onclick="demo1('Hey World')">Hey World</button>
+        <button onclick="demo1('Goodbye World')">Goodbye World</button>
+        <button onclick="demo1('Hi!')">Hi!</button>
+      </div>
+      <div class="strategy-note">
+        <strong>Strategy:</strong> <code>smart</code> - Reuses matching characters, minimizes DOM changes
+      </div>
+    </div>
+
+    <!-- Sequential Strategy -->
+    <div class="example">
+      <h2>2. Sequential Transition</h2>
+      <p class="example-description">
+        Removes all characters first, then adds new ones. Clean and simple - best for
+        completely different text.
+      </p>
+      <div class="text-display">
+        <div class="text-2">First Text</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo2('First Text')">First Text</button>
+        <button onclick="demo2('Second Text')">Second Text</button>
+        <button onclick="demo2('Third Option')">Third Option</button>
+        <button onclick="demo2('Something Completely Different')">Long Text</button>
+      </div>
+      <div class="strategy-note">
+        <strong>Strategy:</strong> <code>sequential</code> - Remove all, then add all
+      </div>
+    </div>
+
+    <!-- Real-World: Counter -->
+    <div class="example">
+      <h2>3. Real-World: Counter</h2>
+      <p class="example-description">
+        Practical example: animated counter that transitions smoothly between numbers.
+      </p>
+      <div class="text-display" style="font-size: 4rem; font-weight: 900;">
+        <div class="text-4">0</div>
+      </div>
+      <div class="controls">
+        <button onclick="incrementCounter()">+1</button>
+        <button onclick="decrementCounter()">-1</button>
+        <button onclick="setCounter(100)">Set to 100</button>
+        <button onclick="setCounter(999)">Set to 999</button>
+        <button onclick="resetCounter()">Reset to 0</button>
+      </div>
+    </div>
+
+    <!-- Chained Transitions -->
+    <div class="example">
+      <h2>4. Chained Transitions</h2>
+      <p class="example-description">
+        Chain multiple transitions sequentially using GSAP timeline callbacks.
+      </p>
+      <div class="text-display">
+        <div class="text-6">Watch This</div>
+      </div>
+      <div class="controls">
+        <button onclick="demo6Chain()">Run Sequence</button>
+        <button onclick="demo6Reset()">Reset</button>
+      </div>
+      <div class="strategy-note">
+        Transitions return GSAP timelines, so you can chain them with callbacks
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // Example 1: Smart Transition
+    const wrapper1 = new CharWrapper('.text-1', {
+      wrap: { chars: true }
+    });
+    wrapper1.wrap();
+
+    function demo1(newText) {
+      wrapper1.transitionTo(newText, {
+        strategy: 'smart',
+        addDuration: 0.4,
+        removeDuration: 0.4,
+        stagger: 0.02
+      });
+    }
+
+    // Example 2: Sequential Transition
+    const wrapper2 = new CharWrapper('.text-2', {
+      wrap: { chars: true }
+    });
+    wrapper2.wrap();
+
+    function demo2(newText) {
+      wrapper2.transitionTo(newText, {
+        strategy: 'sequential',
+        addDuration: 0.5,
+        removeDuration: 0.5,
+        stagger: 0.03
+      });
+    }
+
+    // Example 3: Counter
+    const wrapper4 = new CharWrapper('.text-4', {
+      wrap: { chars: true }
+    });
+    wrapper4.wrap();
+
+    let currentCount = 0;
+
+    function incrementCounter() {
+      currentCount++;
+      wrapper4.transitionTo(String(currentCount), {
+        strategy: 'smart',
+        addDuration: 0.3,
+        removeDuration: 0.3,
+        stagger: 0.05
+      });
+    }
+
+    function decrementCounter() {
+      currentCount--;
+      wrapper4.transitionTo(String(currentCount), {
+        strategy: 'smart',
+        addDuration: 0.3,
+        removeDuration: 0.3,
+        stagger: 0.05
+      });
+    }
+
+    function setCounter(value) {
+      currentCount = value;
+      wrapper4.transitionTo(String(currentCount), {
+        strategy: 'smart',
+        addDuration: 0.4,
+        removeDuration: 0.4,
+        stagger: 0.03
+      });
+    }
+
+    function resetCounter() {
+      currentCount = 0;
+      wrapper4.transitionTo('0', {
+        strategy: 'sequential',
+        addDuration: 0.5,
+        removeDuration: 0.5,
+        stagger: 0.05
+      });
+    }
+
+    // Example 5: Chained Transitions
+    const wrapper6 = new CharWrapper('.text-6', {
+      wrap: { chars: true }
+    });
+    wrapper6.wrap();
+
+    function demo6Chain() {
+      const messages = [
+        'First...',
+        'Then Second...',
+        'Finally Third!',
+        'Done!'
+      ];
+
+      let index = 0;
+
+      function nextTransition() {
+        if (index < messages.length) {
+          wrapper6.transitionTo(messages[index], {
+            strategy: 'smart',
+            addDuration: 0.4,
+            removeDuration: 0.4,
+            stagger: 0.02,
+            onComplete: () => {
+              index++;
+              if (index < messages.length) {
+                setTimeout(nextTransition, 800);
+              }
+            }
+          });
+        }
+      }
+
+      nextTransition();
+    }
+
+    function demo6Reset() {
+      wrapper6.transitionTo('Watch This', {
+        strategy: 'smart',
+        addDuration: 0.3,
+        removeDuration: 0.3
+      });
+    }
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+      wrapper1.destroy();
+      wrapper2.destroy();
+      wrapper4.destroy();
+      wrapper6.destroy();
+    });
+  </script>
+</body>
+</html>
