@@ -85,29 +85,34 @@ export class TextTransition {
     timeline: gsap.core.Timeline
   ): gsap.core.Timeline {
 
-    // Phase 1: Fade out and remove all old characters
-    timeline.to(oldElements, {
-      opacity: 0,
-      scale: 0,
-      duration: opts.removeDuration,
-      stagger: opts.stagger,
-      ease: opts.ease,
-      onComplete: () => {
-        // Clear container
-        rootElement.innerHTML = '';
-      },
-    });
-
-    // Phase 2: Create and add all new characters
+    // Pre-create new elements (but don't append to DOM yet)
     const newElements: HTMLElement[] = [];
     newText.split('').forEach((char, index) => {
       const charElement = wrapperFactory.createCharElement(char, index);
-      gsap.set(charElement, { opacity: 0, scale: 0 });
       newElements.push(charElement);
-      rootElement.appendChild(charElement);
     });
 
-    // Animate new characters in
+    // Phase 1: Fade out old characters
+    if (oldElements.length > 0) {
+      timeline.to(oldElements, {
+        opacity: 0,
+        scale: 0,
+        duration: opts.removeDuration,
+        stagger: opts.stagger,
+        ease: opts.ease,
+      });
+    }
+
+    // Phase 2: Clear and add new elements at the right time
+    timeline.call(() => {
+      rootElement.innerHTML = '';
+      newElements.forEach(el => {
+        gsap.set(el, { opacity: 0, scale: 0 });
+        rootElement.appendChild(el);
+      });
+    }, undefined, opts.removeDuration);
+
+    // Phase 3: Animate new characters in
     timeline.to(
       newElements,
       {
@@ -117,7 +122,7 @@ export class TextTransition {
         stagger: opts.stagger,
         ease: opts.ease,
       },
-      opts.removeDuration
+      `+=${opts.removeDuration * 0.05}` // Small delay after DOM update
     );
 
     return timeline;
