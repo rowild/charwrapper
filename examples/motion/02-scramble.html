@@ -224,6 +224,9 @@
   <!-- Motion One from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
 
+  <!-- CharWrapper - Single Bundle File -->
+  <script src="../../dist/charwrapper.js"></script>
+
   <!-- Matrix Background Effect -->
   <script>
     // Simple matrix rain background
@@ -260,11 +263,7 @@
     setInterval(drawMatrix, 50);
   </script>
 
-  <!-- CharWrapper - Single Bundle File -->
-  <script src="../../dist/charwrapper.js"></script>
-
   <script>
-
     const RANDOM_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*';
 
     window.wrappers = [];
@@ -363,16 +362,16 @@
         const randomRotate = Math.random() * 30 - 15;
 
         char.style.opacity = '0';
-        char.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg)`;
 
         setTimeout(() => {
           // Appear and snap to position
           motion.animate(char,
             {
               opacity: [0, 1],
-              x: [randomX, 0],
-              y: [randomY, 0],
-              rotate: [randomRotate, 0]
+              transform: [
+                `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg)`,
+                'translate(0px, 0px) rotate(0deg)'
+              ]
             },
             { duration: 0.3, easing: 'ease-out' }
           );
