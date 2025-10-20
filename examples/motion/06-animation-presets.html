@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Animation Examples - CharWrapper 2.0</title>
 
-  <!-- Motion One from CDN -->
+  <!-- Anime.js from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
 
   <!-- CharWrapper bundle -->
@@ -175,10 +175,10 @@
 
   <div class="container">
     <h1>Animation Examples</h1>
-    <p class="subtitle">Ready-to-use anime.js animations</p>
+    <p class="subtitle">Ready-to-use Motion One animations</p>
 
     <div class="info-box">
-      <strong>ℹ️ Anime.js Powered:</strong> These animations showcase CharWrapper with anime.js.
+      <strong>ℹ️ Anime.js Powered:</strong> These animations showcase CharWrapper with Motion One.
       CharWrapper core is animation-agnostic and works with any animation library.
     </div>
 
@@ -306,25 +306,25 @@
 
       if (type === 'fadeIn') {
         chars.forEach(c => c.style.opacity = '0');
-        anime({ targets: chars, opacity: [0, 1], duration: 800, delay: anime.stagger(30), easing: 'easeOutQuad' });
+        motion.animate(chars, { opacity: [0, 1], duration: 800, delay: motion.stagger(0.03), easing: 'ease-out' });
       } else if (type === 'slideUp') {
         chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
-        anime({ targets: chars, translateY: [50, 0], opacity: [0, 1], duration: 600, delay: anime.stagger(20), easing: 'easeOutBack' });
+        motion.animate(chars, { y: [50, 0], opacity: [0, 1], duration: 600, delay: motion.stagger(0.02), easing: 'ease-out' });
       } else if (type === 'scaleIn') {
         chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'scale(0)'; });
-        anime({ targets: chars, scale: [0, 1], opacity: [0, 1], duration: 600, delay: anime.stagger(25), easing: 'easeOutElastic(1, 0.6)' });
+        motion.animate(chars, { scale: [0, 1], opacity: [0, 1], duration: 600, delay: motion.stagger(0.025), easing: 'spring(1, 0.6)' });
       } else if (type === 'rotateIn') {
         chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'scale(0) rotate(180deg)'; });
-        anime({ targets: chars, scale: [0, 1], rotate: [180, 0], opacity: [0, 1], duration: 800, delay: anime.stagger(25), easing: 'easeOutBack' });
+        motion.animate(chars, { scale: [0, 1], rotate: [180, 0], opacity: [0, 1], duration: 800, delay: motion.stagger(0.025), easing: 'ease-out' });
       } else if (type === 'elastic') {
         chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(-50px)'; });
-        anime({ targets: chars, translateY: [-50, 0], opacity: [0, 1], duration: 800, delay: anime.stagger(30), easing: 'easeOutElastic(1, 0.5)' });
+        motion.animate(chars, { y: [-50, 0], opacity: [0, 1], duration: 800, delay: motion.stagger(0.03), easing: 'spring(1, 0.5)' });
       } else if (type === 'wave') {
         chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(-30px)'; });
-        anime({ targets: chars, translateY: [-30, 0], opacity: [0, 1], duration: 600, delay: function(el, i) { return i * 30 + Math.sin(i) * 50; }, easing: 'easeOutBounce' });
+        motion.animate(chars, { y: [-30, 0], opacity: [0, 1], duration: 600, delay: function(el, i) { return i * 30 + Math.sin(i) * 50; }, easing: 'ease-out' });
       } else if (type === 'glitch') {
         chars.forEach((c, i) => { c.style.opacity = '0'; c.style.transform = `translate(${Math.random()*100-50}px, ${Math.random()*40-20}px) rotate(${Math.random()*30-15}deg)`; });
-        anime({ targets: chars, translateX: 0, translateY: 0, rotate: 0, opacity: [0, 1], duration: 300, delay: anime.stagger(30), easing: 'easeOutQuart' });
+        motion.animate(chars, { x: 0, y: 0, rotate: 0, opacity: [0, 1], duration: 300, delay: motion.stagger(0.03), easing: 'ease-out' });
       }
     }
 
@@ -339,12 +339,12 @@
 
     function demo2() {
       result2.chars.forEach(c => c.style.opacity = '0');
-      anime({ targets: result2.chars, opacity: [0, 1], duration: 50, delay: anime.stagger(30), easing: 'linear' });
+      motion.animate(result2.chars, { opacity: [0, 1], duration: 50, delay: motion.stagger(0.03), easing: 'linear' });
     }
 
     function demo2Custom() {
       result2.chars.forEach(c => c.style.opacity = '0');
-      anime({ targets: result2.chars, opacity: [0, 1], duration: 50, delay: anime.stagger(100), easing: 'linear' });
+      motion.animate(result2.chars, { opacity: [0, 1], duration: 50, delay: motion.stagger(0.1), easing: 'linear' });
     }
 
     function reset2() {
@@ -358,9 +358,9 @@
     function demo3(type) {
       stopLoop3();
       if (type === 'wave') {
-        currentAnims.demo3 = anime({ targets: result3.chars, translateY: [-10, 10], duration: 1000, delay: anime.stagger(50), direction: 'alternate', loop: true, easing: 'easeInOutSine' });
+        currentAnims.demo3 = motion.animate(result3.chars, { y: [-10, 10], duration: 1000, delay: motion.stagger(0.05), direction: 'alternate', loop: true, easing: 'ease-in-outSine' });
       } else if (type === 'pulse') {
-        currentAnims.demo3 = anime({ targets: result3.chars, scale: [1, 1.2, 1], duration: 800, delay: anime.stagger(100), loop: true, easing: 'easeInOutQuad' });
+        currentAnims.demo3 = motion.animate(result3.chars, { scale: [1, 1.2, 1], duration: 800, delay: motion.stagger(0.1), loop: true, easing: 'ease-in-out' });
       } else if (type === 'color') {
         const colors = ['#ff6b9d', '#ffd93d', '#6bcf7f', '#4d96ff', '#a78bfa'];
         let colorIndex = 0;
@@ -369,7 +369,7 @@
           colorIndex++;
         }, 500);
       } else if (type === 'shimmer') {
-        currentAnims.demo3 = anime({ targets: result3.chars, opacity: [1, 0.3, 1], duration: 1500, delay: anime.stagger(100), loop: true, easing: 'easeInOutQuad' });
+        currentAnims.demo3 = motion.animate(result3.chars, { opacity: [1, 0.3, 1], duration: 1500, delay: motion.stagger(0.1), loop: true, easing: 'ease-in-out' });
       }
     }
 
@@ -389,16 +389,16 @@
     function demo4(type) {
       reset4();
       if (type === 'fadeOut') {
-        anime({ targets: result4.chars, opacity: [1, 0], duration: 600, delay: anime.stagger(30), easing: 'easeOutQuad' });
+        motion.animate(result4.chars, { opacity: [1, 0], duration: 600, delay: motion.stagger(0.03), easing: 'ease-out' });
       } else if (type === 'slideOut') {
-        anime({ targets: result4.chars, translateY: [0, 100], opacity: [1, 0], duration: 600, delay: anime.stagger(20), easing: 'easeInQuad' });
+        motion.animate(result4.chars, { y: [0, 100], opacity: [1, 0], duration: 600, delay: motion.stagger(0.02), easing: 'easeInQuad' });
       } else if (type === 'scaleOut') {
-        anime({ targets: result4.chars, scale: [1, 0], opacity: [1, 0], duration: 500, delay: anime.stagger(25), easing: 'easeInBack' });
+        motion.animate(result4.chars, { scale: [1, 0], opacity: [1, 0], duration: 500, delay: motion.stagger(0.025), easing: 'easeInBack' });
       } else if (type === 'explode') {
         result4.chars.forEach((c, i) => {
           const angle = (i / result4.chars.length) * Math.PI * 2;
           const distance = 200;
-          anime({ targets: c, translateX: Math.cos(angle) * distance, translateY: Math.sin(angle) * distance, rotate: Math.random() * 720, opacity: [1, 0], duration: 1000, easing: 'easeOutQuad' });
+          motion.animate(c, { x: Math.cos(angle) * distance, y: Math.sin(angle) * distance, rotate: Math.random() * 720, opacity: [1, 0], duration: 1000, easing: 'ease-out' });
         });
       }
     }
@@ -414,25 +414,25 @@
     function demo5Default() {
       reset5();
       result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
-      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 600, delay: anime.stagger(20), easing: 'easeOutQuad' });
+      motion.animate(result5.chars, { y: [50, 0], opacity: [0, 1], duration: 600, delay: motion.stagger(0.02), easing: 'ease-out' });
     }
 
     function demo5Slow() {
       reset5();
       result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
-      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 2000, delay: anime.stagger(100), easing: 'easeOutQuad' });
+      motion.animate(result5.chars, { y: [50, 0], opacity: [0, 1], duration: 2000, delay: motion.stagger(0.1), easing: 'ease-out' });
     }
 
     function demo5Fast() {
       reset5();
       result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
-      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 200, delay: anime.stagger(10), easing: 'easeOutQuad' });
+      motion.animate(result5.chars, { y: [50, 0], opacity: [0, 1], duration: 200, delay: motion.stagger(0.01), easing: 'ease-out' });
     }
 
     function demo5Custom() {
       reset5();
       result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
-      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 1500, delay: anime.stagger(50), easing: 'easeOutElastic(1, 0.3)' });
+      motion.animate(result5.chars, { y: [50, 0], opacity: [0, 1], duration: 1500, delay: motion.stagger(0.05), easing: 'spring(1, 0.3)' });
     }
 
     function reset5() {
@@ -448,7 +448,7 @@
       wrapper6 = new CharWrapper('.text-6', { wrap: { chars: true } });
       const result = wrapper6.wrap();
       result.chars.forEach(char => {
-        const listener = () => anime({ targets: char, translateY: [0, -20, 0], duration: 600, easing: 'easeOutBounce' });
+        const listener = () => motion.animate(char, { y: [0, -20, 0], duration: 600, easing: 'ease-out' });
         char.addEventListener('mouseenter', listener);
         eventListeners6.push({ el: char, type: 'mouseenter', fn: listener });
       });
@@ -459,7 +459,7 @@
       wrapper6 = new CharWrapper('.text-6', { wrap: { chars: true } });
       const result = wrapper6.wrap();
       result.chars.forEach(char => {
-        const listener = () => anime({ targets: char, rotate: [0, 360], duration: 600, easing: 'easeOutQuad' });
+        const listener = () => motion.animate(char, { rotate: [0, 360], duration: 600, easing: 'ease-out' });
         char.addEventListener('click', listener);
         eventListeners6.push({ el: char, type: 'click', fn: listener });
       });

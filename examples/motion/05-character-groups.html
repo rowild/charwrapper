@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Character Groups - CharWrapper 2.0</title>
 
-  <!-- Motion One from CDN -->
+  <!-- Anime.js from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/motion@11.11.13/dist/motion.js"></script>
 
   <!-- CharWrapper bundle -->
@@ -330,14 +330,13 @@
         char.style.transform = 'scale(0)';
       });
 
-      const anim = anime({
-        targets: result1.groups.vowels,
+      const anim = motion.animate(result1.groups.vowels,
+      {
         scale: [0, 1],
-        opacity: [0, 1],
-        duration: 500,
-        delay: anime.stagger(50),
-        easing: 'easeOutBack'
-      });
+        opacity: [0, 1]
+      },
+      { duration: 0.5, delay: motion.stagger(0.05), easing: 'ease-out' }
+    );
       animations.example1.push(anim);
     }
 
@@ -356,14 +355,13 @@
         char.style.transform = 'translateY(-30px)';
       });
 
-      const anim = anime({
-        targets: result1.groups.consonants,
-        translateY: [-30, 0],
-        opacity: [0, 1],
-        duration: 600,
-        delay: anime.stagger(30),
-        easing: 'easeOutBounce'
-      });
+      const anim = motion.animate(result1.groups.consonants,
+      {
+        y: [-30, 0],
+        opacity: [0, 1]
+      },
+      { duration: 0.6, delay: motion.stagger(0.03), easing: 'easeOutBounce' }
+    );
       animations.example1.push(anim);
     }
 
@@ -381,28 +379,26 @@
         char.style.transform = 'scale(0)';
       });
 
-      const anim1 = anime({
-        targets: result1.groups.vowels,
+      const anim1 = motion.animate(result1.groups.vowels,
+      {
         scale: [0, 1],
-        opacity: [0, 1],
-        duration: 500,
-        delay: anime.stagger(50),
-        easing: 'easeOutBack'
-      });
+        opacity: [0, 1]
+      },
+      { duration: 0.5, delay: motion.stagger(0.05), easing: 'ease-out' }
+    );
 
       result1.groups.consonants.forEach(char => {
         char.style.opacity = '0';
         char.style.transform = 'translateY(30px)';
       });
 
-      const anim2 = anime({
-        targets: result1.groups.consonants,
-        translateY: [30, 0],
-        opacity: [0, 1],
-        duration: 600,
-        delay: anime.stagger(30, {start: 200}),
-        easing: 'easeOutQuad'
-      });
+      const anim2 = motion.animate(result1.groups.consonants,
+      {
+        y: [30, 0],
+        opacity: [0, 1]
+      },
+      { duration: 0.6, delay: motion.stagger(0.03, {start: 200}), easing: 'ease-out' }
+    );
 
       animations.example1.push(anim1, anim2);
     }
@@ -446,14 +442,13 @@
         char.style.transform = 'scale(1.5)';
       });
 
-      const anim = anime({
-        targets: result2.groups.diacritics,
+      const anim = motion.animate(result2.groups.diacritics,
+      {
         scale: [1.5, 1],
-        opacity: [0, 1],
-        duration: 800,
-        delay: anime.stagger(100),
-        easing: 'easeOutElastic(1, 0.5)'
-      });
+        opacity: [0, 1]
+      },
+      { duration: 0.8, delay: motion.stagger(0.1), easing: 'spring(1, 0.5)' }
+    );
       animations.example2.push(anim);
     }
 
@@ -471,14 +466,13 @@
         char.style.transform = 'scale(0) rotate(360deg)';
       });
 
-      const anim = anime({
-        targets: result2.groups.french,
+      const anim = motion.animate(result2.groups.french,
+      {
         rotate: [360, 0],
-        scale: [0, 1],
-        duration: 800,
-        delay: anime.stagger(150),
-        easing: 'easeOutBack'
-      });
+        scale: [0, 1]
+      },
+      { duration: 0.8, delay: motion.stagger(0.15), easing: 'ease-out' }
+    );
       animations.example2.push(anim);
     }
 
@@ -497,14 +491,13 @@
         char.style.transform = 'translateY(-50px)';
       });
 
-      const anim = anime({
-        targets: result2.groups.german,
-        translateY: [-50, 0],
-        opacity: [0, 1],
-        duration: 1000,
-        delay: anime.stagger(200),
-        easing: 'easeOutBounce'
-      });
+      const anim = motion.animate(result2.groups.german,
+      {
+        y: [-50, 0],
+        opacity: [0, 1]
+      },
+      { duration: 1.0, delay: motion.stagger(0.2), easing: 'easeOutBounce' }
+    );
       animations.example2.push(anim);
     }
 
@@ -545,14 +538,13 @@
         char.style.transform = 'scale(2)';
       });
 
-      const anim = anime({
-        targets: result3.groups.numbers,
+      const anim = motion.animate(result3.groups.numbers,
+      {
         scale: [2, 1],
-        opacity: [0, 1],
-        duration: 600,
-        delay: anime.stagger(100),
-        easing: 'easeOutQuad'
-      });
+        opacity: [0, 1]
+      },
+      { duration: 0.6, delay: motion.stagger(0.1), easing: 'ease-out' }
+    );
       animations.example3.push(anim);
     }
 
@@ -570,14 +562,13 @@
         char.style.transform = 'scale(0) rotate(720deg)';
       });
 
-      const anim = anime({
-        targets: result3.groups.punctuation,
+      const anim = motion.animate(result3.groups.punctuation,
+      {
         rotate: [720, 0],
-        scale: [0, 1],
-        duration: 800,
-        delay: anime.stagger(150),
-        easing: 'easeOutBack'
-      });
+        scale: [0, 1]
+      },
+      { duration: 0.8, delay: motion.stagger(0.15), easing: 'ease-out' }
+    );
       animations.example3.push(anim);
     }
 
@@ -595,13 +586,13 @@
         char.style.transform = 'translateX(-20px)';
       });
 
-      const anim = anime({
-        targets: result3.groups.letters,
+      const anim = motion.animate(result3.groups.letters,
+      {
         opacity: [0, 1],
-        translateX: [-20, 0],
-        duration: 500,
-        delay: anime.stagger(20)
-      });
+        x: [-20, 0]
+      },
+      { duration: 0.5, delay: motion.stagger(0.02) }
+    );
       animations.example3.push(anim);
     }
 
@@ -643,14 +634,13 @@
         char.style.transform = 'scale(1.5) translateY(-20px)';
       });
 
-      const anim = anime({
-        targets: result4.groups.firstLetters,
+      const anim = motion.animate(result4.groups.firstLetters,
+      {
         scale: [1.5, 1],
-        translateY: [-20, 0],
-        duration: 600,
-        delay: anime.stagger(100),
-        easing: 'easeOutBack'
-      });
+        y: [-20, 0]
+      },
+      { duration: 0.6, delay: motion.stagger(0.1), easing: 'ease-out' }
+    );
       animations.example4.push(anim);
     }
 
@@ -666,14 +656,13 @@
         char.style.transform = 'translateX(20px)';
       });
 
-      const anim = anime({
-        targets: result4.groups.lastLetters,
+      const anim = motion.animate(result4.groups.lastLetters,
+      {
         opacity: [0, 1],
-        translateX: [20, 0],
-        duration: 600,
-        delay: anime.stagger(100),
-        easing: 'easeOutQuad'
-      });
+        x: [20, 0]
+      },
+      { duration: 0.6, delay: motion.stagger(0.1), easing: 'ease-out' }
+    );
       animations.example4.push(anim);
     }
 
@@ -712,14 +701,13 @@
         char.style.transform = 'translateY(-15px)';
       });
 
-      const anim = anime({
-        targets: result5.groups.everySecond,
-        translateY: [-15, 0],
-        opacity: [0, 1],
-        duration: 500,
-        delay: anime.stagger(50),
-        easing: 'easeOutQuad'
-      });
+      const anim = motion.animate(result5.groups.everySecond,
+      {
+        y: [-15, 0],
+        opacity: [0, 1]
+      },
+      { duration: 0.5, delay: motion.stagger(0.05), easing: 'ease-out' }
+    );
       animations.example5.push(anim);
     }
 
@@ -736,14 +724,13 @@
         char.style.transform = 'scale(1.5)';
       });
 
-      const anim = anime({
-        targets: result5.groups.everyThird,
+      const anim = motion.animate(result5.groups.everyThird,
+      {
         scale: [1.5, 1],
-        opacity: [0, 1],
-        duration: 600,
-        delay: anime.stagger(80),
-        easing: 'easeOutBack'
-      });
+        opacity: [0, 1]
+      },
+      { duration: 0.6, delay: motion.stagger(0.08), easing: 'ease-out' }
+    );
       animations.example5.push(anim);
     }
 
@@ -759,14 +746,13 @@
         char.style.transform = 'scale(0) rotate(360deg)';
       });
 
-      const anim = anime({
-        targets: result5.groups.everyFifth,
+      const anim = motion.animate(result5.groups.everyFifth,
+      {
         rotate: [360, 0],
-        scale: [0, 1],
-        duration: 800,
-        delay: anime.stagger(150),
-        easing: 'easeOutBack'
-      });
+        scale: [0, 1]
+      },
+      { duration: 0.8, delay: motion.stagger(0.15), easing: 'ease-out' }
+    );
       animations.example5.push(anim);
     }
 
@@ -804,15 +790,14 @@
         char.style.transform = 'scale(1.3) translateY(-10px)';
       });
 
-      const anim = anime({
-        targets: result6.groups.keywords,
+      const anim = motion.animate(result6.groups.keywords,
+      {
         scale: [1.3, 1],
-        translateY: [-10, 0],
-        opacity: [0, 1],
-        duration: 800,
-        delay: anime.stagger(30),
-        easing: 'easeOutElastic(1, 0.5)'
-      });
+        y: [-10, 0],
+        opacity: [0, 1]
+      },
+      { duration: 0.8, delay: motion.stagger(0.03), easing: 'spring(1, 0.5)' }
+    );
       animations.example6.push(anim);
     }
 

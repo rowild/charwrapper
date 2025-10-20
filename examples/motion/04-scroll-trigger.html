@@ -253,15 +253,18 @@
       char.style.transform = 'translateY(50px) rotate(-15deg)';
     });
 
-    anime({
-      targets: heroChars,
-      opacity: [0, 1],
-      translateY: [50, 0],
-      rotate: [-15, 0],
-      duration: 1000,
-      delay: anime.stagger(30),
-      easing: 'easeOutBack'
-    });
+    motion.animate(heroChars,
+      {
+        opacity: [0, 1],
+        y: [50, 0],
+        rotate: [-15, 0]
+      },
+      {
+        duration: 1,
+        delay: motion.stagger(0.03),
+        easing: 'ease-out'
+      }
+    );
 
     // Effect 1: Fade In on Scroll
     const wrapper1 = new CharWrapper('#text1', {
@@ -279,14 +282,17 @@
     const observer1 = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          anime({
-            targets: chars1,
-            opacity: [0, 1],
-            translateY: [30, 0],
-            duration: 800,
-            delay: anime.stagger(20),
-            easing: 'easeOutQuad'
-          });
+          motion.animate(chars1,
+            {
+              opacity: [0, 1],
+              y: [30, 0]
+            },
+            {
+              duration: 0.8,
+              delay: motion.stagger(0.02),
+              easing: 'ease-out'
+            }
+          );
           observer1.unobserve(entry.target);
         }
       });
@@ -313,15 +319,18 @@
         if (entry.isIntersecting) {
           words2.forEach((word, index) => {
             const isEven = index % 2 === 0;
-            anime({
-              targets: word,
-              opacity: [0, 1],
-              translateX: [isEven ? -100 : 100, 0],
-              rotate: [isEven ? -10 : 10, 0],
-              duration: 1000,
-              delay: index * 100,
-              easing: 'easeOutCubic'
-            });
+            motion.animate(word,
+              {
+                opacity: [0, 1],
+                x: [isEven ? -100 : 100, 0],
+                rotate: [isEven ? -10 : 10, 0]
+              },
+              {
+                duration: 1,
+                delay: index * 0.1,
+                easing: 'ease-out'
+              }
+            );
           });
           observer2.unobserve(entry.target);
         }
@@ -346,15 +355,18 @@
     const observer3 = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          anime({
-            targets: chars3,
-            opacity: [0, 1],
-            scale: [0, 1],
-            rotate: [180, 0],
-            duration: 1000,
-            delay: anime.stagger(30),
-            easing: 'easeOutBack'
-          });
+          motion.animate(chars3,
+            {
+              opacity: [0, 1],
+              scale: [0, 1],
+              rotate: [180, 0]
+            },
+            {
+              duration: 1,
+              delay: motion.stagger(0.03),
+              easing: 'ease-out'
+            }
+          );
           observer3.unobserve(entry.target);
         }
       });
@@ -401,14 +413,17 @@
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           chars5.forEach((char, i) => {
-            anime({
-              targets: char,
-              opacity: [0.3, 1],
-              filter: ['blur(10px)', 'blur(0px)'],
-              duration: 800,
-              delay: i * 20,
-              easing: 'easeOutQuad'
-            });
+            motion.animate(char,
+              {
+                opacity: [0.3, 1],
+                filter: ['blur(10px)', 'blur(0px)']
+              },
+              {
+                duration: 0.8,
+                delay: i * 0.02,
+                easing: 'ease-out'
+              }
+            );
           });
           observer5.unobserve(entry.target);
         }
