@@ -511,6 +511,282 @@ Check out `examples/05-character-groups.html` for a complete interactive demonst
 
 **Note:** Character groups are completely **optional**. If you don't configure any groups, the `groups` object in the result will simply be empty `{}`.
 
+## 📊 Data Attributes - Data-Driven Selection
+
+CharWrapper includes a powerful **data attribute selection system** that allows you to define text segments in HTML using data attributes instead of CSS selectors. This is perfect for:
+- **Dynamic content** - CMS-driven text animations
+- **Structured data** - Business cards, profiles, forms
+- **Custom ordering** - Animate elements in any sequence regardless of HTML order
+- **Mixing content types** - Combine text, graphics, and interactive elements
+
+### Why Use Data Attributes?
+
+Instead of wrapping elements individually, wrap a **container** and use data attributes to organize and control the content:
+
+```javascript
+// Wrap the entire container - all text inside will be wrapped
+const wrapper = new CharWrapper('.profile-card', {
+  wrap: { chars: true }
+});
+
+// All text nodes inside .profile-card are now wrapped
+const { chars } = wrapper.wrap();
+
+// Animate all characters in document order
+gsap.from(chars, { opacity: 0, stagger: 0.02 });
+```
+
+The `data-sub-set-name` attributes provide semantic structure and enable features like custom classes and exclusion.
+
+### Basic Setup
+
+#### 1. Mark Elements with Data Attributes
+
+```html
+<div class="profile">
+  <h1 data-sub-set-name="first_name">John</h1>
+  <h1 data-sub-set-name="last_name">Van der Slice</h1>
+
+  <!-- Mix in non-text elements -->
+  <div data-sub-set-name="divider_line" class="divider"></div>
+
+  <p data-sub-set-name="profession_1">composer</p>
+  <p data-sub-set-name="profession_2">teacher</p>
+  <p data-sub-set-name="profession_3">analyst</p>
+</div>
+```
+
+#### 2. Initialize CharWrapper
+
+**IMPORTANT:** CharWrapper wraps the **container element** and processes all text nodes inside it **in HTML document order**. The order elements appear in your HTML determines their animation sequence:
+
+```javascript
+// Wrap the container - all text inside will be wrapped in document order
+const wrapper = new CharWrapper('.profile', {
+  wrap: { chars: true }
+});
+
+const { chars } = wrapper.wrap();
+
+// Animate all characters in the order they appear in HTML
+gsap.from(chars, { opacity: 0, stagger: 0.02 });
+```
+
+### Controlling Animation Order
+
+The text is wrapped in **HTML document order** - the order elements appear in your HTML source. If you want to change the animation order, simply rearrange the HTML elements:
+
+```html
+<div class="profile">
+  <!-- First name animates first -->
+  <h1 data-sub-set-name="first_name">John</h1>
+
+  <!-- Last name animates second -->
+  <h1 data-sub-set-name="last_name">Van der Slice</h1>
+
+  <!-- Professions animate in the order they appear -->
+  <p data-sub-set-name="profession_1">composer</p>
+  <p data-sub-set-name="profession_2">teacher</p>
+  <p data-sub-set-name="profession_3">analyst</p>
+</div>
+```
+
+To control specific element animations separately, target them with CSS selectors after the character animation:
+
+```javascript
+const wrapper = new CharWrapper('.profile', { wrap: { chars: true } });
+const { chars } = wrapper.wrap();
+
+const tl = gsap.timeline();
+
+// First animate all text
+tl.from(chars, { opacity: 0, stagger: 0.02 });
+
+// Then animate specific elements (e.g., a divider)
+tl.from('.divider', { scaleX: 0 }, '-=0.5');
+```
+
+### Custom Classes per Element
+
+Add element-specific classes using `data-sub-set-chars-class`:
+
+```html
+<div class="profile">
+  <!-- Add 'name-char' class to all characters in this element -->
+  <h1 data-sub-set-name="first_name"
+      data-sub-set-chars-class="name-char">John</h1>
+
+  <!-- Add 'profession-char' class to all characters in this element -->
+  <p data-sub-set-name="profession_1"
+     data-sub-set-chars-class="profession-char">composer</p>
+</div>
+```
+
+```css
+/* Target characters in specific elements */
+.name-char {
+  color: #ff6b9d;
+  font-weight: bold;
+}
+
+.profession-char {
+  color: #4ecdc4;
+  font-style: italic;
+}
+```
+
+### Excluding Elements
+
+Exclude elements from wrapping using `data-sub-set-name="_exclude_"`:
+
+```html
+<div class="profile">
+  <h1 data-sub-set-name="name">John Doe</h1>
+
+  <!-- This will be skipped during wrapping -->
+  <div data-sub-set-name="_exclude_">
+    <span>This text will NOT be wrapped</span>
+  </div>
+
+  <p data-sub-set-name="profession">composer</p>
+</div>
+```
+
+### Mixing Text and Graphics
+
+**Key Feature:** Data attributes work with **any element**, not just text! This lets you combine text animations with graphic elements:
+
+```html
+<div class="business-card">
+  <h1 data-sub-set-name="first_name">John</h1>
+  <h1 data-sub-set-name="last_name">Van der Slice</h1>
+
+  <!-- Animate a divider line -->
+  <div data-sub-set-name="divider_line" class="divider"></div>
+
+  <p data-sub-set-name="title">Lead Composer</p>
+</div>
+```
+
+```javascript
+const wrapper = new CharWrapper('[data-sub-set-name]', {
+  wrap: { chars: true }
+});
+
+const { chars } = wrapper.wrap();
+
+// Create timeline
+const tl = gsap.timeline();
+
+// First name and last name appear
+tl.from(chars, { opacity: 0, y: 20, stagger: 0.02 });
+
+// Then animate the divider
+tl.from('.divider', {
+  scaleX: 0,
+  transformOrigin: 'center',
+  duration: 0.6,
+  ease: 'power2.out'
+}, '-=0.3');
+
+// Finally the title
+tl.from('.title', { opacity: 0, y: 10 }, '-=0.2');
+```
+
+### Configuration
+
+You can customize data attribute names:
+
+```javascript
+const wrapper = new CharWrapper('[data-profile-item]', {
+  wrap: { chars: true },
+  dataAttributes: {
+    subSetName: 'profileItem',      // data-profile-item
+    subSetClass: 'profileClass',     // data-profile-class
+    customOrder: 'sequence'          // data-sequence
+  }
+});
+```
+
+### Real-World Example: Animated Profile Card
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    .profile-card {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .divider {
+      height: 2px;
+      background: linear-gradient(to right, transparent, #333, transparent);
+      margin: 1rem 0;
+      transform-origin: center;
+    }
+
+    .char { display: inline-block; }
+  </style>
+</head>
+<body>
+  <div class="profile-card">
+    <h1 data-sub-set-name="first_name">John</h1>
+    <h1 data-sub-set-name="last_name">Van der Slice</h1>
+
+    <div data-sub-set-name="divider_line" class="divider"></div>
+
+    <p data-sub-set-name="profession_1">composer</p>
+    <p data-sub-set-name="profession_2">teacher</p>
+    <p data-sub-set-name="profession_3">analyst</p>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="charwrapper.min.js"></script>
+
+  <script>
+    // Wrap the entire profile card
+    const wrapper = new CharWrapper('.profile-card', {
+      wrap: { chars: true }
+    });
+
+    const { chars } = wrapper.wrap();
+
+    const tl = gsap.timeline();
+
+    // Animate all text characters in document order
+    tl.from(chars, {
+      opacity: 0,
+      y: 20,
+      stagger: 0.02,
+      ease: 'back.out(1.7)'
+    });
+
+    // Animate divider from center outward
+    tl.from('.divider', {
+      scaleX: 0,
+      duration: 0.6,
+      ease: 'power2.out'
+    }, '-=0.5');
+  </script>
+</body>
+</html>
+```
+
+### Live Demo
+
+Check out `examples/gsap/09-data-attributes.html`, `examples/animejs/09-data-attributes.html`, and `examples/waapi/09-data-attributes.html` for complete interactive demonstrations showing:
+- Data-driven element selection
+- HTML document order vs custom ordering
+- Mixing text and graphic elements
+- Custom class assignment per element
+- Excluding elements from processing
+
+**Note:** The data attributes feature is completely **optional**. Most users will use CSS selectors (`'.text'`, `'#heading'`) and won't need data attributes unless building dynamic, data-driven animations.
+
 ## 🎬 Animation Presets (Optional GSAP Feature)
 
 **⚠️ Requires GSAP:** Animation presets are optional GSAP-specific features. CharWrapper core is animation-agnostic and works with any animation library (anime.js, Framer Motion, etc.). To use presets, include GSAP separately:

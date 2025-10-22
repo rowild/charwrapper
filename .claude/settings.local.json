@@ -4,7 +4,9 @@
       "WebSearch",
       "WebFetch(domain:gsap.com)",
       "WebFetch(domain:webflow.com)",
-      "Bash(npx tsc --noEmit src/utils.ts)"
+      "Bash(npx tsc --noEmit src/utils.ts)",
+      "Bash(npm run bundle)",
+      "Bash(06-animation-presets.html)"
     ],
     "deny": [],
     "ask": []
