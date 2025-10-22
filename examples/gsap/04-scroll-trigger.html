@@ -284,26 +284,29 @@
 
     // Effect 2: Slide from Sides (Words)
     const wrapper2 = new CharWrapper('#text2', {
-      wrap: { words: true, chars: true },
+      wrap: { words: true, chars: false }, // Explicitly only wrap words, not characters
     });
     const { words: words2 } = wrapper2.wrap();
     window.wrappers.push(wrapper2);
 
-    words2.forEach((word, index) => {
-      const isEven = index % 2 === 0;
-      gsap.from(word, {
-        opacity: 0,
-        x: isEven ? -100 : 100,
-        rotation: isEven ? -10 : 10,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: '#text2',
-          start: 'top 75%',
-          end: 'top 40%',
-          scrub: 1,
-        },
-      });
+    // Create staggered animation with dramatic alternating directions for each word
+    gsap.from(words2, {
+      opacity: 0,
+      x: (i) => i % 2 === 0 ? -1000 : 1000,  // Even indices from far left, odd from far right (very dramatic)
+      rotation: (i) => i % 2 === 0 ? -45 : 45,  // More dramatic rotation
+      scale: 0.2, // Start very small
+      duration: 1.5,
+      ease: 'back.out(1.5)',
+      stagger: {
+        each: 0.12,  // Stagger delay between each word
+        from: "start" // Stagger from the first element
+      },
+      scrollTrigger: {
+        trigger: '#text2',
+        start: 'top 80%',
+        end: 'top 30%',
+        scrub: 1,
+      },
     });
 
     // Effect 3: Rotation Cascade

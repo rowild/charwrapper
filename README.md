@@ -268,6 +268,91 @@ const wrapper = new CharWrapper('.text', {
 
 **Note:** Accessibility is **enabled by default**. This ensures your text animations are screen reader friendly out of the box!
 
+## 🧩 Complete Configuration Reference
+
+Here's a comprehensive example showing ALL available configuration options for reference:
+
+```javascript
+const wrapper = new CharWrapper('.text', {
+  // Wrap Options - What to wrap
+  wrap: {
+    chars: true,        // Wrap individual characters
+    words: false,       // Wrap words (can combine with chars)
+    spaces: false,      // Wrap space characters  
+    specialChars: false // Wrap special characters (!?.,)
+  },
+
+  // Enumeration Options - Add numbered classes
+  enumerate: {
+    chars: false,             // Add numbered classes (.char-001, .char-002)
+    words: false,             // Add numbered classes to words
+    includeSpaces: false,     // Include spaces in enumeration count
+    includeSpecialChars: false // Include special chars in enumeration count
+  },
+
+  // CSS Classes - Customize the class names used
+  classes: {
+    char: 'char',           // Base character class
+    word: 'word',           // Base word class
+    space: 'char--space',   // Space character class
+    special: 'char--special', // Special character class
+    regular: 'char--regular'  // Regular character class
+  },
+
+  // HTML Tags - Choose the element type for wrapping
+  tags: {
+    char: 'span', // Tag for character wrapping (span, div, i, em, strong, mark)
+    word: 'span'  // Tag for word wrapping
+  },
+
+  // Data Attributes - Customize data attribute names (for data-driven selection)
+  dataAttributes: {
+    subSetName: 'subSetName',      // data-sub-set-name
+    subSetClass: 'subSetCharsClass', // data-sub-set-chars-class
+    customOrder: 'customOrder'       // data-custom-order
+  },
+
+  // Advanced Options
+  replaceSpaceWith: '\\xa0', // Replace spaces with non-breaking space
+
+  // Processing Options - Text processing behavior
+  processing: {
+    stripHTML: true,        // Remove HTML tags before processing
+    trimWhitespace: true,   // Trim leading/trailing whitespace (preserved when adjacent to inline elements)
+    preserveStructure: true, // Maintain DOM structure
+    lazyWrap: false,        // Wrap on-demand for performance
+    ordered: false          // Order elements by data-custom-order attribute (for data attribute selection)
+  },
+
+  // Performance Options
+  performance: {
+    useBatching: true,     // Use DocumentFragment for DOM updates (recommended)
+    cacheSelectors: true   // Cache DOM queries
+  },
+
+  // Accessibility Options
+  accessibility: {
+    enabled: true,         // Enable accessibility features
+    ariaLabel: 'auto',     // 'auto' = use original text, 'none' = disabled, or custom string
+    ariaHidden: true,      // Add aria-hidden="true" to wrapped elements
+    addTitle: true         // Add title attribute if not present
+  },
+
+  // Character Groups - Smart selection system for character subsets
+  groups: {
+    // Examples of different group types (these are optional):
+    vowels: /[aeiou]/i,                    // Pattern matching
+    everyThird: { nth: 3 },                // Every Nth character
+    firstThree: { indices: [0, 1, 2] },    // Specific indices
+    // Custom filter function
+    firstLetters: {
+      custom: (char, index, context) => context.isFirstInWord,
+      class: 'first-letter'
+    }
+  }
+});
+```
+
 ## 🎯 Character Groups (NEW!)
 
 CharWrapper 2.0 introduces **Character Groups** - a powerful feature for selecting and animating specific character subsets. This is something GSAP SplitText doesn't offer!
