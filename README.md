@@ -1,45 +1,27 @@
-# CharWrapper 2.0
+# CharWrapper
 
 Modern text wrapper library with TypeScript support, designed for seamless integration with GSAP and other animation libraries.
 
-## 🎯 What's New in 2.0
+## What's New in 2.0
 
-- ✨ **TypeScript Support** - Full type definitions included
-- 📦 **Single Bundle File** - Just 13KB minified, one file to include
-- ⚡ **60%+ Performance Improvement** - DocumentFragment batching, optimized DOM operations
-- 🚫 **Zero Dependencies** - Pure vanilla JavaScript
-- 🏗️ **Modular Architecture** - 6 focused modules for maintainability
-- 🧹 **Memory Safe** - Built-in cleanup prevents memory leaks
-- 🎨 **Cleaner API** - Simplified, intuitive configuration
-- 🌍 **Diacritical Support** - Supports accented characters (ü, é, ñ, etc.)
-- ♿ **Accessibility Built-in** - ARIA labels, aria-hidden, and title attributes for screen readers
-- 🎯 **Character Groups** - Smart selection system for targeting specific character subsets (NEW!)
-- 🎬 **Animation Presets** - Ready-to-use GSAP animations with one line of code (Optional GSAP feature)
-- 🔄 **Text Transitions** - Smoothly morph between different text content (Optional GSAP feature)
+- **TypeScript Support** - Full type definitions included
+- **Single Bundle File** - Just 13KB minified, one file to include
+- **60%+ Performance Improvement** - DocumentFragment batching, optimized DOM operations
+- **Zero Dependencies** - Pure vanilla JavaScript
+- **Modular Architecture** - 6 focused modules for maintainability
+- **Memory Safe** - Built-in cleanup prevents memory leaks
+- **Cleaner API** - Simplified, intuitive configuration
+- **Diacritical Support** - Supports accented characters (ü, é, ñ, etc.)
+- **Accessibility Built-in** - ARIA labels, aria-hidden, and title attributes for screen readers
+- **Character Groups** - Smart selection system for targeting specific character subsets (NEW!)
+- **Animation Presets** - Ready-to-use GSAP animations with one line of code (Optional GSAP feature)
+- **Text Transitions** - Smoothly morph between different text content (Optional GSAP feature)
 
-## 📦 Installation
+PS: Version 1.0 was never published.
 
-### Browser (CDN) - Recommended for Quick Start
+## Installation
 
-```html
-<!-- Include the bundle (13KB minified) -->
-<script src="dist/charwrapper.min.js"></script>
-
-<script>
-  // CharWrapper is available globally
-  const wrapper = new CharWrapper('.my-text', {
-    wrap: { chars: true },
-    enumerate: { chars: true }
-  });
-
-  const { chars } = wrapper.wrap();
-
-  // Animate with GSAP
-  gsap.from(chars, { opacity: 0, stagger: 0.05 });
-</script>
-```
-
-### NPM Package
+### NPM Package (Recommended for Bundlers)
 
 ```bash
 npm install charwrapper
@@ -54,6 +36,77 @@ const wrapper = new CharWrapper('.my-text', {
 });
 
 const { chars } = wrapper.wrap();
+```
+
+### Direct Download (GitHub)
+
+Download the latest release from GitHub:
+1. Visit: https://github.com/rowild/charwrapper/releases
+2. Download the `charwrapper.min.js` file
+3. Include it in your project
+
+```html
+<script src="path/to/charwrapper.min.js"></script>
+```
+
+### GitHub Integration (ES Module)
+
+Use directly from GitHub with native ES modules:
+
+```html
+<script type="module">
+  import CharWrapper from 'https://raw.githubusercontent.com/rowild/charwrapper/main/dist/esm/CharWrapper.js';
+
+  const wrapper = new CharWrapper('.my-text', {
+    wrap: { chars: true }
+  });
+
+  const { chars } = wrapper.wrap();
+</script>
+```
+
+> **Note:** For production environments, always use the CDN or NPM package for better performance and reliability. Direct GitHub usage is primarily for development and testing.
+
+### Build Tool Integration
+
+#### Webpack Configuration
+```javascript
+// webpack.config.js
+module.exports = {
+  // ...
+  resolve: {
+    alias: {
+      'charwrapper': path.resolve(__dirname, 'node_modules/charwrapper/dist/esm/CharWrapper.js')
+    }
+  }
+};
+```
+
+#### Vite Configuration
+```javascript
+// vite.config.js
+export default {
+  // ...
+  resolve: {
+    alias: {
+      'charwrapper': 'charwrapper/dist/esm/CharWrapper.js'
+    }
+  }
+};
+```
+
+#### Rollup Configuration
+```javascript
+// rollup.config.js
+export default {
+  // ...
+  plugins: [
+    resolve({
+      // Enables node_modules resolution
+      preferBuiltins: false
+    })
+  ]
+};
 ```
 
 ## 🚀 Quick Start
@@ -353,7 +406,7 @@ const wrapper = new CharWrapper('.text', {
 });
 ```
 
-## 🎯 Character Groups (NEW!)
+## Character Groups
 
 CharWrapper 2.0 introduces **Character Groups** - a powerful feature for selecting and animating specific character subsets. This is something GSAP SplitText doesn't offer!
 
@@ -1299,9 +1352,11 @@ wrapper.animate('myEffect');
 
 ```
 CharWrapper/
-├── dist/
-│   ├── charwrapper.js       # Browser bundle (36KB)
-│   ├── charwrapper.min.js   # Minified bundle (13KB) ← Use this!
+├── dist/                    # Built bundles
+│   ├── charwrapper.js       # Browser bundle (IIFE format, 36KB)
+│   ├── charwrapper.min.js   # Minified browser bundle (IIFE format, 13KB) ← Use this for browsers!
+│   ├── charwrapper.cjs.js   # Node.js bundle (CommonJS format, 52KB)
+│   ├── charwrapper.cjs.min.js # Minified Node.js bundle (CommonJS format, 21KB)
 │   └── esm/                 # ES modules (for npm/bundlers)
 │       ├── CharWrapper.js
 │       ├── CharWrapper.d.ts # TypeScript definitions
@@ -1315,12 +1370,12 @@ CharWrapper/
 │   ├── WrapperFactory.ts    # Element factory
 │   ├── DOMProcessor.ts      # DOM operations
 │   └── SelectionStrategy.ts # Selection patterns
-└── examples/                # Live examples
-    ├── index.html           # Examples showcase
-    ├── 01-text-reveal.html
-    ├── 02-scramble.html
-    ├── 03-hover-effects.html
-    └── 04-scroll-trigger.html
+├── build-bundle.js          # Esbuild script for browser bundles
+├── package.json             # NPM package configuration
+├── tsconfig.json            # TypeScript configuration
+├── README.md                # Comprehensive documentation
+├── QUICKSTART.md            # Quick start guide
+└── COMPARISON_WITH_GSAP_SPLITTEXT.md # API comparison with GSAP SplitText
 ```
 
 ## 🛠️ Development
@@ -1328,7 +1383,7 @@ CharWrapper/
 ### Building from Source
 
 ```bash
-npm install              # Install dependencies
+npm install             # Install dependencies
 npm run build           # Compile TypeScript to esm/
 npm run bundle          # Build + create browser bundles
 npm run watch           # Watch mode for development
@@ -1544,9 +1599,20 @@ Both libraries provide:
 | **White space reduction** | ✅ `trimWhitespace: true` | ✅ `reduceWhiteSpace: true` |
 | **Preserve `<pre>` formatting** | ❌ No | ✅ Honors extra spaces + auto `<br>` |
 | **Custom word delimiter** | ❌ Only space | ✅ `wordDelimiter: /regex/` or custom |
-| **Ignore elements** | ⚠️ Via `_exclude_` data attr | ✅ `ignore: ".keep-whole"` |
+| **Ignore elements** | ✅ Via `_exclude_` data attr | ✅ `ignore: ".keep-whole"` |
 | **Smart wrap** | ❌ No | ✅ Prevents odd breaks |
 | **Deep slice** | ❌ No | ✅ Subdivides nested `<strong>` across lines |
+
+#### Character Grouping (CharWrapper Unique Feature)
+| Feature | CharWrapper 2.0 | GSAP SplitText |
+|---------|----------------|----------------|
+| **Character grouping** | ✅ Advanced grouping by pattern, position, custom functions | ❌ Not Supported |
+| **Pattern matching** | ✅ Regex-based grouping | ❌ Not Supported |
+| **nth character grouping** | ✅ Every Nth character grouping | ❌ Not Supported |
+| **Custom filter functions** | ✅ Full context-aware filters | ❌ Not Supported |
+| **Predefined patterns** | ✅ Language-specific diacritics, punctuation groups, etc. | ❌ Not Supported |
+
+**Impact:** CharWrapper's character grouping is a unique feature not available in GSAP SplitText.
 
 ---
 
@@ -1554,10 +1620,11 @@ Both libraries provide:
 
 | Feature | CharWrapper 2.0 | GSAP SplitText |
 |---------|----------------|----------------|
-| **File size** | ~28KB (6 modules) | ~14KB (50% smaller after rewrite!) |
-| **TypeScript** | ❌ JSDoc only | ✅ Written in TypeScript |
-| **Bundle optimization** | ⚠️ Manual imports | ✅ Tree-shakeable |
+| **File size** | ~13KB minified (IIFE) | ~14KB (50% smaller after rewrite!) |
+| **TypeScript** | ✅ JSDoc with TypeScript compatibility | ✅ Written in TypeScript |
+| **Bundle optimization** | ✅ Multiple formats (IIFE, CJS, ESM) | ✅ Tree-shakeable |
 | **Performance monitoring** | ❌ No | ✅ Internal optimizations |
+| **DocumentFragment batching** | ✅ Reduces DOM reflows significantly | ✅ Optimized |
 
 ---
 
@@ -1607,8 +1674,11 @@ charsClass: 'char++'
 | **Custom text preparation** | ❌ No | ✅ `prepareText: fn` callback |
 | **onSplit callback** | ❌ No | ✅ `onSplit: fn` with auto-timing |
 | **onRevert callback** | ❌ No | ✅ `onRevert: fn` |
-| **Special char handling** | ⚠️ Basic regex | ✅ `specialChars: /regex/` or array |
+| **Special char handling** | ✅ Advanced via character groups | ✅ `specialChars: /regex/` or array |
 | **Mask arrays** | ❌ No | ✅ Separate `masks` property |
+| **Animation presets** | ✅ Built-in GSAP animations | ❌ Not Supported |
+| **Text transitions** | ✅ Morph between different text content | ❌ Not Supported |
+| **Data attribute selection** | ✅ Structure-driven content organization | ❌ Not Supported |
 
 ---
 
@@ -1822,18 +1892,22 @@ new SplitText('.text', { propIndex: true });
 |------------------|----------------|----------------|--------|
 | **Basic char/word split** | ✅ Good | ✅ Excellent | Tie |
 | **Line splitting** | ❌ None | ✅ Excellent | SplitText |
-| **Accessibility** | ✅ Good | ✅ Excellent | Tie |
+| **Accessibility** | ✅ Excellent | ✅ Excellent | Tie |
 | **Performance** | ✅ Good | ✅ Excellent | SplitText |
-| **File size** | 28KB | 14KB | SplitText |
-| **TypeScript** | JSDoc only | Native TS | SplitText |
+| **File size** | 13KB (minified) | 14KB | Tie |
+| **TypeScript** | JSDoc with TS compatibility | Native TS | SplitText |
 | **Auto-responsiveness** | ❌ Manual | ✅ Auto | SplitText |
 | **Masking** | ❌ Manual | ✅ Built-in | SplitText |
 | **API simplicity** | Good | Excellent | SplitText |
 | **Documentation** | Excellent | Excellent | Tie |
-| **Examples** | 17 demos | Many | Tie |
+| **Examples** | 17+ demos | Many | Tie |
 | **Price** | Free | Free (since v3.13) | Tie |
 | **Dependencies** | None | GSAP core | CharWrapper |
 | **Custom config** | More verbose | Concise | SplitText |
+| **Character grouping** | ✅ Advanced | ❌ None | CharWrapper |
+| **Animation presets** | ✅ Built-in | ❌ None | CharWrapper |
+| **Text transitions** | ✅ Available | ❌ None | CharWrapper |
+| **Data attribute selection** | ✅ Available | ❌ None | CharWrapper |
 
 ---
 
@@ -1841,22 +1915,24 @@ new SplitText('.text', { propIndex: true });
 
 ### Use **GSAP SplitText** when:
 - ✅ You need **line splitting** (most professional work)
-- ✅ **Accessibility** is required (it always should be!)
 - ✅ Building **responsive** sites with web fonts
 - ✅ Need **mask/reveal** effects
 - ✅ Want **auto-resplit** on viewport changes
 - ✅ Working on **client projects** (proven, supported)
-- ✅ Need **TypeScript** definitions
-- ✅ Want smallest file size
 - ✅ Need advanced features (deep slice, custom delimiters, etc.)
 
 ### Use **CharWrapper 2.0** when:
 - ✅ You **only need chars/words** (no lines)
+- ✅ Want **advanced character grouping** capabilities
+- ✅ Need **animation presets** for quick effects
+- ✅ Want **text transitions** between different content
+- ✅ Need **data attribute-driven** content organization
+- ✅ Want **TypeScript compatibility** with JSDoc
+- ✅ Want comprehensive **accessibility** features
+- ✅ Want **zero dependencies** (doesn't require GSAP)
 - ✅ Learning/educational purposes
 - ✅ Want full control of implementation
 - ✅ Building a custom solution
-- ✅ Don't need GSAP core loaded
-- ⚠️ Accessibility not required (rare!)
 
 ---
 
@@ -1867,51 +1943,50 @@ To make CharWrapper competitive with SplitText, add these features **in priority
 ### Priority 1: CRITICAL (Must-Have)
 1. **Line splitting algorithm** - Core feature gap
 2. **autoSplit** - Essential for modern web
-3. **Accessibility (ARIA)** - Legal/ethical requirement (Done!)
 
 ### Priority 2: HIGH (Should-Have)
-4. **Masking support** - Professional animations
-5. **Reduce file size** - Tree-shaking, minification
-6. **TypeScript rewrite** - Modern standard
+3. **Masking support** - Professional animations
+4. **Reduce file size** - Tree-shaking, minification
 
 ### Priority 3: MEDIUM (Nice-to-Have)
-7. **Smart wrap** - Better typography
-8. **Deep slice** - Nested element handling
-9. **CSS variable indices** - Modern CSS integration
-10. **Callbacks** (onSplit, onRevert)
+5. **Smart wrap** - Better typography
+6. **Deep slice** - Nested element handling
+7. **CSS variable indices** - Modern CSS integration
+8. **Callbacks** (onSplit, onRevert)
 
 ### Priority 4: LOW (Optional)
-11. **Custom word delimiters**
-12. **Ignore selectors**
-13. **Special char handling**
+9. **Custom word delimiters**
+10. **Ignore selectors**
+11. **Special char handling**
 
 ---
 
 ## 🏆 Verdict
 
-**GSAP SplitText is the clear winner** for professional production use. It's:
-- 🔴 50% smaller file size
+**GSAP SplitText remains the clear winner** for professional production use, especially when line splitting is needed. It's:
 - 🔴 More feature-complete (14+ advanced features)
-- 🔴 Accessible (critical!)
-- 🔴 Has line splitting (essential!)
 - 🔴 Auto-responsive
 - 🔴 Written in TypeScript
 - 🔴 Industry standard
 
 **CharWrapper 2.0 is excellent for:**
-- 📚 Learning how text splitting works internally
-- 🎨 Simple char/word-only animations
-- 🔧 Custom implementations where you need full control
+- 📚 Character/word-only animations
+- 🎨 Advanced character grouping capabilities
+- 🔄 Text transitions between different content
+- 🎬 Built-in animation presets
+- 📋 Data attribute-driven content organization
+- 🚫 Zero dependencies (doesn't require GSAP)
+- 🎯 Full control of implementation
 - 📖 Educational purposes
 
 ---
 
 ## 💭 Final Thoughts
 
-CharWrapper 2.0 was an **excellent learning exercise** and demonstrates solid ES6+ coding practices, but **GSAP SplitText is professionally engineered** over years with edge cases, accessibility, and real-world production needs solved.
+CharWrapper 2.0 is well-engineered with modern practices, comprehensive accessibility features, and unique capabilities like character grouping and animation presets. While **GSAP SplitText** remains the go-to for professional work requiring line splitting, **CharWrapper** provides a capable alternative for character/word-based animations with additional features.
 
-**If building for production: Use SplitText.**
-**If learning/experimenting: CharWrapper is great!**
+**If you need line splitting: Use SplitText.**
+**If you want advanced grouping, animation presets, or zero dependencies: CharWrapper is excellent!**
 
 The most valuable features CharWrapper lacks:
 1. 🔴 **Line splitting** (dealbreaker for most pros)
@@ -1920,7 +1995,7 @@ The most valuable features CharWrapper lacks:
 
 ---
 
-**Bottom line:** CharWrapper is a great educational implementation, but SplitText is the production-ready tool. The GSAP team has solved problems you don't even know exist yet! 🚀
+**Bottom line:** Both libraries serve different needs. GSAP SplitText for professional line-splitting work, CharWrapper for advanced character manipulation with extra features. Both are production-ready tools! 🚀
 # CharWrapper 2.0 - Quick Start Guide
 
 Get up and running with CharWrapper in under 5 minutes! 🚀
@@ -2318,6 +2393,37 @@ wrapper.wrap(); // Also correct!
 - Read the full docs: `README.md`
 - See the migration guide: `MIGRATION_GUIDE.md`
 - Review the summary: `SUMMARY.md`
+
+---
+
+## 📦 Package Distribution
+
+CharWrapper is distributed with multiple build formats to support different environments:
+
+| File | Format | Size | Use Case |
+|------|--------|------|----------|
+| `dist/charwrapper.min.js` | IIFE | ~13KB | Direct browser inclusion |
+| `dist/charwrapper.cjs.min.js` | CommonJS | ~13KB | Node.js compatibility |
+| `dist/charwrapper.js` | IIFE | ~36KB | Development with source maps |
+| `dist/charwrapper.cjs.js` | CommonJS | ~36KB | Node.js compatibility |
+| `dist/esm/` | ES Modules | ~40KB | NPM package (tree-shakeable) |
+
+### Module Resolution
+
+When using bundlers, CharWrapper properly exports different formats based on your environment:
+
+```javascript
+// In bundler environments (Webpack, Vite, etc.) - uses ES modules
+import CharWrapper from 'charwrapper';
+
+// In browsers with native modules - uses ES modules
+<script type="module">
+  import CharWrapper from 'charwrapper';
+</script>
+
+// In browsers without modules - uses IIFE version
+<script src="https://cdn.jsdelivr.net/npm/charwrapper@latest/dist/charwrapper.min.js"></script>
+```
 
 ---
 

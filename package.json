@@ -1,16 +1,18 @@
 {
   "name": "charwrapper",
   "version": "2.0.0",
-  "description": "Modern ES6+ text animation library for GSAP with TypeScript support",
+  "description": "Modern ES6+ text wrapper library for GSAP, Animejs, Web Animation API and others, with TypeScript support",
   "type": "module",
-  "main": "./dist/esm/CharWrapper.js",
+  "main": "./dist/charwrapper.cjs.js",
+  "module": "./dist/esm/CharWrapper.js",
   "types": "./dist/esm/CharWrapper.d.ts",
   "browser": "./dist/charwrapper.min.js",
   "exports": {
     ".": {
       "types": "./dist/esm/CharWrapper.d.ts",
+      "browser": "./dist/charwrapper.min.js",
       "import": "./dist/esm/CharWrapper.js",
-      "browser": "./dist/charwrapper.min.js"
+      "require": "./dist/charwrapper.cjs.js"
     }
   },
   "files": [
@@ -24,12 +26,15 @@
     "bundle": "npm run build && node build-bundle.js",
     "watch": "tsc --watch",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && npm run bundle"
+    "prepublishOnly": "npm run clean && npm run build && npm run bundle",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
+    "gsap",
+    "animejs",
+    "waapi",
     "text",
     "animation",
-    "gsap",
     "character",
     "wrapper",
     "typescript",
@@ -39,7 +44,10 @@
     "dom",
     "accessibility"
   ],
-  "author": "Robert Wildling",
+  "author": {
+    "name": "Robert Wildling",
+    "email": "webaster@rowild.at"
+  },
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^20.10.0",
@@ -51,10 +59,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/charwrapper.git"
+    "url": "https://github.com/rowild/charwrapper.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/charwrapper/issues"
+    "url": "https://github.com/rowild/charwrapper/issues"
   },
-  "homepage": "https://github.com/yourusername/charwrapper#readme"
+  "homepage": "https://github.com/rowild/charwrapper#readme"
 }

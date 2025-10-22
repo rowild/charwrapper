@@ -20,8 +20,10 @@ CharWrapper is a modern ES6+ text wrapper library designed primarily for use wit
 ```
 CharWrapper/
 ├── dist/                    # Built bundles
-│   ├── charwrapper.js       # Browser bundle (36KB)
-│   ├── charwrapper.min.js   # Minified bundle (13KB) ← Use this!
+│   ├── charwrapper.js       # Browser bundle (IIFE format, 36KB)
+│   ├── charwrapper.min.js   # Minified browser bundle (IIFE format, 13KB) ← Use this for browsers!
+│   ├── charwrapper.cjs.js   # Node.js bundle (CommonJS format, 52KB)
+│   ├── charwrapper.cjs.min.js # Minified Node.js bundle (CommonJS format, 21KB)
 │   └── esm/                 # ES modules (for npm/bundlers)
 │       ├── CharWrapper.js
 │       ├── CharWrapper.d.ts # TypeScript definitions
