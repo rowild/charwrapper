@@ -239,25 +239,26 @@
     const leftChars = leftWrapper.wrap().chars;
     const rightChars = rightWrapper.wrap().chars;
 
-    // Store active timelines
-    let activeTimelines = [];
+    // Store active animations
+    let activeAnimations = [];
 
     // Clear all active animations
     function stopAll() {
-      activeTimelines.forEach(tl => tl.kill());
-      activeTimelines = [];
+      activeAnimations.forEach(anim => {
+        if (anim && anim.cancel) anim.cancel();
+      });
+      activeAnimations = [];
 
       // Reset all characters
-      gsap.set([...leftChars, ...rightChars], {
-        scale: 1,
-        rotation: 0,
-        color: '#00d4ff',
-        clearProps: 'all'
+      [...leftChars, ...rightChars].forEach(char => {
+        const animations = char.getAnimations();
+        animations.forEach(a => a.cancel());
+        char.style.transform = 'scale(1) rotate(0deg)';
       });
 
       // Restore original colors
-      gsap.set(leftChars, { color: '#00d4ff' });
-      gsap.set(rightChars, { color: '#ff6b6b' });
+      leftChars.forEach(char => char.style.color = '#00d4ff');
+      rightChars.forEach(char => char.style.color = '#ff6b6b');
 
       // Update active button
       document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
@@ -280,79 +281,29 @@
 
       // Create a continuous color wave that cycles through each character
       leftChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1 });
-        tl.to(char, {
-          color: colors[0],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[1],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[2],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[3],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[4],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[5],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        });
-
-        // Stagger the start time for wave effect
-        tl.delay(index * 0.1);
-        activeTimelines.push(tl);
+        const anim = char.animate(
+          colors.map(color => ({ color: color })),
+          {
+            duration: 2400, // 6 colors * 400ms each
+            delay: index * 100,
+            iterations: Infinity,
+            easing: 'ease-in-out'
+          }
+        );
+        activeAnimations.push(anim);
       });
 
       rightChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1 });
-        tl.to(char, {
-          color: colors[0],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[1],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[2],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[3],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[4],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[5],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        });
-
-        // Stagger from opposite direction
-        tl.delay((rightChars.length - 1 - index) * 0.1 + 0.3);
-        activeTimelines.push(tl);
+        const anim = char.animate(
+          colors.map(color => ({ color: color })),
+          {
+            duration: 2400, // 6 colors * 400ms each
+            delay: (rightChars.length - 1 - index) * 100 + 300,
+            iterations: Infinity,
+            easing: 'ease-in-out'
+          }
+        );
+        activeAnimations.push(anim);
       });
     }
 
@@ -363,26 +314,38 @@
 
       // Left side - scale wave from start to end
       leftChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1, yoyo: true });
-        tl.to(char, {
-          scale: 1.6,
-          duration: 0.3,
-          ease: 'power2.inOut'
-        });
-        tl.delay(index * 0.08);
-        activeTimelines.push(tl);
+        const anim = char.animate(
+          [
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.6)' },
+            { transform: 'scale(1)' }
+          ],
+          {
+            duration: 600, // 300ms up, 300ms down
+            delay: index * 80,
+            iterations: Infinity,
+            easing: 'ease-in-out'
+          }
+        );
+        activeAnimations.push(anim);
       });
 
       // Right side - scale wave from end to start
       rightChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1, yoyo: true });
-        tl.to(char, {
-          scale: 1.6,
-          duration: 0.3,
-          ease: 'power2.inOut'
-        });
-        tl.delay((rightChars.length - 1 - index) * 0.08 + 0.2);
-        activeTimelines.push(tl);
+        const anim = char.animate(
+          [
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.6)' },
+            { transform: 'scale(1)' }
+          ],
+          {
+            duration: 600,
+            delay: (rightChars.length - 1 - index) * 80 + 200,
+            iterations: Infinity,
+            easing: 'ease-in-out'
+          }
+        );
+        activeAnimations.push(anim);
       });
     }
 
@@ -393,26 +356,36 @@
 
       // Left side - rotate continuously with wave delay
       leftChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1 });
-        tl.to(char, {
-          rotationY: '+=360',
-          duration: 1.2,
-          ease: 'power1.inOut'
-        });
-        tl.delay(index * 0.1);
-        activeTimelines.push(tl);
+        const anim = char.animate(
+          [
+            { transform: 'rotateY(0deg)' },
+            { transform: 'rotateY(360deg)' }
+          ],
+          {
+            duration: 1200,
+            delay: index * 100,
+            iterations: Infinity,
+            easing: 'ease-in-out'
+          }
+        );
+        activeAnimations.push(anim);
       });
 
       // Right side - rotate opposite direction with wave delay
       rightChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1 });
-        tl.to(char, {
-          rotationY: '-=360',
-          duration: 1.2,
-          ease: 'power1.inOut'
-        });
-        tl.delay((rightChars.length - 1 - index) * 0.1 + 0.4);
-        activeTimelines.push(tl);
+        const anim = char.animate(
+          [
+            { transform: 'rotateY(0deg)' },
+            { transform: 'rotateY(-360deg)' }
+          ],
+          {
+            duration: 1200,
+            delay: (rightChars.length - 1 - index) * 100 + 400,
+            iterations: Infinity,
+            easing: 'ease-in-out'
+          }
+        );
+        activeAnimations.push(anim);
       });
     }
 
@@ -423,14 +396,20 @@
 
       // Both sides pulse together with slight stagger across characters
       [...leftChars, ...rightChars].forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1, yoyo: true });
-        tl.to(char, {
-          scale: 1.4,
-          duration: 0.6,
-          ease: 'sine.inOut'
-        });
-        tl.delay(index * 0.03);
-        activeTimelines.push(tl);
+        const anim = char.animate(
+          [
+            { transform: 'scale(1)' },
+            { transform: 'scale(1.4)' },
+            { transform: 'scale(1)' }
+          ],
+          {
+            duration: 1200, // 600ms up, 600ms down
+            delay: index * 30,
+            iterations: Infinity,
+            easing: 'ease-in-out'
+          }
+        );
+        activeAnimations.push(anim);
       });
     }
 

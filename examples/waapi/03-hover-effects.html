@@ -203,8 +203,7 @@
     </div>
   </div>
 
-  <!-- Web Animations API (Native) -->
-  <!-- No external animation library needed - using native Web Animations API -->
+  <!-- Anime.js from CDN -->
 
   <!-- CharWrapper - Single Bundle File -->
   <script src="../../dist/charwrapper.js"></script>
@@ -222,12 +221,13 @@
 
     chars1.forEach(char => {
       char.addEventListener('mouseenter', () => {
-        anime({
-          targets: char,
-          translateY: [
-            { value: -20, duration: 300, easing: 'easeOutQuad' },
-            { value: 0, duration: 500, easing: 'easeOutBounce' }
-          ]
+        char.animate([
+          { transform: 'translateY(0)' },
+          { transform: 'translateY(-20px)', offset: 0.375 },
+          { transform: 'translateY(0)' }
+        ], {
+          duration: 800,
+          easing: 'ease-out'
         });
       });
     });
@@ -249,18 +249,14 @@
           const colorIndex = distance % rainbowColors.length;
           const delay = distance * 50;
 
-          anime({
-            targets: c,
-            color: [
-              { value: rainbowColors[colorIndex], duration: 300 },
-              { value: '#ffffff', duration: 300, delay: 300 }
-            ],
-            scale: [
-              { value: 1.2, duration: 300, easing: 'easeOutBack' },
-              { value: 1, duration: 300, delay: 300 }
-            ],
+          c.animate([
+            { color: rainbowColors[colorIndex], transform: 'scale(1.2)' },
+            { color: '#ffffff', transform: 'scale(1)' }
+          ], {
+            duration: 600,
             delay: delay,
-            easing: 'easeOutQuad'
+            easing: 'ease-out',
+            fill: 'forwards'
           });
         });
       });
@@ -297,29 +293,29 @@
 
           // Cancel previous animation if exists
           if (magneticAnimations.has(char)) {
-            magneticAnimations.get(char).pause();
+            magneticAnimations.get(char).cancel();
           }
 
-          const anim = anime({
-            targets: char,
-            translateX: Math.cos(angle) * force,
-            translateY: Math.sin(angle) * force,
+          const anim = char.animate([
+            { transform: `translate(${Math.cos(angle) * force}px, ${Math.sin(angle) * force}px)` }
+          ], {
             duration: 300,
-            easing: 'easeOutQuad'
+            easing: 'ease-out',
+            fill: 'forwards'
           });
 
           magneticAnimations.set(char, anim);
         } else {
           if (magneticAnimations.has(char)) {
-            magneticAnimations.get(char).pause();
+            magneticAnimations.get(char).cancel();
           }
 
-          const anim = anime({
-            targets: char,
-            translateX: 0,
-            translateY: 0,
+          const anim = char.animate([
+            { transform: 'translate(0, 0)' }
+          ], {
             duration: 500,
-            easing: 'easeOutElastic(1, 0.3)'
+            easing: 'ease-out',
+            fill: 'forwards'
           });
 
           magneticAnimations.set(char, anim);
@@ -328,12 +324,14 @@
     });
 
     section3.addEventListener('mouseleave', () => {
-      anime({
-        targets: chars3,
-        translateX: 0,
-        translateY: 0,
-        duration: 800,
-        easing: 'easeOutElastic(1, 0.3)'
+      chars3.forEach(char => {
+        char.animate([
+          { transform: 'translate(0, 0)' }
+        ], {
+          duration: 800,
+          easing: 'ease-out',
+          fill: 'forwards'
+        });
       });
     });
 
@@ -352,21 +350,15 @@
           const delay = distance * 50;
 
           // Scale wave
-          anime({
-            targets: c,
-            scale: [
-              { value: 1.5, duration: 400, easing: 'easeOutQuad' },
-              { value: 1, duration: 400, easing: 'easeOutElastic(1, 0.5)' }
-            ],
-            rotate: [
-              { value: 360, duration: 400, easing: 'easeOutQuad' },
-              { value: 0, duration: 400, easing: 'easeOutElastic(1, 0.5)' }
-            ],
-            color: [
-              { value: '#ffd93d', duration: 400 },
-              { value: '#ffffff', duration: 400 }
-            ],
-            delay: delay
+          c.animate([
+            { transform: 'scale(1) rotate(0deg)', color: '#ffffff' },
+            { transform: 'scale(1.5) rotate(360deg)', color: '#ffd93d', offset: 0.5 },
+            { transform: 'scale(1) rotate(0deg)', color: '#ffffff' }
+          ], {
+            duration: 800,
+            delay: delay,
+            easing: 'ease-out',
+            fill: 'forwards'
           });
         });
       });
@@ -381,16 +373,22 @@
       char.style.transform = 'translateY(30px)';
     });
 
-    // Shuffle array for random stagger
-    const shuffled = [...allChars].sort(() => Math.random() - 0.5);
+    // Staggered entrance animation
+    allChars.forEach((char, i) => {
+      // Calculate delay from center
+      const centerIndex = allChars.length / 2;
+      const distanceFromCenter = Math.abs(i - centerIndex);
+      const delay = distanceFromCenter * 20;
 
-    anime({
-      targets: allChars,
-      opacity: [0, 1],
-      translateY: [30, 0],
-      duration: 800,
-      delay: anime.stagger(20, { from: 'center' }),
-      easing: 'easeOutBack'
+      char.animate([
+        { opacity: 0, transform: 'translateY(30px)' },
+        { opacity: 1, transform: 'translateY(0)' }
+      ], {
+        duration: 800,
+        delay: delay,
+        easing: 'ease-out',
+        fill: 'forwards'
+      });
     });
 
     // Cleanup

@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Animation Examples - CharWrapper 2.0</title>
 
-  <!-- Web Animations API (Native) -->
-  <!-- No external animation library needed - using native Web Animations API -->
-
   <!-- CharWrapper bundle -->
   <script src="../../dist/charwrapper.min.js"></script>
 
@@ -175,10 +172,10 @@
 
   <div class="container">
     <h1>Animation Examples</h1>
-    <p class="subtitle">Ready-to-use anime.js animations</p>
+    <p class="subtitle">Ready-to-use Web Animation API animations</p>
 
     <div class="info-box">
-      <strong>ℹ️ Anime.js Powered:</strong> These animations showcase CharWrapper with anime.js.
+      <strong>ℹ️ Web Animation API Powered:</strong> These animations showcase CharWrapper with the native Web Animation API.
       CharWrapper core is animation-agnostic and works with any animation library.
     </div>
 
@@ -294,6 +291,21 @@
   <script>
     let currentAnims = {};
 
+    // Helper function to animate elements with stagger
+    function animateWithStagger(elements, keyframes, duration, staggerDelay, easing = 'ease-out') {
+      const animations = [];
+      elements.forEach((el, i) => {
+        const anim = el.animate(keyframes, {
+          duration: duration,
+          delay: i * staggerDelay,
+          easing: easing,
+          fill: 'forwards'
+        });
+        animations.push(anim);
+      });
+      return animations;
+    }
+
     // Example 1: Entrance Animations
     const wrapper1 = new CharWrapper('.text-1', {
       wrap: { chars: true }
@@ -306,31 +318,91 @@
 
       if (type === 'fadeIn') {
         chars.forEach(c => c.style.opacity = '0');
-        anime({ targets: chars, opacity: [0, 1], duration: 800, delay: anime.stagger(30), easing: 'easeOutQuad' });
+        currentAnims.demo1 = animateWithStagger(chars,
+          [{ opacity: 0 }, { opacity: 1 }],
+          800, 30, 'ease-out'
+        );
       } else if (type === 'slideUp') {
         chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
-        anime({ targets: chars, translateY: [50, 0], opacity: [0, 1], duration: 600, delay: anime.stagger(20), easing: 'easeOutBack' });
+        currentAnims.demo1 = animateWithStagger(chars,
+          [
+            { transform: 'translateY(50px)', opacity: 0 },
+            { transform: 'translateY(0)', opacity: 1 }
+          ],
+          600, 20, 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+        );
       } else if (type === 'scaleIn') {
         chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'scale(0)'; });
-        anime({ targets: chars, scale: [0, 1], opacity: [0, 1], duration: 600, delay: anime.stagger(25), easing: 'easeOutElastic(1, 0.6)' });
+        currentAnims.demo1 = animateWithStagger(chars,
+          [
+            { transform: 'scale(0)', opacity: 0 },
+            { transform: 'scale(1)', opacity: 1 }
+          ],
+          600, 25, 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+        );
       } else if (type === 'rotateIn') {
         chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'scale(0) rotate(180deg)'; });
-        anime({ targets: chars, scale: [0, 1], rotate: [180, 0], opacity: [0, 1], duration: 800, delay: anime.stagger(25), easing: 'easeOutBack' });
+        currentAnims.demo1 = animateWithStagger(chars,
+          [
+            { transform: 'scale(0) rotate(180deg)', opacity: 0 },
+            { transform: 'scale(1) rotate(0deg)', opacity: 1 }
+          ],
+          800, 25, 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+        );
       } else if (type === 'elastic') {
         chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(-50px)'; });
-        anime({ targets: chars, translateY: [-50, 0], opacity: [0, 1], duration: 800, delay: anime.stagger(30), easing: 'easeOutElastic(1, 0.5)' });
+        currentAnims.demo1 = animateWithStagger(chars,
+          [
+            { transform: 'translateY(-50px)', opacity: 0 },
+            { transform: 'translateY(0)', opacity: 1 }
+          ],
+          800, 30, 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+        );
       } else if (type === 'wave') {
-        chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(-30px)'; });
-        anime({ targets: chars, translateY: [-30, 0], opacity: [0, 1], duration: 600, delay: function(el, i) { return i * 30 + Math.sin(i) * 50; }, easing: 'easeOutBounce' });
+        currentAnims.demo1 = [];
+        chars.forEach((c, i) => {
+          c.style.opacity = '0';
+          c.style.transform = 'translateY(-30px)';
+          const delay = i * 30 + Math.sin(i) * 50;
+          const anim = c.animate(
+            [
+              { transform: 'translateY(-30px)', opacity: 0 },
+              { transform: 'translateY(0)', opacity: 1 }
+            ],
+            { duration: 600, delay: delay, easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)', fill: 'forwards' }
+          );
+          currentAnims.demo1.push(anim);
+        });
       } else if (type === 'glitch') {
-        chars.forEach((c, i) => { c.style.opacity = '0'; c.style.transform = `translate(${Math.random()*100-50}px, ${Math.random()*40-20}px) rotate(${Math.random()*30-15}deg)`; });
-        anime({ targets: chars, translateX: 0, translateY: 0, rotate: 0, opacity: [0, 1], duration: 300, delay: anime.stagger(30), easing: 'easeOutQuart' });
+        chars.forEach((c, i) => {
+          const randomX = Math.random()*100-50;
+          const randomY = Math.random()*40-20;
+          const randomRotate = Math.random()*30-15;
+          c.style.opacity = '0';
+          c.style.transform = `translate(${randomX}px, ${randomY}px) rotate(${randomRotate}deg)`;
+        });
+        currentAnims.demo1 = animateWithStagger(chars,
+          [
+            { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 }
+          ],
+          300, 30, 'ease-out'
+        );
       }
     }
 
     function reset1() {
-      if (currentAnims.demo1) currentAnims.demo1.pause();
-      result1.chars.forEach(c => { c.style.opacity = '1'; c.style.transform = 'scale(1) translateY(0) translateX(0) rotate(0)'; });
+      // Cancel all running animations
+      if (currentAnims.demo1) {
+        currentAnims.demo1.forEach(a => a.cancel && a.cancel());
+        currentAnims.demo1 = null;
+      }
+      // Also cancel any animations directly on the elements
+      result1.chars.forEach(c => {
+        const animations = c.getAnimations();
+        animations.forEach(a => a.cancel());
+        c.style.opacity = '1';
+        c.style.transform = 'scale(1) translateY(0) translateX(0) rotate(0)';
+      });
     }
 
     // Example 2: Typewriter
@@ -338,17 +410,49 @@
     const result2 = wrapper2.wrap();
 
     function demo2() {
-      result2.chars.forEach(c => c.style.opacity = '0');
-      anime({ targets: result2.chars, opacity: [0, 1], duration: 50, delay: anime.stagger(30), easing: 'linear' });
+      // Cancel any existing animations first
+      if (currentAnims.demo2) {
+        currentAnims.demo2.forEach(a => a.cancel && a.cancel());
+      }
+      result2.chars.forEach(c => {
+        const animations = c.getAnimations();
+        animations.forEach(a => a.cancel());
+        c.style.opacity = '0';
+      });
+      currentAnims.demo2 = animateWithStagger(result2.chars,
+        [{ opacity: 0 }, { opacity: 1 }],
+        50, 30, 'linear'
+      );
     }
 
     function demo2Custom() {
-      result2.chars.forEach(c => c.style.opacity = '0');
-      anime({ targets: result2.chars, opacity: [0, 1], duration: 50, delay: anime.stagger(100), easing: 'linear' });
+      // Cancel any existing animations first
+      if (currentAnims.demo2) {
+        currentAnims.demo2.forEach(a => a.cancel && a.cancel());
+      }
+      result2.chars.forEach(c => {
+        const animations = c.getAnimations();
+        animations.forEach(a => a.cancel());
+        c.style.opacity = '0';
+      });
+      currentAnims.demo2 = animateWithStagger(result2.chars,
+        [{ opacity: 0 }, { opacity: 1 }],
+        50, 100, 'linear'
+      );
     }
 
     function reset2() {
-      result2.chars.forEach(c => c.style.opacity = '1');
+      // Cancel all running animations
+      if (currentAnims.demo2) {
+        currentAnims.demo2.forEach(a => a.cancel && a.cancel());
+        currentAnims.demo2 = null;
+      }
+      // Also cancel any animations directly on the elements
+      result2.chars.forEach(c => {
+        const animations = c.getAnimations();
+        animations.forEach(a => a.cancel());
+        c.style.opacity = '1';
+      });
     }
 
     // Example 3: Loop Animations
@@ -357,10 +461,42 @@
 
     function demo3(type) {
       stopLoop3();
+      currentAnims.demo3 = [];
+
       if (type === 'wave') {
-        currentAnims.demo3 = anime({ targets: result3.chars, translateY: [-10, 10], duration: 1000, delay: anime.stagger(50), direction: 'alternate', loop: true, easing: 'easeInOutSine' });
+        result3.chars.forEach((c, i) => {
+          const anim = c.animate(
+            [
+              { transform: 'translateY(-10px)' },
+              { transform: 'translateY(10px)' }
+            ],
+            {
+              duration: 1000,
+              delay: i * 50,
+              direction: 'alternate',
+              iterations: Infinity,
+              easing: 'ease-in-out'
+            }
+          );
+          currentAnims.demo3.push(anim);
+        });
       } else if (type === 'pulse') {
-        currentAnims.demo3 = anime({ targets: result3.chars, scale: [1, 1.2, 1], duration: 800, delay: anime.stagger(100), loop: true, easing: 'easeInOutQuad' });
+        result3.chars.forEach((c, i) => {
+          const anim = c.animate(
+            [
+              { transform: 'scale(1)' },
+              { transform: 'scale(1.2)' },
+              { transform: 'scale(1)' }
+            ],
+            {
+              duration: 800,
+              delay: i * 100,
+              iterations: Infinity,
+              easing: 'ease-in-out'
+            }
+          );
+          currentAnims.demo3.push(anim);
+        });
       } else if (type === 'color') {
         const colors = ['#ff6b9d', '#ffd93d', '#6bcf7f', '#4d96ff', '#a78bfa'];
         let colorIndex = 0;
@@ -369,14 +505,32 @@
           colorIndex++;
         }, 500);
       } else if (type === 'shimmer') {
-        currentAnims.demo3 = anime({ targets: result3.chars, opacity: [1, 0.3, 1], duration: 1500, delay: anime.stagger(100), loop: true, easing: 'easeInOutQuad' });
+        result3.chars.forEach((c, i) => {
+          const anim = c.animate(
+            [
+              { opacity: 1 },
+              { opacity: 0.3 },
+              { opacity: 1 }
+            ],
+            {
+              duration: 1500,
+              delay: i * 100,
+              iterations: Infinity,
+              easing: 'ease-in-out'
+            }
+          );
+          currentAnims.demo3.push(anim);
+        });
       }
     }
 
     function stopLoop3() {
       if (currentAnims.demo3) {
-        if (currentAnims.demo3.pause) currentAnims.demo3.pause();
-        else clearInterval(currentAnims.demo3);
+        if (Array.isArray(currentAnims.demo3)) {
+          currentAnims.demo3.forEach(a => a.cancel && a.cancel());
+        } else {
+          clearInterval(currentAnims.demo3);
+        }
         currentAnims.demo3 = null;
       }
       result3.chars.forEach(c => { c.style.opacity = '1'; c.style.transform = 'scale(1) translateY(0)'; c.style.color = '#fff'; });
@@ -389,22 +543,59 @@
     function demo4(type) {
       reset4();
       if (type === 'fadeOut') {
-        anime({ targets: result4.chars, opacity: [1, 0], duration: 600, delay: anime.stagger(30), easing: 'easeOutQuad' });
+        currentAnims.demo4 = animateWithStagger(result4.chars,
+          [{ opacity: 1 }, { opacity: 0 }],
+          600, 30, 'ease-out'
+        );
       } else if (type === 'slideOut') {
-        anime({ targets: result4.chars, translateY: [0, 100], opacity: [1, 0], duration: 600, delay: anime.stagger(20), easing: 'easeInQuad' });
+        currentAnims.demo4 = animateWithStagger(result4.chars,
+          [
+            { transform: 'translateY(0)', opacity: 1 },
+            { transform: 'translateY(100px)', opacity: 0 }
+          ],
+          600, 20, 'ease-in'
+        );
       } else if (type === 'scaleOut') {
-        anime({ targets: result4.chars, scale: [1, 0], opacity: [1, 0], duration: 500, delay: anime.stagger(25), easing: 'easeInBack' });
+        currentAnims.demo4 = animateWithStagger(result4.chars,
+          [
+            { transform: 'scale(1)', opacity: 1 },
+            { transform: 'scale(0)', opacity: 0 }
+          ],
+          500, 25, 'cubic-bezier(0.6, -0.28, 0.735, 0.045)'
+        );
       } else if (type === 'explode') {
+        currentAnims.demo4 = [];
         result4.chars.forEach((c, i) => {
           const angle = (i / result4.chars.length) * Math.PI * 2;
           const distance = 200;
-          anime({ targets: c, translateX: Math.cos(angle) * distance, translateY: Math.sin(angle) * distance, rotate: Math.random() * 720, opacity: [1, 0], duration: 1000, easing: 'easeOutQuad' });
+          const anim = c.animate(
+            [
+              { transform: 'translate(0, 0) rotate(0deg)', opacity: 1 },
+              {
+                transform: `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) rotate(${Math.random() * 720}deg)`,
+                opacity: 0
+              }
+            ],
+            { duration: 1000, easing: 'ease-out', fill: 'forwards' }
+          );
+          currentAnims.demo4.push(anim);
         });
       }
     }
 
     function reset4() {
-      result4.chars.forEach(c => { c.style.opacity = '1'; c.style.transform = 'scale(1) translateY(0) translateX(0) rotate(0)'; });
+      // Cancel all running animations
+      if (currentAnims.demo4) {
+        currentAnims.demo4.forEach(a => a.cancel && a.cancel());
+        currentAnims.demo4 = null;
+      }
+      // Also cancel any animations directly on the elements
+      result4.chars.forEach(c => {
+        const animations = c.getAnimations();
+        animations.forEach(a => a.cancel());
+        c.style.opacity = '1';
+        c.style.transform = 'scale(1) translateY(0) translateX(0) rotate(0)';
+      });
     }
 
     // Example 5: Custom Options
@@ -414,29 +605,64 @@
     function demo5Default() {
       reset5();
       result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
-      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 600, delay: anime.stagger(20), easing: 'easeOutQuad' });
+      currentAnims.demo5 = animateWithStagger(result5.chars,
+        [
+          { transform: 'translateY(50px)', opacity: 0 },
+          { transform: 'translateY(0)', opacity: 1 }
+        ],
+        600, 20, 'ease-out'
+      );
     }
 
     function demo5Slow() {
       reset5();
       result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
-      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 2000, delay: anime.stagger(100), easing: 'easeOutQuad' });
+      currentAnims.demo5 = animateWithStagger(result5.chars,
+        [
+          { transform: 'translateY(50px)', opacity: 0 },
+          { transform: 'translateY(0)', opacity: 1 }
+        ],
+        2000, 100, 'ease-out'
+      );
     }
 
     function demo5Fast() {
       reset5();
       result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
-      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 200, delay: anime.stagger(10), easing: 'easeOutQuad' });
+      currentAnims.demo5 = animateWithStagger(result5.chars,
+        [
+          { transform: 'translateY(50px)', opacity: 0 },
+          { transform: 'translateY(0)', opacity: 1 }
+        ],
+        200, 10, 'ease-out'
+      );
     }
 
     function demo5Custom() {
       reset5();
       result5.chars.forEach(c => { c.style.opacity = '0'; c.style.transform = 'translateY(50px)'; });
-      anime({ targets: result5.chars, translateY: [50, 0], opacity: [0, 1], duration: 1500, delay: anime.stagger(50), easing: 'easeOutElastic(1, 0.3)' });
+      currentAnims.demo5 = animateWithStagger(result5.chars,
+        [
+          { transform: 'translateY(50px)', opacity: 0 },
+          { transform: 'translateY(0)', opacity: 1 }
+        ],
+        1500, 50, 'cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+      );
     }
 
     function reset5() {
-      result5.chars.forEach(c => { c.style.opacity = '1'; c.style.transform = 'scale(1) translateY(0)'; });
+      // Cancel all running animations
+      if (currentAnims.demo5) {
+        currentAnims.demo5.forEach(a => a.cancel && a.cancel());
+        currentAnims.demo5 = null;
+      }
+      // Also cancel any animations directly on the elements
+      result5.chars.forEach(c => {
+        const animations = c.getAnimations();
+        animations.forEach(a => a.cancel());
+        c.style.opacity = '1';
+        c.style.transform = 'scale(1) translateY(0)';
+      });
     }
 
     // Example 6: Interactive
@@ -448,7 +674,16 @@
       wrapper6 = new CharWrapper('.text-6', { wrap: { chars: true } });
       const result = wrapper6.wrap();
       result.chars.forEach(char => {
-        const listener = () => anime({ targets: char, translateY: [0, -20, 0], duration: 600, easing: 'easeOutBounce' });
+        const listener = () => {
+          char.animate(
+            [
+              { transform: 'translateY(0)' },
+              { transform: 'translateY(-20px)' },
+              { transform: 'translateY(0)' }
+            ],
+            { duration: 600, easing: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)' }
+          );
+        };
         char.addEventListener('mouseenter', listener);
         eventListeners6.push({ el: char, type: 'mouseenter', fn: listener });
       });
@@ -459,7 +694,15 @@
       wrapper6 = new CharWrapper('.text-6', { wrap: { chars: true } });
       const result = wrapper6.wrap();
       result.chars.forEach(char => {
-        const listener = () => anime({ targets: char, rotate: [0, 360], duration: 600, easing: 'easeOutQuad' });
+        const listener = () => {
+          char.animate(
+            [
+              { transform: 'rotate(0deg)' },
+              { transform: 'rotate(360deg)' }
+            ],
+            { duration: 600, easing: 'ease-out' }
+          );
+        };
         char.addEventListener('click', listener);
         eventListeners6.push({ el: char, type: 'click', fn: listener });
       });

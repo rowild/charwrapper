@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CharWrapper - Data Attributes Demo</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: white;
+    }
+
+    .container {
+      max-width: 800px;
+      width: 100%;
+    }
+
+    h1.page-title {
+      font-size: clamp(2rem, 5vw, 3rem);
+      margin-bottom: 1rem;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .description {
+      text-align: center;
+      margin-bottom: 3rem;
+      opacity: 0.9;
+      line-height: 1.6;
+      font-size: 1.1rem;
+    }
+
+    /* Profile Card */
+    .profile-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #333;
+      text-align: center;
+    }
+
+    /* Name Styling */
+    .first-name, .last-name {
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 700;
+      margin: 0.5rem 0;
+      color: #667eea;
+    }
+
+    .last-name {
+      color: #764ba2;
+      margin-bottom: 2rem;
+    }
+
+    /* Divider Line */
+    .divider {
+      height: 3px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        #667eea,
+        #764ba2,
+        transparent
+      );
+      margin: 2rem 0;
+      transform-origin: center;
+      border-radius: 2px;
+    }
+
+    /* Professions */
+    .profession {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      margin: 0.8rem 0;
+      color: #555;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    /* Character styling */
+    .char {
+      display: inline-block;
+      transform-origin: center;
+    }
+
+    .char--space {
+      width: 0.3em;
+    }
+
+    /* Ordered Text Section */
+    .ordered-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #333;
+      margin-top: 3rem;
+    }
+
+    .ordered-title {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 700;
+      margin-bottom: 2rem;
+      text-align: center;
+      color: #667eea;
+    }
+
+    .sentence {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      line-height: 1.8;
+      margin: 1rem 0;
+      text-align: center;
+    }
+
+    .number-word {
+      font-weight: 700;
+      color: #1a1a1a;
+    }
+
+    .position-word {
+      color: #ff6b9d;
+      font-weight: 500;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 1.5rem;
+      margin-top: 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .info-box h3 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #fff;
+    }
+
+    .info-box ul {
+      list-style: none;
+      line-height: 1.8;
+    }
+
+    .info-box li::before {
+      content: '✓ ';
+      color: #4ecdc4;
+      font-weight: bold;
+      margin-right: 0.5rem;
+    }
+
+    .controls {
+      text-align: center;
+      margin-top: 2rem;
+    }
+
+    button {
+      background: white;
+      color: #667eea;
+      border: none;
+      padding: 1rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      margin: 0.5rem;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    .back-link {
+      position: fixed;
+      top: 2rem;
+      left: 2rem;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      color: white;
+      text-decoration: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 1000;
+    }
+
+    .back-link:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.5);
+      transform: translateX(-5px);
+    }
+
+    .back-link::before {
+      content: '←';
+      font-size: 1.2rem;
+    }
+
+    code {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back-link">All Examples</a>
+
+  <div class="container">
+    <h1 class="page-title">Data Attributes Demo</h1>
+
+    <p class="description">
+      This example demonstrates wrapping a <strong>container element</strong> that contains structured content.
+      All text inside the container is wrapped automatically in HTML document order.
+      <br>Data attributes provide semantic structure and enable mixing text with graphics!
+    </p>
+
+    <!-- Profile Card with Data Attributes -->
+    <div class="profile-card">
+      <!-- Text elements marked with data-sub-set-name -->
+      <h1 class="first-name" data-sub-set-name="first_name">John</h1>
+      <h1 class="last-name" data-sub-set-name="last_name">Van der Slice</h1>
+
+      <!-- Non-text graphic element - also marked with data attribute -->
+      <div class="divider" data-sub-set-name="divider_line"></div>
+
+      <!-- More text elements -->
+      <p class="profession" data-sub-set-name="profession_1">composer</p>
+      <p class="profession" data-sub-set-name="profession_2">teacher</p>
+      <p class="profession" data-sub-set-name="profession_3">analyst</p>
+    </div>
+
+    <!-- Variant 2: Custom Ordering with data-custom-order -->
+    <div class="ordered-card">
+      <h2 class="ordered-title">Variant 2: Custom Order Animation</h2>
+
+      <!-- Sentences in RANDOM HTML order, but animated by data-custom-order -->
+      <div class="sentence" data-custom-order="7">
+        This is text <span class="number-word">ONE</span> but it appears <span class="position-word">SEVENTH</span>
+      </div>
+
+      <div class="sentence" data-custom-order="3">
+        This is text <span class="number-word">TWO</span> but it appears <span class="position-word">THIRD</span>
+      </div>
+
+      <div class="sentence" data-custom-order="1">
+        This is text <span class="number-word">THREE</span> but it appears <span class="position-word">FIRST</span>
+      </div>
+
+      <div class="sentence" data-custom-order="5">
+        This is text <span class="number-word">FOUR</span> but it appears <span class="position-word">FIFTH</span>
+      </div>
+
+      <div class="sentence" data-custom-order="2">
+        This is text <span class="number-word">FIVE</span> but it appears <span class="position-word">SECOND</span>
+      </div>
+
+      <div class="sentence" data-custom-order="6">
+        This is text <span class="number-word">SIX</span> but it appears <span class="position-word">SIXTH</span>
+      </div>
+
+      <div class="sentence" data-custom-order="4">
+        This is text <span class="number-word">SEVEN</span> but it appears <span class="position-word">FOURTH</span>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box">
+      <h3>🔑 Key Concepts Demonstrated:</h3>
+      <ul>
+        <li><strong>Variant 1:</strong> HTML document order - text animates as it appears in the DOM</li>
+        <li><strong>Variant 2:</strong> Custom ordering with <code>data-custom-order</code> - animate in any sequence!</li>
+        <li>Mix text and graphics: divider line animated separately but in sequence</li>
+        <li>Use <code>data-sub-set-name</code> attributes for semantic structure</li>
+        <li>Perfect for business cards, profiles, and structured content</li>
+      </ul>
+    </div>
+
+    <div class="controls">
+      <button onclick="replayAnimation()">Replay Animation</button>
+      <button onclick="location.href='../index.html'">Back to Examples</button>
+    </div>
+  </div>
+
+  <!-- Anime.js from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
+
+  <!-- CharWrapper - Single Bundle File -->
+  <script src="../../dist/charwrapper.js"></script>
+
+  <script>
+    // Store wrappers and animations for replay
+    let wrapper1;
+    let animations = {
+      variant1: [],
+      variant2: []
+    };
+
+    function initAnimation() {
+      // ===== VARIANT 1: HTML Document Order =====
+      wrapper1 = new CharWrapper('.profile-card', {
+        wrap: { chars: true },
+        enumerate: { chars: true }
+      });
+
+      const { chars: chars1 } = wrapper1.wrap();
+
+      // Set initial state for text characters
+      chars1.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'translateY(30px) rotate(-5deg)';
+      });
+
+      // Set initial state for divider
+      const divider = document.querySelector('.divider');
+      divider.style.transform = 'scaleX(0)';
+
+      // Animate all text characters with stagger
+      animations.variant1.push(anime({
+        targets: chars1,
+        opacity: [0, 1],
+        translateY: [30, 0],
+        rotate: [-5, 0],
+        duration: 800,
+        delay: anime.stagger(30),
+        easing: 'easeOutBack',
+      }));
+
+      // Animate the divider line
+      animations.variant1.push(anime({
+        targets: '.divider',
+        scaleX: [0, 1],
+        duration: 800,
+        delay: 600,
+        easing: 'easeOutQuad'
+      }));
+
+      // Add a subtle pulse effect
+      animations.variant1.push(anime({
+        targets: '.divider',
+        opacity: [1, 0.7, 1],
+        duration: 800,
+        delay: 1000,
+        easing: 'easeInOutSine'
+      }));
+
+      // ===== VARIANT 2: Custom Order with data-custom-order =====
+      // Get all sentences and sort by data-custom-order
+      const sentences = Array.from(document.querySelectorAll('.sentence'));
+
+      // Sort sentences by data-custom-order attribute
+      const sortedSentences = sentences.sort((a, b) => {
+        const orderA = parseInt(a.getAttribute('data-custom-order') || '0');
+        const orderB = parseInt(b.getAttribute('data-custom-order') || '0');
+        return orderA - orderB;
+      });
+
+      // Wrap each sentence individually
+      const allOrderedChars = [];
+      sortedSentences.forEach(sentence => {
+        const sentenceWrapper = new CharWrapper(sentence, {
+          wrap: { chars: true },
+          enumerate: { chars: true }
+        });
+        const { chars } = sentenceWrapper.wrap();
+        allOrderedChars.push(...chars);
+      });
+
+      // Set initial state for ordered text
+      allOrderedChars.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'scale(0.5) rotate(15deg)';
+      });
+
+      // Animate in custom order (THREE, FIVE, TWO, SEVEN, FOUR, SIX, ONE)
+      animations.variant2.push(anime({
+        targets: allOrderedChars,
+        opacity: [0, 1],
+        scale: [0.5, 1],
+        rotate: [15, 0],
+        duration: 600,
+        delay: anime.stagger(20, { start: 1500 }), // Start after first animation
+        easing: 'easeOutBack'
+      }));
+    }
+
+    // Replay function
+    function replayAnimation() {
+      // Reset variant 1 characters
+      const chars1 = document.querySelectorAll('.profile-card .char');
+      chars1.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'translateY(30px) rotate(-5deg)';
+      });
+
+      // Reset divider
+      const divider = document.querySelector('.divider');
+      divider.style.transform = 'scaleX(0)';
+      divider.style.opacity = '1';
+
+      // Reset variant 2 characters
+      const chars2 = document.querySelectorAll('.ordered-card .char');
+      chars2.forEach(char => {
+        char.style.opacity = '0';
+        char.style.transform = 'scale(0.5) rotate(15deg)';
+      });
+
+      // Restart all animations
+      animations.variant1.forEach(anim => anim.restart());
+      animations.variant2.forEach(anim => anim.restart());
+    }
+
+    // Initialize on page load
+    initAnimation();
+
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+      if (wrapper1) wrapper1.destroy();
+    });
+  </script>
+</body>
+</html>
