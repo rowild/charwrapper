@@ -11,13 +11,8 @@
   <!-- CharWrapper bundle -->
   <script src="../../dist/charwrapper.min.js"></script>
 
+  <link rel="stylesheet" href="../css/3d-common.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(to bottom, #1a1a2e 0%, #0f3460 50%, #16213e 100%);
@@ -169,44 +164,31 @@
       background: rgba(255, 255, 255, 0.3);
       border-color: rgba(255, 255, 255, 0.6);
     }
-
-    .back-link {
-      position: fixed;
-      top: 2rem;
-      left: 2rem;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      color: white;
-      text-decoration: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 50px;
-      font-weight: 600;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      z-index: 1000;
-    }
-
-    .back-link:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.4);
-      transform: translateX(-5px);
-    }
-
-    .back-link::before {
-      content: '←';
-      font-size: 1.2rem;
-    }
   </style>
 </head>
 <body>
   <a href="index.html" class="back-link">All Examples</a>
 
+  <div class="nav-menu">
+    <h3>More Anime.js Examples</h3>
+    <ul>
+      <li><a href="01-text-reveal.html">Text Reveal Animations</a></li>
+      <li><a href="02-scramble.html">Scramble & Shuffle</a></li>
+      <li><a href="03-hover-effects.html">Interactive Hover Effects</a></li>
+      <li><a href="04-scroll-trigger.html">Scroll Triggered Animations</a></li>
+      <li><a href="05-character-groups.html">Character Groups</a></li>
+      <li><a href="06-animation-presets.html">Animation Examples</a></li>
+      <li><a href="07-text-transitions.html">Text Transitions</a></li>
+      <li><a href="08-3d-text.html">3D Text Effects</a></li>
+      <li><a href="09-data-attributes.html">Data Attributes</a></li>
+      <li class="padding-top: 0.25rem; border-top: 1px solid silder; margin-top: 0.25rem;"></li>
+      <li><a href="index.html#animejs">Back to All Anime.js Examples</a></li>
+    </ul>
+  </div>
+  
   <div class="info">
     <h1>3D Text Effects</h1>
-    <p>CharWrapper with CSS 3D transforms and animated effects</p>
+    <p>CharWrapper in 3D with Anime.js</p>
   </div>
 
   <div class="container">
@@ -239,25 +221,23 @@
     const leftChars = leftWrapper.wrap().chars;
     const rightChars = rightWrapper.wrap().chars;
 
-    // Store active timelines
-    let activeTimelines = [];
+    // Store active animations
+    let activeAnimations = [];
 
     // Clear all active animations
     function stopAll() {
-      activeTimelines.forEach(tl => tl.kill());
-      activeTimelines = [];
+      activeAnimations.forEach(anim => anim.pause());
+      activeAnimations = [];
 
       // Reset all characters
-      gsap.set([...leftChars, ...rightChars], {
-        scale: 1,
-        rotation: 0,
-        color: '#00d4ff',
-        clearProps: 'all'
+      [...leftChars, ...rightChars].forEach(char => {
+        char.style.transform = '';
+        char.style.color = '';
       });
 
       // Restore original colors
-      gsap.set(leftChars, { color: '#00d4ff' });
-      gsap.set(rightChars, { color: '#ff6b6b' });
+      leftChars.forEach(char => char.style.color = '#00d4ff');
+      rightChars.forEach(char => char.style.color = '#ff6b6b');
 
       // Update active button
       document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
@@ -280,79 +260,27 @@
 
       // Create a continuous color wave that cycles through each character
       leftChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1 });
-        tl.to(char, {
-          color: colors[0],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[1],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[2],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[3],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[4],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[5],
-          duration: 0.4,
-          ease: 'power2.inOut'
+        const animation = anime({
+          targets: char,
+          color: colors,
+          duration: 2400, // Total duration for cycling through all colors
+          delay: index * 100, // Stagger the start time for wave effect
+          easing: 'linear',
+          loop: true
         });
-
-        // Stagger the start time for wave effect
-        tl.delay(index * 0.1);
-        activeTimelines.push(tl);
+        activeAnimations.push(animation);
       });
 
       rightChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1 });
-        tl.to(char, {
-          color: colors[0],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[1],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[2],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[3],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[4],
-          duration: 0.4,
-          ease: 'power2.inOut'
-        })
-        .to(char, {
-          color: colors[5],
-          duration: 0.4,
-          ease: 'power2.inOut'
+        const animation = anime({
+          targets: char,
+          color: colors,
+          duration: 2400, // Total duration for cycling through all colors
+          delay: (rightChars.length - 1 - index) * 100 + 300, // Stagger from opposite direction
+          easing: 'linear',
+          loop: true
         });
-
-        // Stagger from opposite direction
-        tl.delay((rightChars.length - 1 - index) * 0.1 + 0.3);
-        activeTimelines.push(tl);
+        activeAnimations.push(animation);
       });
     }
 
@@ -363,26 +291,32 @@
 
       // Left side - scale wave from start to end
       leftChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1, yoyo: true });
-        tl.to(char, {
-          scale: 1.6,
-          duration: 0.3,
-          ease: 'power2.inOut'
+        const animation = anime({
+          targets: char,
+          scale: [
+            { value: 1, duration: 0 },
+            { value: 1.6, duration: 300, easing: 'easeInOutQuad' },
+            { value: 1, duration: 300, easing: 'easeInOutQuad' }
+          ],
+          delay: index * 80,
+          loop: true
         });
-        tl.delay(index * 0.08);
-        activeTimelines.push(tl);
+        activeAnimations.push(animation);
       });
 
       // Right side - scale wave from end to start
       rightChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1, yoyo: true });
-        tl.to(char, {
-          scale: 1.6,
-          duration: 0.3,
-          ease: 'power2.inOut'
+        const animation = anime({
+          targets: char,
+          scale: [
+            { value: 1, duration: 0 },
+            { value: 1.6, duration: 300, easing: 'easeInOutQuad' },
+            { value: 1, duration: 300, easing: 'easeInOutQuad' }
+          ],
+          delay: (rightChars.length - 1 - index) * 80 + 200,
+          loop: true
         });
-        tl.delay((rightChars.length - 1 - index) * 0.08 + 0.2);
-        activeTimelines.push(tl);
+        activeAnimations.push(animation);
       });
     }
 
@@ -393,26 +327,30 @@
 
       // Left side - rotate continuously with wave delay
       leftChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1 });
-        tl.to(char, {
-          rotationY: '+=360',
-          duration: 1.2,
-          ease: 'power1.inOut'
+        const animation = anime({
+          targets: char,
+          rotateY: [
+            { value: 0, duration: 0 },
+            { value: 360, duration: 1200, easing: 'easeInOutQuad' }
+          ],
+          delay: index * 100,
+          loop: true
         });
-        tl.delay(index * 0.1);
-        activeTimelines.push(tl);
+        activeAnimations.push(animation);
       });
 
       // Right side - rotate opposite direction with wave delay
       rightChars.forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1 });
-        tl.to(char, {
-          rotationY: '-=360',
-          duration: 1.2,
-          ease: 'power1.inOut'
+        const animation = anime({
+          targets: char,
+          rotateY: [
+            { value: 0, duration: 0 },
+            { value: -360, duration: 1200, easing: 'easeInOutQuad' }
+          ],
+          delay: (rightChars.length - 1 - index) * 100 + 400,
+          loop: true
         });
-        tl.delay((rightChars.length - 1 - index) * 0.1 + 0.4);
-        activeTimelines.push(tl);
+        activeAnimations.push(animation);
       });
     }
 
@@ -423,14 +361,17 @@
 
       // Both sides pulse together with slight stagger across characters
       [...leftChars, ...rightChars].forEach((char, index) => {
-        const tl = gsap.timeline({ repeat: -1, yoyo: true });
-        tl.to(char, {
-          scale: 1.4,
-          duration: 0.6,
-          ease: 'sine.inOut'
+        const animation = anime({
+          targets: char,
+          scale: [
+            { value: 1, duration: 0 },
+            { value: 1.4, duration: 600, easing: 'easeInOutSine' },
+            { value: 1, duration: 600, easing: 'easeInOutSine' }
+          ],
+          delay: index * 30,
+          loop: true
         });
-        tl.delay(index * 0.03);
-        activeTimelines.push(tl);
+        activeAnimations.push(animation);
       });
     }
 

@@ -11,13 +11,8 @@
   <!-- CharWrapper bundle -->
   <script src="../../dist/charwrapper.min.js"></script>
 
+  <link rel="stylesheet" href="../css/3d-common.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background: linear-gradient(to bottom, #1a1a2e 0%, #0f3460 50%, #16213e 100%);
@@ -169,44 +164,29 @@
       background: rgba(255, 255, 255, 0.3);
       border-color: rgba(255, 255, 255, 0.6);
     }
-
-    .back-link {
-      position: fixed;
-      top: 2rem;
-      left: 2rem;
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      color: white;
-      text-decoration: none;
-      padding: 0.8rem 1.5rem;
-      border-radius: 50px;
-      font-weight: 600;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      transition: all 0.3s;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      z-index: 1000;
-    }
-
-    .back-link:hover {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.4);
-      transform: translateX(-5px);
-    }
-
-    .back-link::before {
-      content: '←';
-      font-size: 1.2rem;
-    }
   </style>
 </head>
 <body>
-  <a href="index.html" class="back-link">All Examples</a>
-
+  <div class="nav-menu">
+    <h3>More WAAPI Examples</h3>
+    <ul>
+      <li><a href="01-text-reveal.html">Text Reveal Animations</a></li>
+      <li><a href="02-scramble.html">Scramble & Shuffle</a></li>
+      <li><a href="03-hover-effects.html">Interactive Hover Effects</a></li>
+      <li><a href="04-scroll-trigger.html">Scroll Triggered Animations</a></li>
+      <li><a href="05-character-groups.html">Character Groups</a></li>
+      <li><a href="06-animation-presets.html">Animation Examples</a></li>
+      <li><a href="07-text-transitions.html">Text Transitions</a></li>
+      <li><a href="08-3d-text.html">3D Text Effects</a></li>
+      <li><a href="09-data-attributes.html">Data Attributes</a></li>
+      <li class="padding-top: 0.25rem; border-top: 1px solid silder; margin-top: 0.25rem;"></li>
+      <li><a href="index.html#waapi">Back to All WAAPI Examples</a></li>
+    </ul>
+  </div>
+  
   <div class="info">
     <h1>3D Text Effects</h1>
-    <p>CharWrapper with CSS 3D transforms and animated effects</p>
+    <p>CharWrapper in 3D width the Web Animation API</p>
   </div>
 
   <div class="container">

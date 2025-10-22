@@ -183,16 +183,21 @@ export class CharWrapper {
     // Get original text content
     const originalText = this.#rootElement!.textContent?.trim() || '';
 
+    // Sanitize text for aria attributes (remove line breaks and extra whitespace)
+    const sanitizedText = originalText.replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+
     // Add aria-label if configured
-    if (ariaLabel === 'auto' && originalText) {
-      this.#rootElement!.setAttribute('aria-label', originalText);
+    if (ariaLabel === 'auto' && sanitizedText) {
+      this.#rootElement!.setAttribute('aria-label', sanitizedText);
     } else if (ariaLabel && ariaLabel !== 'auto' && ariaLabel !== 'none') {
-      this.#rootElement!.setAttribute('aria-label', ariaLabel);
+      // Sanitize custom ariaLabel as well
+      const sanitizedAriaLabel = ariaLabel.replace(/[\r\n]+/g, ' ').replace(/\s{2,}/g, ' ').trim();
+      this.#rootElement!.setAttribute('aria-label', sanitizedAriaLabel);
     }
 
     // Add title attribute if not present and configured
-    if (addTitle && !this.#rootElement!.hasAttribute('title') && originalText) {
-      this.#rootElement!.setAttribute('title', originalText);
+    if (addTitle && !this.#rootElement!.hasAttribute('title') && sanitizedText) {
+      this.#rootElement!.setAttribute('title', sanitizedText);
     }
   }
 

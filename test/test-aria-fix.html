@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test ARIA Fix</title>
+</head>
+<body>
+    <h1>Testing ARIA Attributes Fix</h1>
+    <p id="test-element">This is a test with line breaks:
+and special characters!
+It should format properly.</p>
+
+    <script type="module">
+        // Import the CharWrapper from the source files
+        import CharWrapper from './dist/esm/CharWrapper.js';
+
+        // Create a wrapper for the test element
+        const wrapper = new CharWrapper('#test-element', {
+            wrap: { chars: true },
+            accessibility: { 
+                enabled: true,
+                ariaLabel: 'auto',
+                ariaHidden: true
+            }
+        });
+
+        // Wrap the text
+        const { chars } = wrapper.wrap();
+
+        // Check the aria-label of the parent element
+        const testElement = document.getElementById('test-element');
+        console.log('aria-label attribute:', testElement.getAttribute('aria-label'));
+        
+        // Verify it doesn't contain line breaks
+        const ariaLabel = testElement.getAttribute('aria-label');
+        if (ariaLabel.includes('\n') || ariaLabel.includes('\r')) {
+            console.error('ERROR: aria-label still contains line breaks!');
+        } else {
+            console.log('SUCCESS: aria-label is properly formatted without line breaks');
+        }
+    </script>
+</body>
+</html>

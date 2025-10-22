@@ -1460,3 +1460,869 @@ Check out the examples folder for production-ready code:
 **Built with ❤️ for modern web animations**
 
 *CharWrapper 2.0 - Zero dependencies, maximum performance*
+# CharWrapper vs GSAP SplitText - Detailed Comparison
+
+## 📊 Executive Summary
+
+**GSAP SplitText** is the professional, feature-rich industry standard with 14+ advanced features.
+**CharWrapper 2.0** is a lighter, independent alternative focused on character/word wrapping basics.
+
+---
+
+## ✅ Similarities
+
+### Core Functionality
+Both libraries provide:
+
+| Feature | CharWrapper 2.0 | GSAP SplitText |
+|---------|----------------|----------------|
+| **Character splitting** | ✅ `wrap: { chars: true }` | ✅ `type: "chars"` |
+| **Word splitting** | ✅ `wrap: { words: true }` | ✅ `type: "words"` |
+| **Nested wrapping** | ✅ Words contain chars | ✅ Words contain chars |
+| **Custom CSS classes** | ✅ `classes: { char: 'x' }` | ✅ `charsClass: 'x'` |
+| **Class enumeration** | ✅ `enumerate: { chars: true }` | ✅ `charsClass: 'char++'` |
+| **Custom HTML tags** | ✅ `tags: { char: 'span' }` | ✅ `tag: 'span'` |
+| **Destroy/cleanup** | ✅ `wrapper.destroy()` | ✅ `splitText.revert()` |
+| **Re-wrapping** | ✅ `wrapper.rewrap()` | ✅ `splitText.split(newVars)` |
+
+### Design Patterns
+- Both use ES6 classes
+- Both return element arrays for GSAP animation
+- Both support method chaining
+- Both designed specifically for GSAP integration
+
+---
+
+## 🔴 Key Differences
+
+### 1. **Line Splitting** ⭐ MAJOR
+
+| Feature | CharWrapper 2.0 | GSAP SplitText |
+|---------|----------------|----------------|
+| **Split by lines** | ❌ **NOT SUPPORTED** | ✅ `type: "lines"` |
+| **Line detection** | ❌ N/A | ✅ Intelligent algorithm |
+| **Line reflow handling** | ❌ N/A | ✅ `autoSplit: true` |
+| **Deep slicing** | ❌ N/A | ✅ Handles nested elements across lines |
+
+**Impact:** This is the **biggest missing feature** in CharWrapper. Line splitting is crucial for many professional text animations.
+
+---
+
+### 2. **Accessibility** ⭐ MAJOR
+
+| Feature | CharWrapper 2.0 | GSAP SplitText |
+|---------|----------------|----------------|
+| **aria-label** | ❌ Not implemented | ✅ Auto-added to parent |
+| **aria-hidden** | ❌ Not implemented | ✅ Auto-added to split elements |
+| **Accessibility modes** | ❌ None | ✅ `aria: "auto"\|"hidden"\|"none"` |
+| **Screen reader friendly** | ✅ Yes | ✅ Yes |
+
+**Impact:** CharWrapper now includes accessibility features for screen readers.
+
+---
+
+### 3. **Advanced Features** ⭐ MAJOR
+
+#### Mask/Reveal Effects
+| Feature | CharWrapper 2.0 | GSAP SplitText |
+|---------|----------------|----------------|
+| **Mask property** | ❌ Not supported | ✅ `mask: "lines"\|"words"\|"chars"` |
+| **Automatic masking** | ❌ Manual CSS needed | ✅ Creates wrapper with `overflow: hidden` |
+| **Reveal animations** | ⚠️ Possible but manual | ✅ Built-in, easy |
+
+#### Auto-Split & Responsiveness
+| Feature | CharWrapper 2.0 | GSAP SplitText |
+|---------|----------------|----------------|
+| **Font loading detection** | ❌ Not supported | ✅ `autoSplit: true` + font observer |
+| **Resize observer** | ❌ Not supported | ✅ Auto re-splits on resize |
+| **Debounced re-splitting** | ❌ N/A | ✅ 200ms debounce |
+| **Responsive text** | ⚠️ Manual rewrap() | ✅ Automatic |
+
+#### Text Processing
+| Feature | CharWrapper 2.0 | GSAP SplitText |
+|---------|----------------|----------------|
+| **White space reduction** | ✅ `trimWhitespace: true` | ✅ `reduceWhiteSpace: true` |
+| **Preserve `<pre>` formatting** | ❌ No | ✅ Honors extra spaces + auto `<br>` |
+| **Custom word delimiter** | ❌ Only space | ✅ `wordDelimiter: /regex/` or custom |
+| **Ignore elements** | ⚠️ Via `_exclude_` data attr | ✅ `ignore: ".keep-whole"` |
+| **Smart wrap** | ❌ No | ✅ Prevents odd breaks |
+| **Deep slice** | ❌ No | ✅ Subdivides nested `<strong>` across lines |
+
+---
+
+### 4. **Performance & Optimization**
+
+| Feature | CharWrapper 2.0 | GSAP SplitText |
+|---------|----------------|----------------|
+| **File size** | ~28KB (6 modules) | ~14KB (50% smaller after rewrite!) |
+| **TypeScript** | ❌ JSDoc only | ✅ Written in TypeScript |
+| **Bundle optimization** | ⚠️ Manual imports | ✅ Tree-shakeable |
+| **Performance monitoring** | ❌ No | ✅ Internal optimizations |
+
+---
+
+### 5. **API Design**
+
+#### Configuration Syntax
+```javascript
+// CharWrapper 2.0 - Grouped options
+new CharWrapper('.text', {
+  wrap: { chars: true, words: true },
+  enumerate: { chars: true, includeSpaces: true },
+  classes: { char: 'c', word: 'w' },
+  tags: { char: 'span' }
+});
+
+// GSAP SplitText - Flat options
+new SplitText('.text', {
+  type: 'chars,words',
+  charsClass: 'c++',
+  wordsClass: 'w++',
+  tag: 'span'
+});
+```
+
+**Winner:** SplitText is more concise. CharWrapper's grouped approach is more organized but verbose.
+
+#### Class Enumeration
+```javascript
+// CharWrapper 2.0 - Separate config
+enumerate: { chars: true }
+// Result: .char .char-001 .char-002
+
+// GSAP SplitText - In class name
+charsClass: 'char++'
+// Result: .char .char1 .char2
+```
+
+**Winner:** SplitText's `++` syntax is more elegant.
+
+---
+
+### 6. **Special Features**
+
+| Feature | CharWrapper 2.0 | GSAP SplitText |
+|---------|----------------|----------------|
+| **CSS variable indices** | ❌ No | ✅ `propIndex: true` → `--char: 3` |
+| **Custom text preparation** | ❌ No | ✅ `prepareText: fn` callback |
+| **onSplit callback** | ❌ No | ✅ `onSplit: fn` with auto-timing |
+| **onRevert callback** | ❌ No | ✅ `onRevert: fn` |
+| **Special char handling** | ⚠️ Basic regex | ✅ `specialChars: /regex/` or array |
+| **Mask arrays** | ❌ No | ✅ Separate `masks` property |
+
+---
+
+## 🚨 What CharWrapper is MISSING (Critical Features)
+
+### 🔴 1. **LINE SPLITTING** - The Biggest Gap
+
+**Why it matters:** Line splitting is essential for:
+- Title reveals that animate line-by-line
+- Paragraph entrance animations
+- Staggered line effects
+- Responsive text that reflows properly
+
+**Example use case:**
+```javascript
+// SplitText can do this:
+const split = new SplitText('.title', { type: 'lines' });
+gsap.from(split.lines, {
+  y: 100,
+  opacity: 0,
+  stagger: 0.2
+});
+
+// CharWrapper cannot! ❌
+```
+
+**Impact Level:** 🔴 **CRITICAL** - This is the #1 feature professionals expect.
+
+---
+
+### 🟢 2. **ACCESSIBILITY (ARIA)** - Now Implemented
+
+**Why it matters:**
+- Screen readers can read split text with aria-label
+- Legal requirement in many countries (ADA, WCAG 2.1)
+- CharWrapper now supports accessibility
+
+**Current state:**
+```html
+<!-- CharWrapper output (now accessible) -->
+<div class="text" aria-label="Hi">
+  <span class="char" aria-hidden="true">H</span>
+  <span class="char" aria-hidden="true">i</span>
+</div>
+<!-- Screen reader reads: "Hi" (correct) ✅ -->
+
+<!-- SplitText output (accessible) -->
+<div class="text" aria-label="Hi">
+  <span class="char" aria-hidden="true">H</span>
+  <span class="char" aria-hidden="true">i</span>
+</div>
+<!-- Screen reader reads: "Hi" (correct) ✅ -->
+```
+
+**Impact Level:** 🟢 **RESOLVED** - Now supports accessibility features.
+
+---
+
+### 🟡 3. **MASKING/REVEAL EFFECTS** - Professional Feature
+
+**Why it matters:**
+- Clean text reveals without clipping issues
+- Professional-looking line-by-line animations
+- Proper overflow handling
+
+**Example:**
+```javascript
+// SplitText
+const split = new SplitText('.text', {
+  type: 'lines',
+  mask: 'lines'  // ✅ Auto-creates masks
+});
+gsap.from(split.masks, { scaleY: 0, transformOrigin: 'top' });
+
+// CharWrapper
+// ❌ Must manually create wrapper elements and CSS
+```
+
+**Impact Level:** 🟡 **HIGH** - Very common in professional work.
+
+---
+
+### 🟡 4. **AUTO-SPLIT (Responsive)** - Quality of Life
+
+**Why it matters:**
+- Fonts loading late breaks layout
+- Window resizing breaks line splits
+- Manual rewrapping is tedious
+
+**SplitText solution:**
+```javascript
+const split = new SplitText('.text', {
+  type: 'lines',
+  autoSplit: true  // ✅ Auto re-splits on font load & resize
+});
+```
+
+**CharWrapper workaround:**
+```javascript
+// ❌ Must manually detect and rewrap
+window.addEventListener('resize', debounce(() => {
+  wrapper.rewrap();
+}, 200));
+
+document.fonts.ready.then(() => {
+  wrapper.rewrap();
+});
+```
+
+**Impact Level:** 🟡 **HIGH** - Essential for responsive sites.
+
+---
+
+### 🟠 5. **SMART WRAP** - Edge Case Handling
+
+**Why it matters:**
+- Prevents awkward character-level line breaks
+- Better typography control
+
+**Example issue:**
+```html
+<!-- Without smart wrap -->
+<span class="char">H</span>
+<span class="char">e</span>  <!-- Line break here! -->
+<span class="char">l</span>
+<span class="char">l</span>
+<span class="char">o</span>
+<!-- "He" on one line, "llo" on next - ugly! -->
+
+<!-- With smart wrap (SplitText) -->
+<span style="white-space: nowrap;">
+  <span class="char">H</span>
+  <span class="char">e</span>
+  <span class="char">l</span>
+  <span class="char">l</span>
+  <span class="char">o</span>
+</span>
+<!-- Word stays together! ✅ -->
+```
+
+**Impact Level:** 🟠 **MEDIUM** - Annoying edge case.
+
+---
+
+### 🟠 6. **DEEP SLICE** - Nested Element Handling
+
+**Why it matters:**
+- Handles `<strong>`, `<em>`, `<a>` spanning multiple lines
+- Prevents vertical expansion of lines
+
+**Example:**
+```html
+<!-- Input -->
+<p>This is <strong>important bold text</strong> here.</p>
+
+<!-- If "bold text" wraps across 2 lines, SplitText subdivides it -->
+<!-- CharWrapper strips it or breaks it ❌ -->
+```
+
+**Impact Level:** 🟠 **MEDIUM** - Common in CMS content.
+
+---
+
+### 🟠 7. **CSS VARIABLE INDICES** - Modern CSS Integration
+
+**Why it matters:**
+- Clean CSS-based animations
+- No JS animation needed for simple effects
+
+**SplitText:**
+```javascript
+new SplitText('.text', { propIndex: true });
+```
+```css
+.char {
+  animation-delay: calc(var(--char) * 0.05s);
+}
+```
+
+**CharWrapper:**
+```javascript
+// ❌ Not supported, must use GSAP or manual styling
+```
+
+**Impact Level:** 🟠 **MEDIUM** - Nice-to-have for CSS animations.
+
+---
+
+### 🟢 8. **CUSTOM WORD DELIMITER** - Edge Case
+
+**Why it matters:**
+- Split by custom characters (e.g., `-` or `|`)
+- Internationalization needs
+
+**Impact Level:** 🟢 **LOW** - Rare use case.
+
+---
+
+### 🟢 9. **IGNORE SELECTOR** - Convenience
+
+**Why it matters:**
+- Skip certain elements (e.g., `<sup>`, `<sub>`)
+
+**Impact Level:** 🟢 **LOW** - Can work around with data attributes.
+
+---
+
+## 📊 Feature Comparison Table
+
+| Feature Category | CharWrapper 2.0 | GSAP SplitText | Winner |
+|------------------|----------------|----------------|--------|
+| **Basic char/word split** | ✅ Good | ✅ Excellent | Tie |
+| **Line splitting** | ❌ None | ✅ Excellent | SplitText |
+| **Accessibility** | ✅ Good | ✅ Excellent | Tie |
+| **Performance** | ✅ Good | ✅ Excellent | SplitText |
+| **File size** | 28KB | 14KB | SplitText |
+| **TypeScript** | JSDoc only | Native TS | SplitText |
+| **Auto-responsiveness** | ❌ Manual | ✅ Auto | SplitText |
+| **Masking** | ❌ Manual | ✅ Built-in | SplitText |
+| **API simplicity** | Good | Excellent | SplitText |
+| **Documentation** | Excellent | Excellent | Tie |
+| **Examples** | 17 demos | Many | Tie |
+| **Price** | Free | Free (since v3.13) | Tie |
+| **Dependencies** | None | GSAP core | CharWrapper |
+| **Custom config** | More verbose | Concise | SplitText |
+
+---
+
+## 💡 When to Use Each
+
+### Use **GSAP SplitText** when:
+- ✅ You need **line splitting** (most professional work)
+- ✅ **Accessibility** is required (it always should be!)
+- ✅ Building **responsive** sites with web fonts
+- ✅ Need **mask/reveal** effects
+- ✅ Want **auto-resplit** on viewport changes
+- ✅ Working on **client projects** (proven, supported)
+- ✅ Need **TypeScript** definitions
+- ✅ Want smallest file size
+- ✅ Need advanced features (deep slice, custom delimiters, etc.)
+
+### Use **CharWrapper 2.0** when:
+- ✅ You **only need chars/words** (no lines)
+- ✅ Learning/educational purposes
+- ✅ Want full control of implementation
+- ✅ Building a custom solution
+- ✅ Don't need GSAP core loaded
+- ⚠️ Accessibility not required (rare!)
+
+---
+
+## 🎯 Recommendations for CharWrapper Improvement
+
+To make CharWrapper competitive with SplitText, add these features **in priority order:**
+
+### Priority 1: CRITICAL (Must-Have)
+1. **Line splitting algorithm** - Core feature gap
+2. **autoSplit** - Essential for modern web
+3. **Accessibility (ARIA)** - Legal/ethical requirement (Done!)
+
+### Priority 2: HIGH (Should-Have)
+4. **Masking support** - Professional animations
+5. **Reduce file size** - Tree-shaking, minification
+6. **TypeScript rewrite** - Modern standard
+
+### Priority 3: MEDIUM (Nice-to-Have)
+7. **Smart wrap** - Better typography
+8. **Deep slice** - Nested element handling
+9. **CSS variable indices** - Modern CSS integration
+10. **Callbacks** (onSplit, onRevert)
+
+### Priority 4: LOW (Optional)
+11. **Custom word delimiters**
+12. **Ignore selectors**
+13. **Special char handling**
+
+---
+
+## 🏆 Verdict
+
+**GSAP SplitText is the clear winner** for professional production use. It's:
+- 🔴 50% smaller file size
+- 🔴 More feature-complete (14+ advanced features)
+- 🔴 Accessible (critical!)
+- 🔴 Has line splitting (essential!)
+- 🔴 Auto-responsive
+- 🔴 Written in TypeScript
+- 🔴 Industry standard
+
+**CharWrapper 2.0 is excellent for:**
+- 📚 Learning how text splitting works internally
+- 🎨 Simple char/word-only animations
+- 🔧 Custom implementations where you need full control
+- 📖 Educational purposes
+
+---
+
+## 💭 Final Thoughts
+
+CharWrapper 2.0 was an **excellent learning exercise** and demonstrates solid ES6+ coding practices, but **GSAP SplitText is professionally engineered** over years with edge cases, accessibility, and real-world production needs solved.
+
+**If building for production: Use SplitText.**
+**If learning/experimenting: CharWrapper is great!**
+
+The most valuable features CharWrapper lacks:
+1. 🔴 **Line splitting** (dealbreaker for most pros)
+2. 🟡 **Auto-split responsiveness** (quality of life)
+3. 🟡 **Masking/reveal effects** (professional animations)
+
+---
+
+**Bottom line:** CharWrapper is a great educational implementation, but SplitText is the production-ready tool. The GSAP team has solved problems you don't even know exist yet! 🚀
+# CharWrapper 2.0 - Quick Start Guide
+
+Get up and running with CharWrapper in under 5 minutes! 🚀
+
+---
+
+## 🎯 1. Open the Examples (Easiest Way to Start!)
+
+Double-click or open in your browser:
+
+```
+examples/index.html
+```
+
+This showcases all 4 example types. Click any card to see it in action!
+
+---
+
+## ⚡ 2. Create Your First Animation (30 seconds)
+
+Create a new HTML file:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My First CharWrapper Animation</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    h1 {
+      font-size: 4rem;
+      color: white;
+    }
+
+    .char {
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <h1 class="text">Hello World</h1>
+
+  <!-- Load GSAP from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+  <!-- Load CharWrapper -->
+  <script type="module">
+    import CharWrapper from './src/CharWrapper.js';
+
+    // Create wrapper
+    const wrapper = new CharWrapper('.text', {
+      wrap: { chars: true }
+    });
+
+    // Wrap the text
+    const { chars } = wrapper.wrap();
+
+    // Animate!
+    gsap.from(chars, {
+      opacity: 0,
+      y: 50,
+      rotation: -180,
+      stagger: 0.05,
+      duration: 1,
+      ease: 'back.out(1.7)'
+    });
+  </script>
+</body>
+</html>
+```
+
+**That's it!** Open this file in your browser. ✨
+
+---
+
+## 🎨 3. Common Patterns
+
+### Pattern: Fade In Stagger
+```javascript
+import CharWrapper from './src/CharWrapper.js';
+
+const wrapper = new CharWrapper('.text', {
+  wrap: { chars: true }
+});
+const { chars } = wrapper.wrap();
+
+gsap.from(chars, {
+  opacity: 0,
+  stagger: 0.05
+});
+```
+
+### Pattern: Slide Up
+```javascript
+gsap.from(chars, {
+  opacity: 0,
+  y: 30,
+  stagger: 0.03,
+  ease: 'power2.out'
+});
+```
+
+### Pattern: Scale & Rotate
+```javascript
+gsap.from(chars, {
+  scale: 0,
+  rotation: 360,
+  stagger: 0.04,
+  ease: 'back.out(2)'
+});
+```
+
+### Pattern: Words + Characters
+```javascript
+const wrapper = new CharWrapper('.text', {
+  wrap: { words: true, chars: true }
+});
+const { words, chars } = wrapper.wrap();
+
+// Animate words
+gsap.from(words, {
+  opacity: 0,
+  x: -50,
+  stagger: 0.1
+});
+
+// Or animate individual characters
+gsap.from(chars, {
+  opacity: 0,
+  stagger: 0.02
+});
+```
+
+### Pattern: Enumerated Classes
+```javascript
+const wrapper = new CharWrapper('.text', {
+  wrap: { chars: true },
+  enumerate: { chars: true } // Adds .char-001, .char-002, etc.
+});
+const { chars } = wrapper.wrap();
+
+// Now you can target specific characters in CSS!
+```
+
+CSS:
+```css
+.char-001 { color: red; }
+.char-002 { color: blue; }
+.char-003 { color: green; }
+```
+
+### Pattern: Hover Effects
+```javascript
+const { chars } = wrapper.wrap();
+
+chars.forEach(char => {
+  char.addEventListener('mouseenter', () => {
+    gsap.to(char, { scale: 1.5, duration: 0.3 });
+  });
+
+  char.addEventListener('mouseleave', () => {
+    gsap.to(char, { scale: 1, duration: 0.3 });
+  });
+});
+```
+
+### Pattern: Scroll-Triggered
+```javascript
+import CharWrapper from './src/CharWrapper.js';
+gsap.registerPlugin(ScrollTrigger);
+
+const wrapper = new CharWrapper('.text', {
+  wrap: { chars: true }
+});
+const { chars } = wrapper.wrap();
+
+gsap.from(chars, {
+  opacity: 0,
+  y: 30,
+  stagger: 0.02,
+  scrollTrigger: {
+    trigger: '.text',
+    start: 'top 80%',
+    end: 'top 50%',
+    scrub: 1
+  }
+});
+```
+
+---
+
+## 🔧 4. Configuration Cheat Sheet
+
+```javascript
+new CharWrapper(selector, {
+  // What to wrap
+  wrap: {
+    chars: true,        // Wrap individual characters
+    words: false,       // Wrap words
+    spaces: false,      // Wrap space characters
+    specialChars: false // Wrap !?.,; etc.
+  },
+
+  // Add numbered classes (.char-001, .char-002)
+  enumerate: {
+    chars: false,             // Enable char numbering
+    words: false,             // Enable word numbering
+    includeSpaces: false,     // Include spaces in count
+    includeSpecialChars: false // Include special chars in count
+  },
+
+  // CSS class names
+  classes: {
+    char: 'char',           // Base char class
+    word: 'word',           // Base word class
+    space: 'char--space',   // Space class
+    special: 'char--special', // Special char class
+    regular: 'char--regular'  // Regular char class
+  },
+
+  // HTML tags
+  tags: {
+    char: 'span', // span, div, i, em, strong, mark
+    word: 'span'
+  },
+
+  // Space replacement
+  replaceSpaceWith: '\xa0', // Non-breaking space
+
+  // Performance (usually keep defaults)
+  performance: {
+    useBatching: true,    // DocumentFragment batching
+    cacheSelectors: true  // Cache DOM queries
+  }
+});
+```
+
+---
+
+## 🎯 5. Essential Methods
+
+```javascript
+const wrapper = new CharWrapper('.text', config);
+
+// Wrap the text
+const { chars, words } = wrapper.wrap();
+
+// Get elements later
+const allChars = wrapper.getChars();
+const allWords = wrapper.getWords();
+
+// Get specific element
+const firstChar = wrapper.getChar(0);
+const secondWord = wrapper.getWord(1);
+
+// Filter by type
+const regularChars = wrapper.getCharsByType('regular');
+const spaces = wrapper.getCharsByType('space');
+const specialChars = wrapper.getCharsByType('special');
+
+// Check state
+if (wrapper.isWrapped()) {
+  // ...
+}
+
+// Unwrap (restore original)
+wrapper.unwrap();
+
+// Rewrap (unwrap + wrap)
+wrapper.rewrap();
+
+// Clean up (important!)
+wrapper.destroy();
+```
+
+---
+
+## 💡 6. Tips & Tricks
+
+### Tip 1: Always Destroy
+```javascript
+// In single-page apps, always clean up!
+window.addEventListener('beforeunload', () => {
+  wrapper.destroy();
+});
+```
+
+### Tip 2: Use Static Factory
+```javascript
+// Quick one-liner
+const wrapper = CharWrapper.create('.text', { wrap: { chars: true } });
+```
+
+### Tip 3: Combine with CSS
+```css
+.char {
+  display: inline-block;
+  transition: all 0.3s;
+}
+
+.char:hover {
+  color: #ff6b6b;
+  transform: translateY(-5px);
+}
+```
+
+### Tip 4: Filter Before Animating
+```javascript
+const { chars } = wrapper.wrap();
+
+// Only animate letters (not spaces)
+const regularChars = wrapper.getCharsByType('regular');
+gsap.from(regularChars, { opacity: 0, stagger: 0.05 });
+```
+
+### Tip 5: Multiple Instances
+```javascript
+const wrappers = CharWrapper.wrapMultiple(
+  ['.title', '.subtitle', '.description'],
+  { wrap: { chars: true } }
+);
+
+// Clean up all at once
+wrappers.forEach(w => w.destroy());
+```
+
+---
+
+## 🚨 Common Mistakes
+
+### ❌ Don't: Forget to set display
+```css
+/* Without this, wrapped chars won't flow correctly */
+.char {
+  display: inline-block; /* Add this! */
+}
+```
+
+### ❌ Don't: Forget to destroy
+```javascript
+// Memory leak in SPAs!
+const wrapper = new CharWrapper('.text', config);
+wrapper.wrap();
+// ... never destroyed
+```
+
+✅ **Do:** Always clean up
+```javascript
+const wrapper = new CharWrapper('.text', config);
+wrapper.wrap();
+
+// Later...
+wrapper.destroy();
+```
+
+### ❌ Don't: Wrap twice without unwrapping
+```javascript
+wrapper.wrap();
+wrapper.wrap(); // Error! Already wrapped
+```
+
+✅ **Do:** Use rewrap() or unwrap first
+```javascript
+wrapper.wrap();
+wrapper.rewrap(); // Correct!
+// OR
+wrapper.unwrap();
+wrapper.wrap(); // Also correct!
+```
+
+---
+
+## 📚 Next Steps
+
+1. ✅ You've created your first animation!
+2. 🎨 Explore `examples/` folder for more patterns
+3. 📖 Read `README.md` for complete API docs
+4. 🔄 Check `MIGRATION_GUIDE.md` if upgrading from v1.0
+5. 💡 Experiment with different GSAP eases and effects!
+
+---
+
+## 🆘 Need Help?
+
+- Check the examples: `examples/index.html`
+- Read the full docs: `README.md`
+- See the migration guide: `MIGRATION_GUIDE.md`
+- Review the summary: `SUMMARY.md`
+
+---
+
+## 🎉 You're Ready!
+
+CharWrapper 2.0 is designed to be simple yet powerful.
+
+**Happy animating!** 🚀✨

@@ -387,9 +387,9 @@
     <h2 class="section-title">Explore Examples</h2>
 
     <div class="tabs-container">
-      <button class="tab-button active" onclick="switchTab('gsap')">GSAP</button>
-      <button class="tab-button" onclick="switchTab('animejs')">Anime.js</button>
-      <button class="tab-button" onclick="switchTab('waapi')">Web Animations API</button>
+      <button class="tab-button active" data-tab-name="gsap" onclick="switchTab('gsap')">GSAP</button>
+      <button class="tab-button" data-tab-name="animejs" onclick="switchTab('animejs')">Anime.js</button>
+      <button class="tab-button" data-tab-name="waapi" onclick="switchTab('waapi')">Web Animations API</button>
     </div>
 
     <!-- GSAP Examples -->
@@ -908,7 +908,7 @@
     <p class="subtitle">Check out the source code and start animating!</p>
     <div class="cta-buttons">
       <a href="../src/CharWrapper.js" class="btn btn-primary">View Source</a>
-      <a href="01-text-reveal.html" class="btn btn-secondary">Try Examples</a>
+      <a href="/gsap/01-text-reveal.html" class="btn btn-secondary">Try Examples</a>
     </div>
   </section>
 
@@ -924,7 +924,7 @@
   <script src="../dist/charwrapper.js"></script>
   <script type="module">
 
-    // Tab switching function
+    // Tab switching function with URL hash support
     window.switchTab = function(tabName) {
       // Hide all tab contents
       document.querySelectorAll('.tab-content').forEach(content => {
@@ -939,9 +939,38 @@
       // Show selected tab content
       document.getElementById(`${tabName}-tab`).classList.add('active');
 
-      // Add active class to clicked button
-      event.target.classList.add('active');
+      // Add active class to the corresponding button
+      const activeButton = document.querySelector(`button[data-tab-name="${tabName}"]`);
+      if (activeButton) {
+        activeButton.classList.add('active');
+      }
+
+      // Update URL hash for browser history
+      window.location.hash = `#${tabName}`;
     };
+
+    // Initialize tab based on URL hash or default to 'gsap'
+    window.addEventListener('load', function() {
+      const hash = window.location.hash.substring(1);
+      const validTabs = ['gsap', 'animejs', 'waapi', 'motion'];
+      
+      if (validTabs.includes(hash)) {
+        switchTab(hash);
+      } else {
+        // Default to GSAP tab
+        switchTab('gsap');
+      }
+    });
+
+    // Handle browser back/forward navigation
+    window.addEventListener('hashchange', function() {
+      const hash = window.location.hash.substring(1);
+      const validTabs = ['gsap', 'animejs', 'waapi', 'motion'];
+      
+      if (validTabs.includes(hash)) {
+        switchTab(hash);
+      }
+    });
 
     // Animate logo
     const logoWrapper = new CharWrapper('#logo', {
