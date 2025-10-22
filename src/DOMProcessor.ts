@@ -148,8 +148,30 @@ export class DOMProcessor {
       return null;
     }
 
+    // Check if this text node has element siblings (adjacent elements)
+    const parentElement = textNode.parentElement;
+    let shouldPreserveAdjacentWhitespace = false;
+    
+    if (parentElement) {
+      const siblings = Array.from(parentElement.childNodes);
+      const textNodeIndex = siblings.indexOf(textNode);
+      
+      if (textNodeIndex !== -1) {
+        // Check if there are element nodes immediately before or after this text node
+        const prevSibling = siblings[textNodeIndex - 1];
+        const nextSibling = siblings[textNodeIndex + 1];
+        
+        if ((prevSibling && prevSibling.nodeType === Node.ELEMENT_NODE) || 
+            (nextSibling && nextSibling.nodeType === Node.ELEMENT_NODE)) {
+          shouldPreserveAdjacentWhitespace = true;
+        }
+      }
+    }
+
     // Extract and normalize text
-    const text = normalizeWhitespace(textNode.textContent, this.#config.processing.trimWhitespace);
+    // If this text node is adjacent to elements, preserve whitespace even if trimWhitespace is true
+    const shouldTrim = this.#config.processing.trimWhitespace && !shouldPreserveAdjacentWhitespace;
+    const text = normalizeWhitespace(textNode.textContent, shouldTrim);
 
     if (!text) {
       return null;

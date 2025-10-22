@@ -199,7 +199,7 @@ const chars = wrapper.getChars();
 
   processing: {
     stripHTML: true,        // Remove HTML tags before processing
-    trimWhitespace: true,   // Trim leading/trailing whitespace
+    trimWhitespace: true,   // Trim leading/trailing whitespace (preserved when adjacent to inline elements)
     preserveStructure: true, // Maintain DOM structure
     lazyWrap: false,        // Wrap on-demand for performance
     ordered: false          // Order elements by data-custom-order attribute (for data attribute selection)
