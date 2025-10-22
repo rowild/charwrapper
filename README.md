@@ -200,7 +200,9 @@ const chars = wrapper.getChars();
   processing: {
     stripHTML: true,        // Remove HTML tags before processing
     trimWhitespace: true,   // Trim leading/trailing whitespace
-    preserveStructure: true // Maintain DOM structure
+    preserveStructure: true, // Maintain DOM structure
+    lazyWrap: false,        // Wrap on-demand for performance
+    ordered: false          // Order elements by data-custom-order attribute (for data attribute selection)
   },
 
   performance: {
@@ -574,7 +576,16 @@ gsap.from(chars, { opacity: 0, stagger: 0.02 });
 
 ### Controlling Animation Order
 
-The text is wrapped in **HTML document order** - the order elements appear in your HTML source. If you want to change the animation order, simply rearrange the HTML elements:
+The text is wrapped in **HTML document order** - the order elements appear in your HTML source. If you want to change the animation order, you can either rearrange the HTML elements or use the `ordered: true` processing option:
+
+```javascript
+const wrapper = new CharWrapper('.profile', {
+  wrap: { chars: true },
+  processing: { ordered: true }  // This will order elements by data-custom-order attribute
+});
+```
+
+When `ordered: true`, elements are sorted by their `data-custom-order` attribute values instead of HTML document order.
 
 ```html
 <div class="profile">

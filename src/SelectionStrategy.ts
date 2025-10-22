@@ -70,7 +70,8 @@ export class DataAttributeStrategy extends SelectionStrategy {
    * @returns Array of selected elements
    */
   select(rootElement: string | Element, options: SelectionOptions = {}): Element[] {
-    const { ordered = false } = options;
+    // Use the ordered option from config if not explicitly passed in options
+    const { ordered = this.#config.processing.ordered } = options;
 
     // Get root element
     const root = is.element(rootElement)

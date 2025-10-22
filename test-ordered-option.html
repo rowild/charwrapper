@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test ordered option</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .container {
+      margin: 20px 0;
+      padding: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .char {
+      display: inline-block;
+      margin: 2px;
+      padding: 2px 4px;
+      background-color: #e0e0e0;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Testing ordered option</h1>
+  
+  <h2>Test 1: ordered: false (default) - Document order</h2>
+  <div class="container" id="test1">
+    <div data-sub-set-name="element" data-custom-order="3">Third in sequence (data-custom-order="3")</div>
+    <div data-sub-set-name="element" data-custom-order="1">First in sequence (data-custom-order="1")</div> 
+    <div data-sub-set-name="element" data-custom-order="2">Second in sequence (data-custom-order="2")</div>
+  </div>
+  
+  <h2>Test 2: ordered: true - Custom order (should be 1, 2, 3 based on data-custom-order)</h2>
+  <div class="container" id="test2">
+    <div data-sub-set-name="element" data-custom-order="3">This should appear 3rd in ordered: false, but 3rd in ordered: true</div>
+    <div data-sub-set-name="element" data-custom-order="1">This should appear 1st in ordered: true (first by data-custom-order)</div>
+    <div data-sub-set-name="element" data-custom-order="2">This should appear 2nd in ordered: true (second by data-custom-order)</div>
+  </div>
+
+  <!-- GSAP from CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <!-- CharWrapper - Single Bundle File -->
+  <script src="./dist/charwrapper.js"></script>
+  
+  <script>
+    console.log('Testing ordered option functionality...');
+    
+    // Test 1: Default behavior (ordered: false)
+    try {
+      const wrapper1 = new CharWrapper('#test1', {
+        wrap: { chars: true },
+        processing: { ordered: false }  // Default behavior - document order
+      });
+      const result1 = wrapper1.wrap();
+      console.log('Test 1 (ordered: false) - Wrapped elements:', result1.chars.length);
+      
+      // Log the order of elements to verify
+      const test1Elements = document.querySelectorAll('#test1 [data-sub-set-name]');
+      console.log('Test 1 - Elements in DOM order:', Array.from(test1Elements).map(el => 
+        `Order: ${el.getAttribute('data-custom-order')}, Content: ${el.textContent.substring(0, 10)}...`
+      ));
+    } catch (e) {
+      console.error('Error in Test 1:', e);
+    }
+    
+    // Test 2: With ordered: true
+    try {
+      const wrapper2 = new CharWrapper('#test2', {
+        wrap: { chars: true },
+        processing: { ordered: true }  // Should order by data-custom-order
+      });
+      const result2 = wrapper2.wrap();
+      console.log('Test 2 (ordered: true) - Wrapped elements:', result2.chars.length);
+      
+      // Log the order of elements to verify
+      const test2Elements = document.querySelectorAll('#test2 [data-sub-set-name]');
+      console.log('Test 2 - Elements order with ordered: true:', Array.from(test2Elements).map(el => 
+        `Order: ${el.getAttribute('data-custom-order')}, Content: ${el.textContent.substring(0, 10)}...`
+      ));
+    } catch (e) {
+      console.error('Error in Test 2:', e);
+    }
+    
+    console.log("Test with ordered option completed. Check the console for results.");
+  </script>
+</body>
+</html>

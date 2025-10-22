@@ -105,6 +105,7 @@ export interface ProcessingConfig {
   trimWhitespace: boolean;
   preserveStructure: boolean;
   lazyWrap: boolean;
+  ordered: boolean;
 }
 
 /**
@@ -208,6 +209,7 @@ export const DEFAULT_CONFIG: CharWrapperConfig = {
     trimWhitespace: true,      // Trim leading/trailing whitespace
     preserveStructure: true,   // Try to maintain DOM structure
     lazyWrap: false,          // Wrap on-demand (performance)
+    ordered: false,            // Order elements by data-custom-order attribute
   },
 
   // Performance options
