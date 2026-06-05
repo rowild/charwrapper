@@ -6,14 +6,17 @@
  * and how to structure the wrapped elements.
  */
 
-import { PATTERNS, CharWrapperConfig } from './config.js';
+import { PATTERNS, CharWrapperConfig, EnumerationRule } from './config.js';
 import { padNumber, buildClassString } from './utils.js';
 
 /**
  * Options for creating character/word elements
  */
 export interface WrapOptions {
-  subSetClass?: string | null;
+  rootSetName?: string | null;
+  setName?: string | null;
+  setCharClass?: string | null;
+  setWordClass?: string | null;
 }
 
 /**
@@ -28,8 +31,11 @@ export interface WrapWordsResult {
  * Counter object for enumeration
  */
 interface Counters {
+  rootSet: number;
   char: number;
   word: number;
+  attributeSets: Record<string, number>;
+  attributeSetWords: Record<string, number>;
 }
 
 export class WrapperFactory {
@@ -44,8 +50,11 @@ export class WrapperFactory {
   constructor(config: CharWrapperConfig) {
     this.#config = config;
     this.#counters = {
+      rootSet: 0,
       char: 0,
       word: 0,
+      attributeSets: {},
+      attributeSetWords: {},
     };
   }
 
@@ -53,8 +62,11 @@ export class WrapperFactory {
    * Resets all counters
    */
   resetCounters(): void {
+    this.#counters.rootSet = 0;
     this.#counters.char = 0;
     this.#counters.word = 0;
+    this.#counters.attributeSets = {};
+    this.#counters.attributeSetWords = {};
   }
 
   /**
@@ -65,11 +77,26 @@ export class WrapperFactory {
    * @returns Wrapped character element
    */
   createCharElement(char: string, options: WrapOptions = {}): HTMLElement {
-    const { subSetClass = null } = options;
+    if (typeof options !== 'object' || options === null) {
+      options = {};
+    }
+
+    const { setName = null, setCharClass = null } = options;
     const element = document.createElement(this.#config.tags.char);
 
     // Build class list
-    const classes: (string | null | undefined | false)[] = [this.#config.classes.char];
+    const classes: (string | null | undefined | false)[] = [
+      this.#config.classes.char,
+      this.#config.classes.rootSet,
+    ];
+
+    // Add root-set enumerated class if enabled
+    if (this.#config.enumerate.rootSet) {
+      const shouldEnumerate = this.#shouldEnumerateCharForRule(char, this.#config.enumerate.rootSet);
+      if (shouldEnumerate) {
+        classes.push(`${this.#config.classes.rootSet}-${padNumber(this.#counters.rootSet++)}`);
+      }
+    }
 
     // Add enumerated class if enabled
     if (this.#config.enumerate.chars) {
@@ -79,9 +106,19 @@ export class WrapperFactory {
       }
     }
 
-    // Add subset class if provided
-    if (subSetClass) {
-      classes.push(subSetClass);
+    // Add attribute-set class if provided
+    if (setCharClass) {
+      classes.push(setCharClass);
+    }
+
+    // Add attribute-set enumerated class if enabled and explicit set class exists
+    if (this.#config.enumerate.attributeSets && setName && setCharClass) {
+      const shouldEnumerate = this.#shouldEnumerateCharForRule(char, this.#config.enumerate.attributeSets);
+      if (shouldEnumerate) {
+        const count = this.#counters.attributeSets[setName] ?? 0;
+        classes.push(`${setCharClass}-${padNumber(count)}`);
+        this.#counters.attributeSets[setName] = count + 1;
+      }
     }
 
     // Add character type classes
@@ -122,7 +159,12 @@ export class WrapperFactory {
    * @param charElements - Array of wrapped character elements
    * @returns Wrapped word element containing character elements
    */
-  createWordElement(word: string, charElements: HTMLElement[] = []): HTMLElement {
+  createWordElement(word: string, charElements: HTMLElement[] = [], options: WrapOptions = {}): HTMLElement {
+    if (typeof options !== 'object' || options === null) {
+      options = {};
+    }
+
+    const { setName = null, setWordClass = null } = options;
     const element = document.createElement(this.#config.tags.word);
 
     // Build class list
@@ -134,6 +176,19 @@ export class WrapperFactory {
       const isSpaceWord = word.trim() === '';
       if (!isSpaceWord || this.#config.enumerate.includeSpaces) {
         classes.push(`${this.#config.classes.word}-${padNumber(this.#counters.word++)}`);
+      }
+    }
+
+    if (setWordClass) {
+      classes.push(setWordClass);
+    }
+
+    if (this.#config.enumerate.attributeSets && setName && setWordClass) {
+      const isSpaceWord = word.trim() === '';
+      if (!isSpaceWord || this.#getEnumerationRule(this.#config.enumerate.attributeSets).includeSpaces) {
+        const count = this.#counters.attributeSetWords[setName] ?? 0;
+        classes.push(`${setWordClass}-${padNumber(count)}`);
+        this.#counters.attributeSetWords[setName] = count + 1;
       }
     }
 
@@ -203,7 +258,7 @@ export class WrapperFactory {
       allCharElements.push(...charElements);
 
       // Create word element containing character elements
-      const wordElement = this.createWordElement(word, charElements);
+      const wordElement = this.createWordElement(word, charElements, options);
       wordElements.push(wordElement);
 
       // Add space between words (except after last word)
@@ -226,26 +281,56 @@ export class WrapperFactory {
    * @returns Whether the character should be enumerated
    */
   #shouldEnumerateChar(char: string): boolean {
+    return this.#shouldEnumerateCharForRule(char, {
+      includeSpaces: this.#config.enumerate.includeSpaces,
+      includeSpecialChars: this.#config.enumerate.includeSpecialChars,
+    });
+  }
+
+  /**
+   * Determines if a character should be enumerated for a specific rule.
+   *
+   * @param char - Character to check
+   * @param rule - Boolean or explicit inclusion rule
+   * @returns Whether the character should be enumerated
+   */
+  #shouldEnumerateCharForRule(char: string, rule: boolean | EnumerationRule): boolean {
+    if (!rule) {
+      return false;
+    }
+
+    const normalizedRule = this.#getEnumerationRule(rule);
     const isSpace = PATTERNS.space.test(char);
     const isSpecial = PATTERNS.special.test(char);
 
     // If including everything, enumerate all
-    if (this.#config.enumerate.includeSpaces && this.#config.enumerate.includeSpecialChars) {
+    if (normalizedRule.includeSpaces && normalizedRule.includeSpecialChars) {
       return true;
     }
 
     // If excluding spaces, skip space characters
-    if (isSpace && !this.#config.enumerate.includeSpaces) {
+    if (isSpace && !normalizedRule.includeSpaces) {
       return false;
     }
 
     // If excluding special chars, skip special characters
-    if (isSpecial && !this.#config.enumerate.includeSpecialChars) {
+    if (isSpecial && !normalizedRule.includeSpecialChars) {
       return false;
     }
 
     // Otherwise, enumerate
     return true;
+  }
+
+  #getEnumerationRule(rule: boolean | EnumerationRule): EnumerationRule {
+    if (typeof rule === 'object') {
+      return rule;
+    }
+
+    return {
+      includeSpaces: this.#config.enumerate.includeSpaces,
+      includeSpecialChars: this.#config.enumerate.includeSpecialChars,
+    };
   }
 
   /**

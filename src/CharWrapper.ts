@@ -4,7 +4,7 @@
  * Wraps text characters and words in HTML elements for animation purposes.
  * Designed to work seamlessly with GSAP and other animation libraries.
  *
- * @version 2.0.0
+ * @version 2.0.1
  * @author Robert Wildling
  * @license MIT
  *
@@ -23,7 +23,7 @@
  * wrapper.destroy();
  */
 
-import { validateConfig, CharWrapperConfig, UserConfig } from './config.js';
+import { validateConfig, CharWrapperConfig, UserConfig, RootSet, TextSet, CustomSetSource } from './config.js';
 import { WrapperFactory } from './WrapperFactory.js';
 import { DOMProcessor, ProcessOptions } from './DOMProcessor.js';
 import { Selector } from './SelectionStrategy.js';
@@ -33,15 +33,6 @@ import { TextTransition, TransitionOptions } from './TextTransition.js';
 import { logger, generateId, is } from './utils.js';
 
 /**
- * Result of wrapping operations
- */
-export interface WrapResult {
-  chars: HTMLElement[];
-  words: HTMLElement[];
-  groups: GroupResult;
-}
-
-/**
  * Instance metadata
  */
 export interface InstanceMetadata {
@@ -49,6 +40,9 @@ export interface InstanceMetadata {
   isWrapped: boolean;
   charCount: number;
   wordCount: number;
+  rootSetName: string;
+  attributeSetCount: number;
+  customSetCount: number;
   rootElement?: string;
 }
 
@@ -67,7 +61,7 @@ export class CharWrapper {
   #rootElement: Element | null;
   #originalContent: string;
   #originalText: string;
-  #wrappedElements: WrapResult;
+  #rootSetResult: RootSet | null;
   #isWrapped: boolean;
   #instanceId: string;
 
@@ -107,11 +101,7 @@ export class CharWrapper {
     this.#grouper = new CharacterGrouper(this.#config.groups);
 
     // Initialize state
-    this.#wrappedElements = {
-      chars: [],
-      words: [],
-      groups: {},
-    };
+    this.#rootSetResult = null;
     this.#isWrapped = false;
 
     logger.info(`CharWrapper instance created: ${this.#instanceId}`, {
@@ -124,12 +114,12 @@ export class CharWrapper {
    * Wraps the text content
    *
    * @param options - Additional wrapping options
-   * @returns Object containing wrapped elements { chars, words }
+   * @returns Root set containing wrapped elements and child collections
    */
-  wrap(options: ProcessOptions = {}): WrapResult {
+  wrap(options: ProcessOptions = {}): RootSet {
     if (this.#isWrapped) {
       logger.warn('Element already wrapped. Call unwrap() first or use rewrap()');
-      return this.#wrappedElements;
+      return this.#rootSetResult!;
     }
 
     try {
@@ -145,28 +135,41 @@ export class CharWrapper {
       const result = this.#processor!.processElement(
         this.#rootElement!,
         this.#factory!,
-        options
+        {
+          ...options,
+          rootSetName: options.rootSetName || this.#getRootSetName(),
+        }
       );
 
-      // Group characters if groups are configured
-      const groups = this.#grouper!.groupCharacters(result.chars, this.#originalText);
+      // Group root and attribute-set characters if groups are configured
+      result.rootSet.groups = this.#grouper!.groupCharacters(
+        result.rootSet.chars,
+        result.rootText || this.#textFromElements(result.rootSet.chars)
+      );
 
-      // Store wrapped elements
-      this.#wrappedElements = {
-        chars: result.chars,
-        words: result.words,
-        groups,
-      };
+      Object.entries(result.rootSet.attributeSets).forEach(([name, attributeSet]) => {
+        attributeSet.groups = this.#grouper!.groupCharacters(
+          attributeSet.chars,
+          result.attributeSetTexts[name] || this.#textFromElements(attributeSet.chars)
+        );
+      });
+
+      result.rootSet.customSets = this.#resolveCustomSets(result.rootSet);
+
+      // Store wrapped root set
+      this.#rootSetResult = result.rootSet;
 
       this.#isWrapped = true;
 
       logger.info(`Text wrapped successfully: ${this.#instanceId}`, {
-        charCount: result.chars.length,
-        wordCount: result.words.length,
-        groupCount: Object.keys(groups).length,
+        charCount: result.rootSet.chars.length,
+        wordCount: result.rootSet.words.length,
+        groupCount: Object.keys(result.rootSet.groups).length,
+        attributeSetCount: Object.keys(result.rootSet.attributeSets).length,
+        customSetCount: Object.keys(result.rootSet.customSets).length,
       });
 
-      return this.#wrappedElements;
+      return this.#rootSetResult;
     } catch (error) {
       logger.error('Failed to wrap text:', error);
       throw error;
@@ -215,7 +218,7 @@ export class CharWrapper {
       this.#rootElement!.innerHTML = this.#originalContent;
 
       // Reset state
-      this.#wrappedElements = { chars: [], words: [], groups: {} };
+      this.#rootSetResult = null;
       this.#isWrapped = false;
 
       logger.info(`Text unwrapped: ${this.#instanceId}`);
@@ -229,9 +232,9 @@ export class CharWrapper {
    * Rewraps the text content (unwrap + wrap)
    *
    * @param options - Additional wrapping options
-   * @returns Object containing wrapped elements { chars, words }
+   * @returns Root set containing wrapped elements and child collections
    */
-  rewrap(options: ProcessOptions = {}): WrapResult {
+  rewrap(options: ProcessOptions = {}): RootSet {
     this.unwrap();
     return this.wrap(options);
   }
@@ -249,7 +252,7 @@ export class CharWrapper {
     this.#processor?.clearCache();
 
     // Clear references
-    this.#wrappedElements = { chars: [], words: [], groups: {} };
+    this.#rootSetResult = null;
     this.#rootElement = null;
     this.#processor = null;
     this.#factory = null;
@@ -265,7 +268,7 @@ export class CharWrapper {
    * @returns Array of wrapped character elements
    */
   getChars(): HTMLElement[] {
-    return [...this.#wrappedElements.chars];
+    return [...(this.#rootSetResult?.chars || [])];
   }
 
   /**
@@ -274,7 +277,7 @@ export class CharWrapper {
    * @returns Array of wrapped word elements
    */
   getWords(): HTMLElement[] {
-    return [...this.#wrappedElements.words];
+    return [...(this.#rootSetResult?.words || [])];
   }
 
   /**
@@ -284,7 +287,7 @@ export class CharWrapper {
    * @returns Character element or undefined
    */
   getChar(index: number): HTMLElement | undefined {
-    return this.#wrappedElements.chars[index];
+    return this.#rootSetResult?.chars[index];
   }
 
   /**
@@ -294,7 +297,7 @@ export class CharWrapper {
    * @returns Word element or undefined
    */
   getWord(index: number): HTMLElement | undefined {
-    return this.#wrappedElements.words[index];
+    return this.#rootSetResult?.words[index];
   }
 
   /**
@@ -333,8 +336,11 @@ export class CharWrapper {
     return {
       id: this.#instanceId,
       isWrapped: this.#isWrapped,
-      charCount: this.#wrappedElements.chars.length,
-      wordCount: this.#wrappedElements.words.length,
+      charCount: this.#rootSetResult?.chars.length || 0,
+      wordCount: this.#rootSetResult?.words.length || 0,
+      rootSetName: this.#rootSetResult?.name || this.#getRootSetName(),
+      attributeSetCount: Object.keys(this.#rootSetResult?.attributeSets || {}).length,
+      customSetCount: Object.keys(this.#rootSetResult?.customSets || {}).length,
       rootElement: this.#rootElement?.tagName,
     };
   }
@@ -346,9 +352,77 @@ export class CharWrapper {
    * @returns Filtered character elements
    */
   filterCharsByClass(className: string): HTMLElement[] {
-    return this.#wrappedElements.chars.filter(el =>
+    return (this.#rootSetResult?.chars || []).filter(el =>
       el.classList.contains(className)
     );
+  }
+
+  /**
+   * Gets the current root set.
+   *
+   * @returns Root set or null if not wrapped
+   */
+  getRootSet(): RootSet | null {
+    return this.#rootSetResult;
+  }
+
+  /**
+   * Gets an attribute set by name.
+   *
+   * @param name - Attribute set name
+   * @returns Attribute set or undefined
+   */
+  getAttributeSet(name: string): TextSet | undefined {
+    return this.#rootSetResult?.attributeSets[name];
+  }
+
+  /**
+   * Gets character elements from an attribute set.
+   *
+   * @param name - Attribute set name
+   * @returns Attribute-set chars or empty array
+   */
+  getAttributeSetChars(name: string): HTMLElement[] {
+    return [...(this.getAttributeSet(name)?.chars || [])];
+  }
+
+  /**
+   * Gets word elements from an attribute set.
+   *
+   * @param name - Attribute set name
+   * @returns Attribute-set words or empty array
+   */
+  getAttributeSetWords(name: string): HTMLElement[] {
+    return [...(this.getAttributeSet(name)?.words || [])];
+  }
+
+  /**
+   * Gets a configured custom set.
+   *
+   * @param name - Custom set name
+   * @returns Custom set elements or empty array
+   */
+  getCustomSet(name: string): HTMLElement[] {
+    return [...(this.#rootSetResult?.customSets[name] || [])];
+  }
+
+  /**
+   * Checks if an attribute set exists.
+   *
+   * @param name - Attribute set name
+   * @returns Whether the attribute set exists
+   */
+  hasAttributeSet(name: string): boolean {
+    return Boolean(this.#rootSetResult?.attributeSets[name]);
+  }
+
+  /**
+   * Gets available attribute-set names.
+   *
+   * @returns Attribute-set names
+   */
+  getAttributeSetNames(): string[] {
+    return Object.keys(this.#rootSetResult?.attributeSets || {});
   }
 
   /**
@@ -392,11 +466,11 @@ export class CharWrapper {
     }
 
     // Determine which elements to animate
-    let elements = this.#wrappedElements.chars;
+    let elements = this.#rootSetResult.chars;
 
     // If targeting a specific group
-    if (options.groups && this.#wrappedElements.groups[options.groups]) {
-      elements = this.#wrappedElements.groups[options.groups];
+    if (options.groups && this.#rootSetResult.groups[options.groups]) {
+      elements = this.#rootSetResult.groups[options.groups];
       logger.info(`Animating group "${options.groups}" with preset "${presetName}"`);
     }
 
@@ -435,7 +509,7 @@ export class CharWrapper {
       this.#rootElement,
       this.#originalText,
       newText,
-      this.#wrappedElements.chars,
+      this.#rootSetResult.chars,
       this.#factory,
       {
         ...options,
@@ -448,12 +522,26 @@ export class CharWrapper {
             this.#rootElement!.querySelectorAll(`.${this.#config.classes.char}`)
           ) as HTMLElement[];
 
-          this.#wrappedElements.chars = newChars;
+          const newWords = Array.from(
+            this.#rootElement!.querySelectorAll(`.${this.#config.classes.word}`)
+          ) as HTMLElement[];
+
+          this.#rootSetResult = {
+            name: this.#getRootSetName(),
+            element: this.#rootElement!,
+            chars: newChars,
+            words: newWords,
+            groups: {},
+            attributeSets: {},
+            customSets: {},
+          };
 
           // Re-group if groups were configured
           if (Object.keys(this.#config.groups).length > 0) {
-            this.#wrappedElements.groups = this.#grouper!.groupCharacters(newChars, newText);
+            this.#rootSetResult.groups = this.#grouper!.groupCharacters(newChars, newText);
           }
+
+          this.#rootSetResult.customSets = this.#resolveCustomSets(this.#rootSetResult);
 
           // Call user's onComplete if provided
           if (options.onComplete) {
@@ -497,6 +585,52 @@ export class CharWrapper {
   }
 
   /**
+   * Wraps all matching root-set elements and returns their root sets.
+   *
+   * @param targets - CSS selector, element array, or node list
+   * @param config - Configuration options
+   * @returns Ordered root sets
+   */
+  static wrapAll(targets: string | Element[] | NodeListOf<Element>, config: UserConfig = {}): RootSet[] {
+    const elements = this.#resolveWrapAllTargets(targets);
+    const validatedConfig = validateConfig(config);
+    const rootOrderKey = validatedConfig.dataAttributes.rootOrder;
+    const ordered = validatedConfig.processing.ordered;
+
+    const orderedElements = ordered
+      ? [...elements].sort((a, b) => {
+          const aOrder = this.#parseOrder((a as HTMLElement).dataset?.[rootOrderKey]);
+          const bOrder = this.#parseOrder((b as HTMLElement).dataset?.[rootOrderKey]);
+          const aHasOrder = typeof aOrder === 'number';
+          const bHasOrder = typeof bOrder === 'number';
+
+          if (aHasOrder && bHasOrder && aOrder !== bOrder) {
+            return aOrder! - bOrder!;
+          }
+
+          if (aHasOrder !== bHasOrder) {
+            return aHasOrder ? -1 : 1;
+          }
+
+          return elements.indexOf(a) - elements.indexOf(b);
+        })
+      : elements;
+
+    return orderedElements.map(element => new CharWrapper(element, config).wrap());
+  }
+
+  /**
+   * Finds a root set by name in a root-set array.
+   *
+   * @param rootSets - Root-set array
+   * @param name - Root-set name
+   * @returns First matching root set or undefined
+   */
+  static getRootSet(rootSets: RootSet[], name: string): RootSet | undefined {
+    return rootSets.find(rootSet => rootSet.name === name);
+  }
+
+  /**
    * Register a custom animation preset
    *
    * @param name - Preset name
@@ -514,6 +648,95 @@ export class CharWrapper {
    */
   static registerPreset(name: string, fn: (elements: HTMLElement[], options: PresetOptions) => gsap.core.Timeline | gsap.core.Tween): void {
     registerPresetGlobal(name, fn);
+  }
+
+  #getRootSetName(): string {
+    const configuredName = this.#rootElement instanceof HTMLElement
+      ? this.#rootElement.dataset?.[this.#config.dataAttributes.rootSet]
+      : '';
+
+    return configuredName || this.#instanceId;
+  }
+
+  #textFromElements(elements: HTMLElement[]): string {
+    return elements.map(element => element.textContent || '').join('');
+  }
+
+  #resolveCustomSets(rootSet: RootSet): Record<string, HTMLElement[]> {
+    const customSets: Record<string, HTMLElement[]> = {};
+
+    Object.entries(this.#config.rootSet.customSets || {}).forEach(([name, source]) => {
+      customSets[name] = this.#resolveCustomSetSource(rootSet, source);
+    });
+
+    return customSets;
+  }
+
+  #resolveCustomSetSource(rootSet: RootSet, source: CustomSetSource): HTMLElement[] {
+    if (typeof source === 'function') {
+      return [...source(rootSet)];
+    }
+
+    if (source === 'root' || source === 'rootChars') {
+      return [...rootSet.chars];
+    }
+
+    if (source === 'rootWords') {
+      return [...rootSet.words];
+    }
+
+    if (typeof source === 'string') {
+      return [...(rootSet.attributeSets[source]?.chars || [])];
+    }
+
+    if (Array.isArray(source)) {
+      return source.flatMap(item => {
+        if (typeof item === 'string') {
+          return rootSet.attributeSets[item]?.chars || [];
+        }
+
+        return this.#resolveCustomSetObject(rootSet, item);
+      });
+    }
+
+    return this.#resolveCustomSetObject(rootSet, source);
+  }
+
+  #resolveCustomSetObject(
+    rootSet: RootSet,
+    source: { attributeSet: string; target: 'chars' | 'words' | 'both' }
+  ): HTMLElement[] {
+    const attributeSet = rootSet.attributeSets[source.attributeSet];
+    if (!attributeSet) {
+      return [];
+    }
+
+    if (source.target === 'chars') {
+      return [...attributeSet.chars];
+    }
+
+    if (source.target === 'words') {
+      return [...attributeSet.words];
+    }
+
+    return [...attributeSet.chars, ...attributeSet.words];
+  }
+
+  static #resolveWrapAllTargets(targets: string | Element[] | NodeListOf<Element>): Element[] {
+    if (typeof targets === 'string') {
+      return Array.from(document.querySelectorAll(targets));
+    }
+
+    return Array.from(targets);
+  }
+
+  static #parseOrder(value: string | undefined): number | undefined {
+    if (value === undefined || value === '') {
+      return undefined;
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
   }
 }
 

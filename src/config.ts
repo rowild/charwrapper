@@ -50,6 +50,62 @@ export interface GroupsConfig {
 }
 
 /**
+ * Result of grouping wrapped characters
+ */
+export interface GroupResult {
+  [groupName: string]: HTMLElement[];
+}
+
+/**
+ * Wrapped text set. Root sets and attribute sets both expose these collections.
+ */
+export interface TextSet {
+  name: string;
+  element: Element;
+  chars: HTMLElement[];
+  words: HTMLElement[];
+  groups: GroupResult;
+}
+
+/**
+ * Wrapped root set returned by wrap().
+ */
+export interface RootSet extends TextSet {
+  attributeSets: Record<string, TextSet>;
+  customSets: Record<string, HTMLElement[]>;
+}
+
+/**
+ * Custom set source definitions. String sources refer to attribute-set names,
+ * except for the reserved root/rootChars/rootWords aliases.
+ */
+export type CustomSetSource =
+  | 'root'
+  | 'rootChars'
+  | 'rootWords'
+  | string
+  | string[]
+  | { attributeSet: string; target: 'chars' | 'words' | 'both' }
+  | Array<{ attributeSet: string; target: 'chars' | 'words' | 'both' }>
+  | ((rootSet: RootSet) => HTMLElement[]);
+
+/**
+ * Custom sets configuration
+ */
+export interface CustomSetsConfig {
+  [customSetName: string]: CustomSetSource;
+}
+
+/**
+ * Root set collection configuration
+ */
+export interface RootSetConfig {
+  customSets: CustomSetsConfig;
+  exposeEmptyAttributeSets: boolean;
+  autoDetectDataAttributes: boolean;
+}
+
+/**
  * Wrapping options configuration
  */
 export interface WrapConfig {
@@ -63,8 +119,18 @@ export interface WrapConfig {
  * Enumeration options configuration
  */
 export interface EnumerateConfig {
+  rootSet: boolean | EnumerationRule;
   chars: boolean;
   words: boolean;
+  attributeSets: boolean | EnumerationRule;
+  includeSpaces: boolean;
+  includeSpecialChars: boolean;
+}
+
+/**
+ * Enumeration inclusion rule
+ */
+export interface EnumerationRule {
   includeSpaces: boolean;
   includeSpecialChars: boolean;
 }
@@ -73,6 +139,7 @@ export interface EnumerateConfig {
  * CSS class names configuration
  */
 export interface ClassesConfig {
+  rootSet: string;
   char: string;
   word: string;
   space: string;
@@ -92,9 +159,12 @@ export interface TagsConfig {
  * Data attributes configuration
  */
 export interface DataAttributesConfig {
-  subSetName: string;
-  subSetClass: string;
-  customOrder: string;
+  rootSet: string;
+  rootOrder: string;
+  setName: string;
+  setOrder: string;
+  setCharClass: string;
+  setWordClass: string;
 }
 
 /**
@@ -135,6 +205,7 @@ export interface CharWrapperConfig {
   classes: ClassesConfig;
   tags: TagsConfig;
   dataAttributes: DataAttributesConfig;
+  rootSet: RootSetConfig;
   replaceSpaceWith: string;
   processing: ProcessingConfig;
   performance: PerformanceConfig;
@@ -151,6 +222,7 @@ export type UserConfig = Partial<{
   classes: Partial<ClassesConfig>;
   tags: Partial<TagsConfig>;
   dataAttributes: Partial<DataAttributesConfig>;
+  rootSet: Partial<RootSetConfig>;
   replaceSpaceWith: string;
   processing: Partial<ProcessingConfig>;
   performance: Partial<PerformanceConfig>;
@@ -172,14 +244,17 @@ export const DEFAULT_CONFIG: CharWrapperConfig = {
 
   // Enumeration (add index numbers to classes)
   enumerate: {
+    rootSet: false,
     chars: false,
     words: false,
+    attributeSets: false,
     includeSpaces: false,
     includeSpecialChars: false,
   },
 
   // CSS class names (BEM-style recommended)
   classes: {
+    rootSet: 'belongs-to-root-set',
     char: 'char',
     word: 'word',
     space: 'char--space',
@@ -195,9 +270,19 @@ export const DEFAULT_CONFIG: CharWrapperConfig = {
 
   // Data attributes for data-driven selection
   dataAttributes: {
-    subSetName: 'subSetName',
-    subSetClass: 'subSetCharsClass',
-    customOrder: 'customOrder',
+    rootSet: 'rootSet',
+    rootOrder: 'rootOrder',
+    setName: 'setName',
+    setOrder: 'setOrder',
+    setCharClass: 'setCharClass',
+    setWordClass: 'setWordClass',
+  },
+
+  // Root set options
+  rootSet: {
+    customSets: {},
+    exposeEmptyAttributeSets: false,
+    autoDetectDataAttributes: true,
   },
 
   // Character replacement
@@ -209,7 +294,7 @@ export const DEFAULT_CONFIG: CharWrapperConfig = {
     trimWhitespace: true,      // Trim leading/trailing whitespace
     preserveStructure: true,   // Try to maintain DOM structure
     lazyWrap: false,          // Wrap on-demand (performance)
-    ordered: false,            // Order elements by data-custom-order attribute
+    ordered: false,            // Order root/text records by configured data order attributes
   },
 
   // Performance options

@@ -5,15 +5,10 @@
  * positions, or custom filter functions.
  */
 
-import { GroupsConfig, GroupConfig, CharContext } from './config.js';
+import { GroupsConfig, GroupConfig, CharContext, GroupResult } from './config.js';
 import { logger } from './utils.js';
 
-/**
- * Result of character grouping
- */
-export interface GroupResult {
-  [groupName: string]: HTMLElement[];
-}
+export type { GroupResult };
 
 export class CharacterGrouper {
   #groupsConfig: GroupsConfig;

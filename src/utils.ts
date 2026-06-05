@@ -81,7 +81,7 @@ export function querySelectorSafe(selector: string, context: Document | Element 
  * (Replaces lodash _orderBy for our specific use case)
  *
  * @example
- * sortByDataAttribute(elements, 'customOrder', 'asc')
+ * sortByDataAttribute(elements, 'setOrder', 'asc')
  */
 export function sortByDataAttribute(
   elements: Element[] | NodeListOf<Element>,
@@ -94,6 +94,52 @@ export function sortByDataAttribute(
 
     return order === 'asc' ? aValue - bValue : bValue - aValue;
   });
+}
+
+/**
+ * Converts camelCase dataset keys to kebab-case data attribute names.
+ *
+ * @example
+ * datasetKeyToAttributeName('setName') // "data-set-name"
+ */
+export function datasetKeyToAttributeName(key: string): string {
+  return `data-${key.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase()}`;
+}
+
+/**
+ * Reads a configured dataset value from an element.
+ */
+export function getDatasetValue(element: Element | null | undefined, key: string): string | undefined {
+  if (!element || !(element instanceof HTMLElement)) {
+    return undefined;
+  }
+
+  return element.dataset?.[key];
+}
+
+/**
+ * Finds the closest ancestor with a configured data attribute, bounded by root.
+ */
+export function closestWithDataset(
+  start: Element | null | undefined,
+  root: Element,
+  key: string
+): HTMLElement | null {
+  let current: Element | null | undefined = start;
+
+  while (current) {
+    if (current instanceof HTMLElement && current.dataset?.[key] !== undefined) {
+      return current;
+    }
+
+    if (current === root) {
+      break;
+    }
+
+    current = current.parentElement;
+  }
+
+  return null;
 }
 
 /**

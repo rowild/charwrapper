@@ -1,6 +1,6 @@
 {
   "name": "charwrapper",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Modern ES6+ text wrapper library for GSAP, Animejs, Web Animation API and others, with TypeScript support",
   "type": "module",
   "main": "./dist/charwrapper.cjs.js",
@@ -27,7 +27,7 @@
     "watch": "tsc --watch",
     "clean": "rm -rf dist",
     "prepublishOnly": "npm run clean && npm run build && npm run bundle",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run build && node test/root-set.test.js"
   },
   "keywords": [
     "gsap",
@@ -52,6 +52,7 @@
   "devDependencies": {
     "@types/node": "^20.10.0",
     "esbuild": "^0.25.11",
+    "jsdom": "^29.1.1",
     "typescript": "^5.3.0"
   },
   "engines": {

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Root and Attribute Sets - CharWrapper</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <style>
+    .profile-card {
+      display: grid;
+      gap: 0.75rem;
+      max-width: 720px;
+      margin: 2rem auto;
+      text-align: left;
+    }
+
+    .profile-name {
+      font-size: 3rem;
+      line-height: 1;
+      margin: 0;
+    }
+
+    .profile-meta {
+      font-size: 1.35rem;
+      margin: 0;
+    }
+
+    .first-name-char { color: #e64b6a; }
+    .last-name-char { color: #2f7dd1; }
+    .role-word { color: #248f68; }
+  </style>
+</head>
+<body>
+  <a href="../index.html" class="back-link">All Examples</a>
+
+  <div class="container">
+    <h1>Root and Attribute Sets</h1>
+
+    <div class="example-tabs" role="tablist" aria-label="Example view">
+      <button id="live-tab" type="button" role="tab" aria-selected="true" aria-controls="live-panel" onclick="showExampleTab('live')">Live</button>
+      <button id="code-tab" type="button" role="tab" aria-selected="false" aria-controls="code-panel" onclick="showExampleTab('code')">Code</button>
+    </div>
+
+    <div id="live-panel" class="example-panel" role="tabpanel" aria-labelledby="live-tab">
+      <div class="example-section">
+        <div
+          class="profile-card"
+          data-root-set="profile"
+        >
+          <h2
+            class="profile-name"
+            data-set-name="first_name"
+            data-set-order="1"
+            data-set-char-class="first-name-char"
+          >Ada</h2>
+
+          <h2
+            class="profile-name"
+            data-set-name="last_name"
+            data-set-order="2"
+            data-set-char-class="last-name-char"
+          >Lovelace</h2>
+
+          <p
+            class="profile-meta"
+            data-set-name="role"
+            data-set-order="3"
+            data-set-word-class="role-word"
+          >Mathematician and writer</p>
+
+          <p data-set-name="_exclude_">This explanatory line is not wrapped.</p>
+        </div>
+      </div>
+
+      <div class="controls">
+        <button onclick="replay()">Replay</button>
+      </div>
+    </div>
+
+    <div id="code-panel" class="example-panel code-panel" role="tabpanel" aria-labelledby="code-tab" hidden>
+      <pre><code id="example-code"></code></pre>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="../../dist/charwrapper.js"></script>
+  <script src="../js/code-highlight.js"></script>
+  <script>
+    let wrapper;
+    let timeline;
+    const exampleCode = String.raw`<div class="profile-card" data-root-set="profile">
+  <h2
+    data-set-name="first_name"
+    data-set-order="1"
+    data-set-char-class="first-name-char"
+  >Ada</h2>
+
+  <h2
+    data-set-name="last_name"
+    data-set-order="2"
+    data-set-char-class="last-name-char"
+  >Lovelace</h2>
+
+  <p
+    data-set-name="role"
+    data-set-order="3"
+    data-set-word-class="role-word"
+  >Mathematician and writer</p>
+
+  <p data-set-name="_exclude_">This explanatory line is not wrapped.</p>
+</div>
+
+const wrapper = new CharWrapper('[data-root-set="profile"]', {
+  wrap: { chars: true, words: true },
+  processing: { ordered: true },
+  enumerate: { rootSet: true, chars: true, attributeSets: true },
+  groups: {
+    vowels: /[aeiouAEIOU]/
+  }
+});
+
+const profileRootSet = wrapper.wrap();
+
+const timeline = gsap.timeline();
+timeline.from(profileRootSet.attributeSets.first_name.chars, { opacity: 0, y: 24, stagger: 0.06 });
+timeline.from(profileRootSet.attributeSets.last_name.chars, { opacity: 0, y: 24, stagger: 0.04 }, '-=0.25');
+timeline.from(profileRootSet.attributeSets.role.words, { opacity: 0, x: -16, stagger: 0.08 }, '-=0.15');
+timeline.to(profileRootSet.groups.vowels, { scale: 1.25, yoyo: true, repeat: 1, duration: 0.2, stagger: 0.03 }, '-=0.2');`;
+
+    renderExampleCode('example-code', exampleCode);
+
+    function showExampleTab(name) {
+      const live = name === 'live';
+      document.getElementById('live-panel').hidden = !live;
+      document.getElementById('code-panel').hidden = live;
+      document.getElementById('live-tab').setAttribute('aria-selected', String(live));
+      document.getElementById('code-tab').setAttribute('aria-selected', String(!live));
+    }
+
+    function build() {
+      wrapper = new CharWrapper('[data-root-set="profile"]', {
+        wrap: { chars: true, words: true },
+        processing: { ordered: true },
+        enumerate: { rootSet: true, chars: true, attributeSets: true },
+        groups: {
+          vowels: /[aeiouAEIOU]/
+        }
+      });
+
+      const profileRootSet = wrapper.wrap();
+
+      timeline = gsap.timeline();
+      timeline.from(profileRootSet.attributeSets.first_name.chars, { opacity: 0, y: 24, stagger: 0.06 });
+      timeline.from(profileRootSet.attributeSets.last_name.chars, { opacity: 0, y: 24, stagger: 0.04 }, '-=0.25');
+      timeline.from(profileRootSet.attributeSets.role.words, { opacity: 0, x: -16, stagger: 0.08 }, '-=0.15');
+      timeline.to(profileRootSet.groups.vowels, { scale: 1.25, yoyo: true, repeat: 1, duration: 0.2, stagger: 0.03 }, '-=0.2');
+    }
+
+    function replay() {
+      if (timeline) timeline.kill();
+      if (wrapper) wrapper.unwrap();
+      build();
+    }
+
+    build();
+  </script>
+</body>
+</html>

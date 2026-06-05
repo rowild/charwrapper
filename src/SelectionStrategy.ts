@@ -6,7 +6,7 @@
  * 2. Data Attributes - Data-driven selection with ordering
  */
 
-import { querySelectorSafe, sortByDataAttribute, is, logger } from './utils.js';
+import { querySelectorSafe, sortByDataAttribute, is, logger, datasetKeyToAttributeName } from './utils.js';
 import { CharWrapperConfig } from './config.js';
 
 /**
@@ -79,8 +79,8 @@ export class DataAttributeStrategy extends SelectionStrategy {
       : querySelectorSafe(rootElement);
 
     // Find elements with data attributes
-    const dataAttrName = this.#config.dataAttributes.subSetName;
-    const selector = `[data-${this.#camelToKebab(dataAttrName)}]`;
+    const dataAttrName = this.#config.dataAttributes.setName;
+    const selector = `[${datasetKeyToAttributeName(dataAttrName)}]`;
 
     const elements = Array.from(root.querySelectorAll(selector));
 
@@ -97,21 +97,11 @@ export class DataAttributeStrategy extends SelectionStrategy {
 
     // Sort by custom order if requested
     if (ordered) {
-      const orderAttr = this.#config.dataAttributes.customOrder;
+      const orderAttr = this.#config.dataAttributes.setOrder;
       return sortByDataAttribute(filtered, orderAttr, 'asc');
     }
 
     return filtered;
-  }
-
-  /**
-   * Converts camelCase to kebab-case for data attributes
-   *
-   * @param str - CamelCase string
-   * @returns kebab-case string
-   */
-  #camelToKebab(str: string): string {
-    return str.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
   }
 }
 

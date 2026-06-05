@@ -1,12 +1,21 @@
 /**
  * DOMProcessor
  *
- * Handles DOM traversal, text extraction, and replacement operations.
- * Optimized for performance with DocumentFragment batching.
+ * Handles DOM traversal, text extraction, data-attribute metadata, and
+ * replacement operations. Processing is record-based so returned arrays can be
+ * ordered independently from DOM layout.
  */
 
-import { stripHTML, normalizeWhitespace, createFragment, is, logger } from './utils.js';
-import { CharWrapperConfig } from './config.js';
+import {
+  stripHTML,
+  normalizeWhitespace,
+  createFragment,
+  is,
+  logger,
+  closestWithDataset,
+  getDatasetValue,
+} from './utils.js';
+import { CharWrapperConfig, RootSet, TextSet } from './config.js';
 import { WrapperFactory, WrapOptions } from './WrapperFactory.js';
 
 /**
@@ -15,13 +24,27 @@ import { WrapperFactory, WrapOptions } from './WrapperFactory.js';
 export interface ProcessResult {
   words: HTMLElement[];
   chars: HTMLElement[];
+  rootSet: RootSet;
+  rootText: string;
+  attributeSetTexts: Record<string, string>;
 }
 
 /**
  * Options for processing operations
  */
 export interface ProcessOptions extends WrapOptions {
-  // Additional processing-specific options can be added here
+  rootSetName?: string | null;
+}
+
+interface TextNodeRecord {
+  textNode: ChildNode;
+  parentElement: HTMLElement;
+  setElement: HTMLElement | null;
+  setName?: string;
+  setOrder?: number;
+  setCharClass?: string;
+  setWordClass?: string;
+  domIndex: number;
 }
 
 export class DOMProcessor {
@@ -35,7 +58,7 @@ export class DOMProcessor {
    */
   constructor(config: CharWrapperConfig) {
     this.#config = config;
-    this.#cache = new WeakMap(); // Prevents memory leaks
+    this.#cache = new WeakMap();
   }
 
   /**
@@ -49,24 +72,20 @@ export class DOMProcessor {
       throw new TypeError('extractText requires a valid DOM element');
     }
 
-    // Check cache first
     if (this.#config.performance.cacheSelectors && this.#cache.has(element)) {
       return this.#cache.get(element)!;
     }
 
     let text = element.textContent || '';
 
-    // Strip HTML if configured
     if (this.#config.processing.stripHTML) {
       text = stripHTML(text);
     }
 
-    // Normalize whitespace if configured
     if (this.#config.processing.trimWhitespace) {
       text = normalizeWhitespace(text, true);
     }
 
-    // Cache result
     if (this.#config.performance.cacheSelectors) {
       this.#cache.set(element, text);
     }
@@ -75,7 +94,8 @@ export class DOMProcessor {
   }
 
   /**
-   * Finds all text nodes within an element (recursive)
+   * Finds all text nodes within an element (recursive), respecting configured
+   * `_exclude_` attribute-set markers.
    *
    * @param element - Root element to search
    * @param textNodes - Accumulator for text nodes
@@ -88,15 +108,13 @@ export class DOMProcessor {
 
     for (const node of Array.from(element.childNodes)) {
       if (is.textNode(node)) {
-        // Only include non-empty text nodes
         const text = normalizeWhitespace(node.textContent, true);
         if (text.length > 0) {
           textNodes.push(node);
         }
       } else if (node.nodeType === Node.ELEMENT_NODE) {
-        // Skip excluded elements
-        const isExcluded = (node as HTMLElement).dataset?.subSetName === '_exclude_';
-        if (!isExcluded) {
+        const setName = getDatasetValue(node as HTMLElement, this.#config.dataAttributes.setName);
+        if (setName !== '_exclude_') {
           this.findTextNodes(node, textNodes);
         }
       }
@@ -106,8 +124,7 @@ export class DOMProcessor {
   }
 
   /**
-   * Replaces element content with wrapped elements
-   * Uses DocumentFragment for optimal performance
+   * Replaces element content with wrapped elements.
    *
    * @param element - Element to replace content in
    * @param wrappedElements - Array of wrapped elements
@@ -121,55 +138,48 @@ export class DOMProcessor {
       throw new TypeError('wrappedElements must be an array');
     }
 
-    // Clear existing content (single operation, not three!)
     element.textContent = '';
 
-    // Use DocumentFragment for batching if enabled
     if (this.#config.performance.useBatching) {
       const fragment = createFragment(wrappedElements);
       element.appendChild(fragment);
     } else {
-      // Direct append (useful for debugging or specific use cases)
       wrappedElements.forEach(el => element.appendChild(el));
     }
   }
 
   /**
-   * Processes a single text node and replaces it with wrapped content
+   * Processes a single text node and replaces it with wrapped content.
    *
    * @param textNode - Text node to process
    * @param wrapperFactory - Factory for creating wrapped elements
    * @param options - Processing options
    * @returns Object containing wrapped elements and metadata
    */
-  processTextNode(textNode: Node, wrapperFactory: WrapperFactory, options: ProcessOptions = {}): ProcessResult | null {
+  processTextNode(textNode: Node, wrapperFactory: WrapperFactory, options: ProcessOptions = {}): Pick<ProcessResult, 'words' | 'chars'> | null {
     if (!is.textNode(textNode)) {
       logger.warn('processTextNode called with non-text node', textNode);
       return null;
     }
 
-    // Check if this text node has element siblings (adjacent elements)
     const parentElement = textNode.parentElement;
     let shouldPreserveAdjacentWhitespace = false;
-    
+
     if (parentElement) {
       const siblings = Array.from(parentElement.childNodes);
       const textNodeIndex = siblings.indexOf(textNode);
-      
+
       if (textNodeIndex !== -1) {
-        // Check if there are element nodes immediately before or after this text node
         const prevSibling = siblings[textNodeIndex - 1];
         const nextSibling = siblings[textNodeIndex + 1];
-        
-        if ((prevSibling && prevSibling.nodeType === Node.ELEMENT_NODE) || 
+
+        if ((prevSibling && prevSibling.nodeType === Node.ELEMENT_NODE) ||
             (nextSibling && nextSibling.nodeType === Node.ELEMENT_NODE)) {
           shouldPreserveAdjacentWhitespace = true;
         }
       }
     }
 
-    // Extract and normalize text
-    // If this text node is adjacent to elements, preserve whitespace even if trimWhitespace is true
     const shouldTrim = this.#config.processing.trimWhitespace && !shouldPreserveAdjacentWhitespace;
     const text = normalizeWhitespace(textNode.textContent, shouldTrim);
 
@@ -177,34 +187,29 @@ export class DOMProcessor {
       return null;
     }
 
-    // Determine wrapping mode
     const wrapWords = this.#config.wrap.words;
     const wrapChars = this.#config.wrap.chars;
 
-    let result: ProcessResult = { words: [], chars: [] };
+    let result: Pick<ProcessResult, 'words' | 'chars'> = { words: [], chars: [] };
 
     if (wrapWords) {
-      // Wrap as words (with nested characters if chars is also enabled)
       if (wrapChars) {
         result = wrapperFactory.wrapWords(text, options);
       } else {
-        // Just words, no character wrapping
         const words = text.split(' ');
         result.words = words.map((word, index) => {
-          const wordEl = document.createElement(this.#config.tags.word);
-          wordEl.className = this.#config.classes.word;
+          const wordEl = wrapperFactory.createWordElement(word, [], options);
           wordEl.textContent = word;
 
-          // Add space after each word except the last
           if (index < words.length - 1) {
             const spaceEl = wrapperFactory.createSpaceElement();
             return [wordEl, spaceEl];
           }
+
           return wordEl;
         }).flat();
       }
     } else if (wrapChars) {
-      // Wrap as characters only
       result.chars = wrapperFactory.wrapChars(text, options);
     } else {
       logger.warn('No wrapping mode enabled (neither chars nor words)');
@@ -215,72 +220,229 @@ export class DOMProcessor {
   }
 
   /**
-   * Processes an entire element and all its text nodes
+   * Processes an entire element and all its text nodes.
    *
    * @param element - Root element to process
    * @param wrapperFactory - Factory for creating wrapped elements
    * @param options - Processing options
-   * @returns Object containing all wrapped elements
+   * @returns Object containing all wrapped elements and root-set state
    */
   processElement(element: Element, wrapperFactory: WrapperFactory, options: ProcessOptions = {}): ProcessResult {
-    const textNodes = this.findTextNodes(element);
+    const records = this.#collectTextNodeRecords(element);
+    const rootSetName = options.rootSetName || getDatasetValue(element, this.#config.dataAttributes.rootSet) || '';
 
-    if (textNodes.length === 0) {
+    const rootSet: RootSet = {
+      name: rootSetName,
+      element,
+      chars: [],
+      words: [],
+      groups: {},
+      attributeSets: {},
+      customSets: {},
+    };
+
+    if (records.length === 0) {
       logger.warn('No text nodes found in element', element);
-      return { words: [], chars: [] };
+      return {
+        words: [],
+        chars: [],
+        rootSet,
+        rootText: '',
+        attributeSetTexts: {},
+      };
     }
 
-    const allWords: HTMLElement[] = [];
-    const allChars: HTMLElement[] = [];
+    const orderedRecords = this.#orderRecords(records);
+    const attributeSetTexts: Record<string, string> = {};
+    const rootTextParts: string[] = [];
 
-    // Process each text node
-    textNodes.forEach(textNode => {
-      const result = this.processTextNode(textNode, wrapperFactory, {
+    orderedRecords.forEach(record => {
+      const processOptions: ProcessOptions = {
         ...options,
-        subSetClass: (textNode.parentElement as HTMLElement)?.dataset?.[this.#config.dataAttributes.subSetClass],
-      });
+        rootSetName,
+        setName: record.setName,
+        setCharClass: record.setCharClass,
+        setWordClass: record.setWordClass,
+      };
 
-      if (result) {
-        if (result.words.length > 0) {
-          allWords.push(...result.words);
-        }
-        if (result.chars.length > 0) {
-          allChars.push(...result.chars);
-        }
+      const result = this.processTextNode(record.textNode, wrapperFactory, processOptions);
 
-        // Replace the text node with wrapped content
-        const parent = textNode.parentElement;
-        if (parent) {
-          // Determine which elements to insert
-          const elementsToInsert = result.words.length > 0 ? result.words : result.chars;
+      if (!result) {
+        return;
+      }
 
-          if (this.#config.performance.useBatching) {
-            const fragment = createFragment(elementsToInsert);
-            parent.replaceChild(fragment, textNode);
-          } else {
-            // Insert each element before the text node
-            elementsToInsert.forEach(el => {
-              parent.insertBefore(el, textNode);
-            });
-            // Remove the original text node
-            parent.removeChild(textNode);
-          }
+      const text = this.#getNormalizedText(record.textNode);
+      if (text) {
+        rootTextParts.push(text);
+        if (record.setName) {
+          attributeSetTexts[record.setName] = `${attributeSetTexts[record.setName] || ''}${text}`;
         }
       }
+
+      if (result.words.length > 0) {
+        rootSet.words.push(...result.words);
+      }
+      if (result.chars.length > 0) {
+        rootSet.chars.push(...result.chars);
+      }
+
+      if (record.setName) {
+        const attributeSet = this.#ensureAttributeSet(rootSet, record);
+        if (result.words.length > 0) {
+          attributeSet.words.push(...result.words);
+        }
+        if (result.chars.length > 0) {
+          attributeSet.chars.push(...result.chars);
+        }
+      }
+
+      this.#replaceTextNode(record, result);
     });
 
     return {
-      words: allWords,
-      chars: allChars,
+      words: rootSet.words,
+      chars: rootSet.chars,
+      rootSet,
+      rootText: rootTextParts.join(''),
+      attributeSetTexts,
     };
+  }
+
+  #collectTextNodeRecords(root: Element): TextNodeRecord[] {
+    const records: TextNodeRecord[] = [];
+    let domIndex = 0;
+
+    const walk = (node: Element | Node): void => {
+      if (!node || !('childNodes' in node)) {
+        return;
+      }
+
+      for (const child of Array.from(node.childNodes)) {
+        if (is.textNode(child)) {
+          const text = normalizeWhitespace(child.textContent, true);
+          if (text.length > 0 && child.parentElement) {
+            const setElement = closestWithDataset(
+              child.parentElement,
+              root,
+              this.#config.dataAttributes.setName
+            );
+            const setName = getDatasetValue(setElement, this.#config.dataAttributes.setName);
+
+            if (setName !== '_exclude_') {
+              records.push({
+                textNode: child,
+                parentElement: child.parentElement,
+                setElement,
+                setName,
+                setOrder: this.#parseOrder(getDatasetValue(setElement, this.#config.dataAttributes.setOrder)),
+                setCharClass: getDatasetValue(setElement, this.#config.dataAttributes.setCharClass),
+                setWordClass: getDatasetValue(setElement, this.#config.dataAttributes.setWordClass),
+                domIndex: domIndex++,
+              });
+            }
+          }
+        } else if (child.nodeType === Node.ELEMENT_NODE) {
+          const childElement = child as HTMLElement;
+          const setName = getDatasetValue(childElement, this.#config.dataAttributes.setName);
+          if (setName !== '_exclude_') {
+            walk(childElement);
+          }
+        }
+      }
+    };
+
+    walk(root);
+    return records;
+  }
+
+  #orderRecords(records: TextNodeRecord[]): TextNodeRecord[] {
+    if (!this.#config.processing.ordered) {
+      return records;
+    }
+
+    return [...records].sort((a, b) => {
+      const aHasOrder = typeof a.setOrder === 'number';
+      const bHasOrder = typeof b.setOrder === 'number';
+
+      if (aHasOrder && bHasOrder && a.setOrder !== b.setOrder) {
+        return a.setOrder! - b.setOrder!;
+      }
+
+      if (aHasOrder !== bHasOrder) {
+        return aHasOrder ? -1 : 1;
+      }
+
+      return a.domIndex - b.domIndex;
+    });
+  }
+
+  #ensureAttributeSet(rootSet: RootSet, record: TextNodeRecord): TextSet {
+    const name = record.setName!;
+
+    if (!rootSet.attributeSets[name]) {
+      rootSet.attributeSets[name] = {
+        name,
+        element: record.setElement || record.parentElement,
+        chars: [],
+        words: [],
+        groups: {},
+      };
+    }
+
+    return rootSet.attributeSets[name];
+  }
+
+  #replaceTextNode(record: TextNodeRecord, result: Pick<ProcessResult, 'words' | 'chars'>): void {
+    const parent = record.textNode.parentElement;
+    if (!parent) {
+      return;
+    }
+
+    const elementsToInsert = result.words.length > 0 ? result.words : result.chars;
+
+    if (this.#config.performance.useBatching) {
+      const fragment = createFragment(elementsToInsert);
+      parent.replaceChild(fragment, record.textNode);
+    } else {
+      elementsToInsert.forEach(el => {
+        parent.insertBefore(el, record.textNode);
+      });
+      parent.removeChild(record.textNode);
+    }
+  }
+
+  #getNormalizedText(textNode: ChildNode): string {
+    const parentElement = textNode.parentElement;
+    let shouldPreserveAdjacentWhitespace = false;
+
+    if (parentElement) {
+      const siblings = Array.from(parentElement.childNodes);
+      const textNodeIndex = siblings.indexOf(textNode);
+      const prevSibling = siblings[textNodeIndex - 1];
+      const nextSibling = siblings[textNodeIndex + 1];
+      shouldPreserveAdjacentWhitespace = Boolean(
+        (prevSibling && prevSibling.nodeType === Node.ELEMENT_NODE) ||
+        (nextSibling && nextSibling.nodeType === Node.ELEMENT_NODE)
+      );
+    }
+
+    const shouldTrim = this.#config.processing.trimWhitespace && !shouldPreserveAdjacentWhitespace;
+    return normalizeWhitespace(textNode.textContent, shouldTrim);
+  }
+
+  #parseOrder(value: string | undefined): number | undefined {
+    if (value === undefined || value === '') {
+      return undefined;
+    }
+
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? parsed : undefined;
   }
 
   /**
    * Clears the internal cache
    */
   clearCache(): void {
-    // WeakMap doesn't have a clear method, but entries are automatically
-    // garbage collected when elements are removed from DOM
     this.#cache = new WeakMap();
   }
 }

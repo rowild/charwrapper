@@ -2,6 +2,15 @@
 
 Modern text wrapper library with TypeScript support, designed for seamless integration with GSAP and other animation libraries.
 
+## What's New in 2.0.1
+
+- **Root Sets** - `wrap()` now returns a root set directly with `chars`, `words`, `groups`, `attributeSets`, and `customSets`
+- **Attribute Sets** - Use `data-set-name` to create named child sets from HTML
+- **Batch Root Sets** - `CharWrapper.wrapAll('[data-root-set]')` wraps every root set on a page and returns an ordered array
+- **Explicit Ordering** - Use `data-root-order` for root sets and `data-set-order` inside a root set
+- **Set-Specific Classes** - Use `data-set-char-class` and `data-set-word-class`
+- **Live/Code Examples** - New GSAP examples show runnable demos and highlighted source code
+
 ## What's New in 2.0
 
 - **TypeScript Support** - Full type definitions included
@@ -255,7 +264,7 @@ const chars = wrapper.getChars();
     trimWhitespace: true,   // Trim leading/trailing whitespace (preserved when adjacent to inline elements)
     preserveStructure: true, // Maintain DOM structure
     lazyWrap: false,        // Wrap on-demand for performance
-    ordered: false          // Order elements by data-custom-order attribute (for data attribute selection)
+    ordered: false          // Order root/text records by data-root-order and data-set-order
   },
 
   performance: {
@@ -337,14 +346,17 @@ const wrapper = new CharWrapper('.text', {
 
   // Enumeration Options - Add numbered classes
   enumerate: {
+    rootSet: false,          // Add numbered classes with the root-set class prefix
     chars: false,             // Add numbered classes (.char-001, .char-002)
     words: false,             // Add numbered classes to words
+    attributeSets: false,     // Add numbered classes with data-set-char-class / data-set-word-class
     includeSpaces: false,     // Include spaces in enumeration count
     includeSpecialChars: false // Include special chars in enumeration count
   },
 
   // CSS Classes - Customize the class names used
   classes: {
+    rootSet: 'belongs-to-root-set', // Class applied to every wrapped character
     char: 'char',           // Base character class
     word: 'word',           // Base word class
     space: 'char--space',   // Space character class
@@ -358,11 +370,21 @@ const wrapper = new CharWrapper('.text', {
     word: 'span'  // Tag for word wrapping
   },
 
-  // Data Attributes - Customize data attribute names (for data-driven selection)
+  // Data Attributes - Customize data attribute names
   dataAttributes: {
-    subSetName: 'subSetName',      // data-sub-set-name
-    subSetClass: 'subSetCharsClass', // data-sub-set-chars-class
-    customOrder: 'customOrder'       // data-custom-order
+    rootSet: 'rootSet',          // data-root-set
+    rootOrder: 'rootOrder',      // data-root-order
+    setName: 'setName',          // data-set-name
+    setOrder: 'setOrder',        // data-set-order
+    setCharClass: 'setCharClass', // data-set-char-class
+    setWordClass: 'setWordClass'  // data-set-word-class
+  },
+
+  // Root Set Options
+  rootSet: {
+    customSets: {},              // JS-defined animation targets under each root set
+    exposeEmptyAttributeSets: false,
+    autoDetectDataAttributes: true
   },
 
   // Advanced Options
@@ -374,7 +396,7 @@ const wrapper = new CharWrapper('.text', {
     trimWhitespace: true,   // Trim leading/trailing whitespace (preserved when adjacent to inline elements)
     preserveStructure: true, // Maintain DOM structure
     lazyWrap: false,        // Wrap on-demand for performance
-    ordered: false          // Order elements by data-custom-order attribute (for data attribute selection)
+    ordered: false          // Order root/text records by data-root-order and data-set-order
   },
 
   // Performance Options
@@ -665,34 +687,34 @@ Instead of wrapping elements individually, wrap a **container** and use data att
 
 ```javascript
 // Wrap the entire container - all text inside will be wrapped
-const wrapper = new CharWrapper('.profile-card', {
+const wrapper = new CharWrapper('[data-root-set="profile"]', {
   wrap: { chars: true }
 });
 
-// All text nodes inside .profile-card are now wrapped
-const { chars } = wrapper.wrap();
+// All text nodes inside this root set are now wrapped
+const profileRootSet = wrapper.wrap();
 
 // Animate all characters in document order
-gsap.from(chars, { opacity: 0, stagger: 0.02 });
+gsap.from(profileRootSet.chars, { opacity: 0, stagger: 0.02 });
 ```
 
-The `data-sub-set-name` attributes provide semantic structure and enable features like custom classes and exclusion.
+The `data-set-name` attributes provide semantic child sets inside the root set and enable features like custom classes, ordering, custom sets, and exclusion.
 
 ### Basic Setup
 
 #### 1. Mark Elements with Data Attributes
 
 ```html
-<div class="profile">
-  <h1 data-sub-set-name="first_name">John</h1>
-  <h1 data-sub-set-name="last_name">Van der Slice</h1>
+<div class="profile" data-root-set="profile">
+  <h1 data-set-name="first_name">John</h1>
+  <h1 data-set-name="last_name">Van der Slice</h1>
 
   <!-- Mix in non-text elements -->
-  <div data-sub-set-name="divider_line" class="divider"></div>
+  <div data-set-name="divider_line" class="divider"></div>
 
-  <p data-sub-set-name="profession_1">composer</p>
-  <p data-sub-set-name="profession_2">teacher</p>
-  <p data-sub-set-name="profession_3">analyst</p>
+  <p data-set-name="profession_1">composer</p>
+  <p data-set-name="profession_2">teacher</p>
+  <p data-set-name="profession_3">analyst</p>
 </div>
 ```
 
@@ -702,14 +724,14 @@ The `data-sub-set-name` attributes provide semantic structure and enable feature
 
 ```javascript
 // Wrap the container - all text inside will be wrapped in document order
-const wrapper = new CharWrapper('.profile', {
+const wrapper = new CharWrapper('[data-root-set="profile"]', {
   wrap: { chars: true }
 });
 
-const { chars } = wrapper.wrap();
+const profileRootSet = wrapper.wrap();
 
 // Animate all characters in the order they appear in HTML
-gsap.from(chars, { opacity: 0, stagger: 0.02 });
+gsap.from(profileRootSet.chars, { opacity: 0, stagger: 0.02 });
 ```
 
 ### Controlling Animation Order
@@ -719,24 +741,24 @@ The text is wrapped in **HTML document order** - the order elements appear in yo
 ```javascript
 const wrapper = new CharWrapper('.profile', {
   wrap: { chars: true },
-  processing: { ordered: true }  // This will order elements by data-custom-order attribute
+  processing: { ordered: true }  // Uses data-set-order inside this root
 });
 ```
 
-When `ordered: true`, elements are sorted by their `data-custom-order` attribute values instead of HTML document order.
+When `ordered: true`, root sets returned by `CharWrapper.wrapAll()` are sorted by `data-root-order`, and text records inside a root set are sorted by nearest `data-set-order`.
 
 ```html
-<div class="profile">
+<div class="profile" data-root-set="profile" data-root-order="1">
   <!-- First name animates first -->
-  <h1 data-sub-set-name="first_name">John</h1>
+  <h1 data-set-name="first_name" data-set-order="1">John</h1>
 
   <!-- Last name animates second -->
-  <h1 data-sub-set-name="last_name">Van der Slice</h1>
+  <h1 data-set-name="last_name" data-set-order="2">Van der Slice</h1>
 
   <!-- Professions animate in the order they appear -->
-  <p data-sub-set-name="profession_1">composer</p>
-  <p data-sub-set-name="profession_2">teacher</p>
-  <p data-sub-set-name="profession_3">analyst</p>
+  <p data-set-name="profession_1" data-set-order="3">composer</p>
+  <p data-set-name="profession_2" data-set-order="4">teacher</p>
+  <p data-set-name="profession_3" data-set-order="5">analyst</p>
 </div>
 ```
 
@@ -744,12 +766,12 @@ To control specific element animations separately, target them with CSS selector
 
 ```javascript
 const wrapper = new CharWrapper('.profile', { wrap: { chars: true } });
-const { chars } = wrapper.wrap();
+const profileRootSet = wrapper.wrap();
 
 const tl = gsap.timeline();
 
 // First animate all text
-tl.from(chars, { opacity: 0, stagger: 0.02 });
+tl.from(profileRootSet.chars, { opacity: 0, stagger: 0.02 });
 
 // Then animate specific elements (e.g., a divider)
 tl.from('.divider', { scaleX: 0 }, '-=0.5');
@@ -757,17 +779,17 @@ tl.from('.divider', { scaleX: 0 }, '-=0.5');
 
 ### Custom Classes per Element
 
-Add element-specific classes using `data-sub-set-chars-class`:
+Add element-specific classes using `data-set-char-class`:
 
 ```html
 <div class="profile">
   <!-- Add 'name-char' class to all characters in this element -->
-  <h1 data-sub-set-name="first_name"
-      data-sub-set-chars-class="name-char">John</h1>
+  <h1 data-set-name="first_name"
+      data-set-char-class="name-char">John</h1>
 
   <!-- Add 'profession-char' class to all characters in this element -->
-  <p data-sub-set-name="profession_1"
-     data-sub-set-chars-class="profession-char">composer</p>
+  <p data-set-name="profession_1"
+     data-set-char-class="profession-char">composer</p>
 </div>
 ```
 
@@ -786,18 +808,18 @@ Add element-specific classes using `data-sub-set-chars-class`:
 
 ### Excluding Elements
 
-Exclude elements from wrapping using `data-sub-set-name="_exclude_"`:
+Exclude elements from wrapping using `data-set-name="_exclude_"`:
 
 ```html
 <div class="profile">
-  <h1 data-sub-set-name="name">John Doe</h1>
+  <h1 data-set-name="name">John Doe</h1>
 
   <!-- This will be skipped during wrapping -->
-  <div data-sub-set-name="_exclude_">
+  <div data-set-name="_exclude_">
     <span>This text will NOT be wrapped</span>
   </div>
 
-  <p data-sub-set-name="profession">composer</p>
+  <p data-set-name="profession">composer</p>
 </div>
 ```
 
@@ -807,28 +829,28 @@ Exclude elements from wrapping using `data-sub-set-name="_exclude_"`:
 
 ```html
 <div class="business-card">
-  <h1 data-sub-set-name="first_name">John</h1>
-  <h1 data-sub-set-name="last_name">Van der Slice</h1>
+  <h1 data-set-name="first_name">John</h1>
+  <h1 data-set-name="last_name">Van der Slice</h1>
 
   <!-- Animate a divider line -->
-  <div data-sub-set-name="divider_line" class="divider"></div>
+  <div data-set-name="divider_line" class="divider"></div>
 
-  <p data-sub-set-name="title">Lead Composer</p>
+  <p data-set-name="title">Lead Composer</p>
 </div>
 ```
 
 ```javascript
-const wrapper = new CharWrapper('[data-sub-set-name]', {
+const wrapper = new CharWrapper('[data-root-set="business-card"]', {
   wrap: { chars: true }
 });
 
-const { chars } = wrapper.wrap();
+const businessCardRootSet = wrapper.wrap();
 
 // Create timeline
 const tl = gsap.timeline();
 
 // First name and last name appear
-tl.from(chars, { opacity: 0, y: 20, stagger: 0.02 });
+tl.from(businessCardRootSet.chars, { opacity: 0, y: 20, stagger: 0.02 });
 
 // Then animate the divider
 tl.from('.divider', {
@@ -847,12 +869,15 @@ tl.from('.title', { opacity: 0, y: 10 }, '-=0.2');
 You can customize data attribute names:
 
 ```javascript
-const wrapper = new CharWrapper('[data-profile-item]', {
+const wrapper = new CharWrapper('[data-text-root="profile"]', {
   wrap: { chars: true },
   dataAttributes: {
-    subSetName: 'profileItem',      // data-profile-item
-    subSetClass: 'profileClass',     // data-profile-class
-    customOrder: 'sequence'          // data-sequence
+    rootSet: 'textRoot',           // data-text-root
+    rootOrder: 'textRootOrder',    // data-text-root-order
+    setName: 'profileItem',        // data-profile-item
+    setOrder: 'profileItemOrder',  // data-profile-item-order
+    setCharClass: 'profileChar',   // data-profile-char
+    setWordClass: 'profileWord'    // data-profile-word
   }
 });
 ```
@@ -882,15 +907,15 @@ const wrapper = new CharWrapper('[data-profile-item]', {
   </style>
 </head>
 <body>
-  <div class="profile-card">
-    <h1 data-sub-set-name="first_name">John</h1>
-    <h1 data-sub-set-name="last_name">Van der Slice</h1>
+  <div class="profile-card" data-root-set="profile">
+    <h1 data-set-name="first_name">John</h1>
+    <h1 data-set-name="last_name">Van der Slice</h1>
 
-    <div data-sub-set-name="divider_line" class="divider"></div>
+    <div data-set-name="divider_line" class="divider"></div>
 
-    <p data-sub-set-name="profession_1">composer</p>
-    <p data-sub-set-name="profession_2">teacher</p>
-    <p data-sub-set-name="profession_3">analyst</p>
+    <p data-set-name="profession_1">composer</p>
+    <p data-set-name="profession_2">teacher</p>
+    <p data-set-name="profession_3">analyst</p>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
