@@ -4,7 +4,7 @@
  * Wraps text characters and words in HTML elements for animation purposes.
  * Designed to work seamlessly with GSAP and other animation libraries.
  *
- * @version 2.0.1
+ * @version 2.0.2
  * @author Robert Wildling
  * @license MIT
  *

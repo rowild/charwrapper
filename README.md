@@ -2,6 +2,11 @@
 
 Modern text wrapper library with TypeScript support, designed for seamless integration with GSAP and other animation libraries.
 
+## What's New in 2.0.2
+
+- **Changelog** - Release notes are now maintained in `CHANGELOG.md`
+- **Agent Workflow Notes** - The `fin-patch` workflow and changelog convention are documented in `AGENTS.md`
+
 ## What's New in 2.0.1
 
 - **Root Sets** - `wrap()` now returns a root set directly with `chars`, `words`, `groups`, `attributeSets`, and `customSets`

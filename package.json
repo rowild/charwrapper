@@ -1,6 +1,6 @@
 {
   "name": "charwrapper",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Modern ES6+ text wrapper library for GSAP, Animejs, Web Animation API and others, with TypeScript support",
   "type": "module",
   "main": "./dist/charwrapper.cjs.js",
@@ -19,6 +19,7 @@
     "dist",
     "src",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {

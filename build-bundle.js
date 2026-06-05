@@ -17,7 +17,7 @@ await esbuild.build({
   platform: 'browser',
   banner: {
     js: `/**
- * CharWrapper v2.0.1 - Text Character Wrapper for GSAP Animations
+ * CharWrapper v2.0.2 - Text Character Wrapper for GSAP Animations
  * @author Robert Wildling
  * @license MIT
  */`
@@ -42,7 +42,7 @@ await esbuild.build({
   platform: 'node',
   banner: {
     js: `/**
- * CharWrapper v2.0.1 - Text Character Wrapper for GSAP Animations
+ * CharWrapper v2.0.2 - Text Character Wrapper for GSAP Animations
  * @author Robert Wildling
  * @license MIT
  */`
@@ -61,7 +61,7 @@ await esbuild.build({
   target: 'es2020',
   platform: 'browser',
   banner: {
-    js: `/** CharWrapper v2.0.1 | MIT License | github.com/rowild/charwrapper */`
+    js: `/** CharWrapper v2.0.2 | MIT License | github.com/rowild/charwrapper */`
   },
   footer: {
     js: `if(typeof window!=='undefined'){window.CharWrapper=CharWrapperModule.default||CharWrapperModule.CharWrapper;}`
@@ -79,7 +79,7 @@ await esbuild.build({
   target: 'node16',
   platform: 'node',
   banner: {
-    js: `/** CharWrapper v2.0.1 | MIT License | github.com/rowild/charwrapper */`
+    js: `/** CharWrapper v2.0.2 | MIT License | github.com/rowild/charwrapper */`
   }
 });
 
